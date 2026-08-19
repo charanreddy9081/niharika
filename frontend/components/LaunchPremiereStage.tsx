@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Volume2, VolumeX, Sparkles, ArrowRight, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 interface LaunchPremiereStageProps {
   onEnterStore: () => void;
 }
@@ -44,7 +46,7 @@ export const LaunchPremiereStage: React.FC<LaunchPremiereStageProps> = ({ onEnte
     e.preventDefault();
     if (!email) return;
     try {
-      await fetch('http://localhost:5000/api/contact/subscribe', {
+      await fetch(`${API}/api/contact/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

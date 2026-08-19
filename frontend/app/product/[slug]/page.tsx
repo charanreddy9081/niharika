@@ -12,6 +12,8 @@ import { useWishlist } from '../../../context/WishlistContext';
 import { Star, Heart, ShoppingBag, Truck, ShieldCheck, Sparkles, ChevronRight, Palette, Layers, Maximize } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -32,7 +34,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
-    fetch('http://localhost:5000/api/products/' + slug)
+    fetch(`${API}/api/products/` + slug)
       .then(res => res.json())
       .then(data => {
         if (data.success && data.data) {
@@ -44,7 +46,7 @@ export default function ProductDetailPage() {
       .catch(err => console.error('Error loading product:', err))
       .finally(() => setLoading(false));
 
-    fetch('http://localhost:5000/api/products')
+    fetch(`${API}/api/products`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
