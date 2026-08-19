@@ -1,12 +1,35 @@
 const { supabase } = require('../config/db');
 
-const mapId = doc => {
-  if (!doc) return doc;
-  return { ...doc, _id: doc.id };
+const mapToDb = (data) => {
+  if (!data) return data;
+  const mapped = { ...data };
+  if (mapped.imageUrl !== undefined) { mapped.image_url = mapped.imageUrl; delete mapped.imageUrl; }
+  if (mapped.thumbnailUrl !== undefined) { mapped.thumbnail_url = mapped.thumbnailUrl; delete mapped.thumbnailUrl; }
+  if (mapped.originalUrl !== undefined) { mapped.original_url = mapped.originalUrl; delete mapped.originalUrl; }
+  if (mapped.sortOrder !== undefined) { mapped.sort_order = mapped.sortOrder; delete mapped.sortOrder; }
+  if (mapped.isFeatured !== undefined) { mapped.is_featured = mapped.isFeatured; delete mapped.isFeatured; }
+  delete mapped._id;
+  delete mapped.createdAt;
+  delete mapped.updatedAt;
+  return mapped;
 };
+
+const mapFromDb = (doc) => {
+  if (!doc) return doc;
+  return {
+    ...doc,
+    _id: doc.id,
+    imageUrl: doc.image_url,
+    thumbnailUrl: doc.thumbnail_url,
+    originalUrl: doc.original_url,
+    sortOrder: doc.sort_order,
+    isFeatured: doc.is_featured,
+  };
+};
+
 const mapIds = docs => {
   if (!docs) return [];
-  return docs.map(mapId);
+  return docs.map(mapFromDb);
 };
 
 // GET all gallery items with search and category filtering
@@ -22,15 +45,15 @@ exports.getGallery = async (req, res) => {
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,category.ilike.%${search}%`);
     }
     if (featured === 'true') {
-      query = query.eq('isFeatured', true);
+      query = query.eq('is_featured', true);
     }
 
     if (sort === 'oldest') {
-      query = query.order('sortOrder', { ascending: false }).order('created_at', { ascending: true });
+      query = query.order('sort_order', { ascending: false }).order('created_at', { ascending: true });
     } else if (sort === 'title') {
       query = query.order('title', { ascending: true });
     } else {
-      query = query.order('sortOrder', { ascending: true }).order('created_at', { ascending: false });
+      query = query.order('sort_order', { ascending: true }).order('created_at', { ascending: false });
     }
 
     const { data: items, error } = await query;
@@ -56,7 +79,7 @@ exports.getGalleryById = async (req, res) => {
 
     const { data: item, error } = await query.single();
     if (error || !item) return res.status(404).json({ success: false, message: 'Gallery item not found' });
-    return res.json({ success: true, data: mapId(item) });
+    return res.json({ success: true, data: mapFromDb(item) });
   } catch (error) {
     console.error('Error fetching gallery item:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -78,10 +101,10 @@ exports.createGalleryItem = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Artwork already exists with this slug' });
     }
 
-    const { data: item, error } = await supabase.from('galleries').insert([newItem]).select().single();
+    const { data: item, error } = await supabase.from('galleries').insert([mapToDb(newItem)]).select().single();
     if (error) throw error;
 
-    return res.status(201).json({ success: true, data: mapId(item) });
+    return res.status(201).json({ success: true, data: mapFromDb(item) });
   } catch (error) {
     console.error('Error creating gallery item:', error);
     res.status(400).json({ success: false, message: error.message });
@@ -92,9 +115,9 @@ exports.createGalleryItem = async (req, res) => {
 exports.updateGalleryItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data: item, error } = await supabase.from('galleries').update(req.body).eq('id', id).select().single();
+    const { data: item, error } = await supabase.from('galleries').update(mapToDb(req.body)).eq('id', id).select().single();
     if (error || !item) return res.status(404).json({ success: false, message: 'Gallery item not found' });
-    return res.json({ success: true, data: mapId(item) });
+    return res.json({ success: true, data: mapFromDb(item) });
   } catch (error) {
     console.error('Error updating gallery item:', error);
     res.status(400).json({ success: false, message: error.message });
