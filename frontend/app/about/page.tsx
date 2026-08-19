@@ -11,7 +11,7 @@ import { useArtistImage } from '../../hooks/useArtistImage';
 
 export default function AboutPage() {
   const { c } = useSiteContent('artist');
-  const { src: artistSrc, alt: artistAlt, loading: imgLoading } = useArtistImage();
+  const { src: artistSrc, alt: artistAlt, loading: imgLoading } = useArtistImage(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#06120d]">

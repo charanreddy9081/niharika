@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -16,57 +16,76 @@ export interface ArtistImage {
 }
 
 const FALLBACK_IMAGE = '/images/studio_hero.jpg';
-const LAST_SHOWN_KEY = 'nha_last_artist_img';
 
 /**
- * Hook: useArtistImage()
+ * useArtistImage(autoRotate, intervalMs)
  *
- * Fetches active artist images, picks one on mount, avoids immediate repetition.
- * Image only changes when the page/component is mounted — NOT on a timer.
- *
- * Returns: { image, allImages, loading }
+ * @param autoRotate  true = auto-cycle every `intervalMs` (for home page hero)
+ *                    false = pick one randomly on mount and stay (for about page)
+ * @param intervalMs  rotation interval in ms (default 3000)
  */
-export function useArtistImage() {
-  const [image, setImage] = useState<ArtistImage | null>(null);
-  const [allImages, setAllImages] = useState<ArtistImage[]>([]);
+export function useArtistImage(autoRotate = false, intervalMs = 3000) {
+  const [images, setImages] = useState<ArtistImage[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [nextIndex, setNextIndex] = useState<number | null>(null);
+  const [transitioning, setTransitioning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Fetch images once on mount
   useEffect(() => {
     fetch(`${API}/api/artist-images`)
       .then(r => r.json())
       .then(d => {
         if (d.success && Array.isArray(d.data) && d.data.length > 0) {
-          const imgs: ArtistImage[] = d.data;
-          setAllImages(imgs);
-
-          if (imgs.length === 1) {
-            setImage(imgs[0]);
-          } else {
-            // Avoid showing the same image twice in a row
-            const lastId = typeof window !== 'undefined'
-              ? sessionStorage.getItem(LAST_SHOWN_KEY)
-              : null;
-
-            const candidates = imgs.filter(i => i.id !== lastId);
-            const pool = candidates.length > 0 ? candidates : imgs;
-            const picked = pool[Math.floor(Math.random() * pool.length)];
-
-            if (typeof window !== 'undefined') {
-              sessionStorage.setItem(LAST_SHOWN_KEY, picked.id);
-            }
-            setImage(picked);
-          }
+          setImages(d.data);
+          // Start at a random index
+          const start = Math.floor(Math.random() * d.data.length);
+          setCurrentIndex(start);
         }
       })
-      .catch(() => { /* fallback image used */ })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
+  // Auto-rotate timer
+  useEffect(() => {
+    if (!autoRotate || images.length <= 1) return;
+
+    timerRef.current = setInterval(() => {
+      setImages(imgs => {
+        setCurrentIndex(prev => {
+          const next = (prev + 1) % imgs.length;
+          setNextIndex(next);
+          setTransitioning(true);
+          // After crossfade completes, swap current → next
+          setTimeout(() => {
+            setCurrentIndex(next);
+            setNextIndex(null);
+            setTransitioning(false);
+          }, 800); // match CSS transition duration
+          return prev; // keep prev during transition
+        });
+        return imgs;
+      });
+    }, intervalMs);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [autoRotate, images.length, intervalMs]);
+
+  const current = images[currentIndex] ?? null;
+  const next = nextIndex !== null ? images[nextIndex] : null;
+
   return {
-    image,
-    allImages,
+    images,
+    current,
+    next,
+    transitioning,
     loading,
-    src: image?.image_url || FALLBACK_IMAGE,
-    alt: image?.title || 'Artist Niharika at Studio Easel',
+    // Convenience for simple single-image usage (about page)
+    src: current?.image_url || FALLBACK_IMAGE,
+    alt: current?.title || 'Artist Niharika at Studio Easel',
   };
 }

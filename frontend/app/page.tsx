@@ -8,6 +8,7 @@ import { Footer } from '../components/Footer';
 import { ProductCard } from '../components/ProductCard';
 import { Sparkles, ArrowRight, Star, Palette, Feather, Shield } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
+import { useArtistImage } from '../hooks/useArtistImage';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -15,6 +16,8 @@ export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { c } = useSiteContent('home');
+  // Auto-rotate artist images every 3 seconds on home page hero
+  const { src: heroSrc, alt: heroAlt, next: heroNext, transitioning, loading: imgLoading } = useArtistImage(true, 3000);
 
   useEffect(() => {
     fetch(`${API}/api/products`)
@@ -64,8 +67,50 @@ export default function HomePage() {
 
             <div className="lg:col-span-5 relative">
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-[#0a2319] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
-                <Image src="/images/studio_hero.jpg" alt="Featured Fine Art Masterpiece" fill priority className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050f0b] via-transparent to-transparent" />
+
+                {/* Current image */}
+                {!imgLoading && (
+                  <Image
+                    src={heroSrc}
+                    alt={heroAlt}
+                    fill
+                    priority
+                    className="object-cover"
+                    style={{
+                      transition: 'opacity 0.8s ease-in-out',
+                      opacity: transitioning ? 0 : 1,
+                    }}
+                  />
+                )}
+
+                {/* Next image (fades in during transition) */}
+                {heroNext && (
+                  <Image
+                    src={heroNext.image_url}
+                    alt={heroNext.title || heroAlt}
+                    fill
+                    className="object-cover"
+                    style={{
+                      transition: 'opacity 0.8s ease-in-out',
+                      opacity: transitioning ? 1 : 0,
+                    }}
+                  />
+                )}
+
+                {/* Fallback while loading */}
+                {imgLoading && (
+                  <Image
+                    src="/images/studio_hero.jpg"
+                    alt="Featured Fine Art Masterpiece"
+                    fill
+                    priority
+                    className="object-cover"
+                  />
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050f0b] via-transparent to-transparent pointer-events-none" />
+
+                {/* Testimonial pill */}
                 <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-[#061810]/90 backdrop-blur-xl border border-[#e8c872]/30 shadow-xl space-y-1.5">
                   <div className="flex text-amber-300 gap-0.5">
                     {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 fill-amber-300" />)}
