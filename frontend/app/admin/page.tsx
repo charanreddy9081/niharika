@@ -430,10 +430,6 @@ export default function AdminPortalPage() {
   };
 
   const handleDeleteProduct = async (id: string) => {
-    }
-  };
-
-  const handleDeleteProduct = async (id: string) => {
     if (!confirm('Are you sure you want to delete this artwork from the catalog?')) return;
     const token = localStorage.getItem('niharikartist_admin_token');
     if (!token) return;
