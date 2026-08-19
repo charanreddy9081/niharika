@@ -56,8 +56,7 @@ const LABELS: Record<string, string> = {
   featured_title: 'Featured Section Title',
   pillars_label: 'Pillars Section Label',
   pillars_title: 'Pillars Section Title',
-  // artist
-  hero_description: 'Hero Description',
+  // artist (shares some keys with home — labels apply by key name)
   origin_label: 'Origin Section Label',
   origin_title: 'Origin Title (Every Brushstroke...)',
   origin_body1: 'Origin Body Paragraph 1',
@@ -77,13 +76,11 @@ const LABELS: Record<string, string> = {
   cta_description: 'CTA Description',
   cta_btn_primary: 'CTA Primary Button',
   cta_btn_secondary: 'CTA Secondary Button',
-  // gallery
+  // gallery / shop / community / contact
   page_label: 'Page Label / Badge',
   page_title: 'Page Title',
   page_subtitle: 'Page Subtitle',
-  // shop
   page_title_script: 'Page Title Script Word',
-  // community
   story1_title: 'Story 1 Title',
   story1_author: 'Story 1 Author',
   story1_excerpt: 'Story 1 Excerpt',
@@ -94,7 +91,6 @@ const LABELS: Record<string, string> = {
   story3_author: 'Story 3 Author',
   story3_excerpt: 'Story 3 Excerpt',
   cta_btn: 'CTA Button',
-  // contact
   panel_title: 'Contact Panel Title',
   email: 'Contact Email',
   phone: 'Contact Phone',
