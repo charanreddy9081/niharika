@@ -22,6 +22,7 @@ export default function AdminPortalPage() {
 
   const [loginEmail, setLoginEmail] = useState('niharikaananthoja@gmail.com');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
 
@@ -523,13 +524,21 @@ export default function AdminPortalPage() {
                     <div className="relative">
                       <Lock className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
-                        type="password"
+                        type={showLoginPassword ? 'text' : 'password'}
                         required
                         value={loginPassword}
                         onChange={e => setLoginPassword(e.target.value)}
                         placeholder="••••••••••••"
-                        className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
+                        className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-10 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword(v => !v)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-[#e8c872] transition-colors"
+                        aria-label={showLoginPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                   <button
