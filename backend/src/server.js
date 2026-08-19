@@ -9,7 +9,13 @@ const PORT = process.env.PORT || 5000;
 
 // Enable CORS for frontend requests
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://niharikartist.shop', '*'],
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://niharikartist.shop',
+    'https://niharikartist.netlify.app',
+    process.env.CLIENT_URL,
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
