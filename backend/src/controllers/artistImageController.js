@@ -40,8 +40,8 @@ exports.createArtistImage = async (req, res) => {
   try {
     const { title, description, storage_path, image_url, is_active, is_featured, display_order } = req.body;
 
-    if (!storage_path || !image_url) {
-      return res.status(400).json({ success: false, message: 'storage_path and image_url are required.' });
+    if (!image_url) {
+      return res.status(400).json({ success: false, message: 'image_url is required.' });
     }
 
     const { data, error } = await supabase
@@ -49,7 +49,7 @@ exports.createArtistImage = async (req, res) => {
       .insert([{
         title: title || '',
         description: description || '',
-        storage_path,
+        storage_path: storage_path || '',
         image_url,
         is_active: is_active !== false,
         is_featured: is_featured === true,

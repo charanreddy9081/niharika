@@ -2,13 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
+    // unoptimized allows any external URL without whitelisting every domain
     unoptimized: true,
     remotePatterns: [
-      { protocol: 'https', hostname: 'niharikartist.com' },
-      { protocol: 'https', hostname: 'cuddlingupmybrush.com' },
-      { protocol: 'https', hostname: 'images.unsplash.com' },
-      // Supabase Storage — artist images bucket
-      { protocol: 'https', hostname: 'epauoqhfzpjccvldxasa.supabase.co' },
+      { protocol: 'https', hostname: '**' },
+      { protocol: 'http',  hostname: '**' },
     ],
   },
 };

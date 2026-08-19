@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import AdminArtistImages from '../../components/admin/AdminArtistImages';
 import AdminSiteContent from '../../components/admin/AdminSiteContent';
 import AdminJournal from '../../components/admin/AdminJournal';
+import ImageInput, { FileData } from '../../components/admin/ImageInput';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -54,6 +55,8 @@ export default function AdminPortalPage() {
   // Gallery search & modal state
   const [gallerySearch, setGallerySearch] = useState('');
   const [isAddGalleryModalOpen, setIsAddGalleryModalOpen] = useState(false);
+  const [galleryImageFile, setGalleryImageFile] = useState<FileData | null>(null);
+  const [galleryImageUrl, setGalleryImageUrl] = useState('/images/gallery/gallery_1.jpg');
   const [newGalleryItem, setNewGalleryItem] = useState({
     title: '',
     category: 'Painting',
@@ -66,6 +69,8 @@ export default function AdminPortalPage() {
   // Product search & modal state
   const [productSearch, setProductSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [productImageFile, setProductImageFile] = useState<FileData | null>(null);
+  const [productImageUrl, setProductImageUrl] = useState('/images/shop/shop_1.jpg');
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: 699,
@@ -289,32 +294,38 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
+      // Resolve final image URL: file upload or URL
+      let finalImageUrl = galleryImageUrl.trim();
+      if (galleryImageFile) {
+        const upRes = await fetch(API + '/api/admin/artist-images/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ fileName: galleryImageFile.fileName, fileData: galleryImageFile.base64, contentType: galleryImageFile.fileType })
+        });
+        const upData = await upRes.json();
+        if (!upData.success) throw new Error(upData.message || 'Image upload failed');
+        finalImageUrl = upData.image_url;
+      }
+      if (!finalImageUrl) { toast.error('Please provide an image URL or upload a file.'); return; }
+
       const res = await fetch(API + '/api/admin/gallery', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify(newGalleryItem)
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ ...newGalleryItem, imageUrl: finalImageUrl, thumbnailUrl: finalImageUrl })
       });
       const data = await res.json();
       if (data.success) {
         toast.success('Gallery artwork created successfully!');
         setIsAddGalleryModalOpen(false);
-        setNewGalleryItem({
-          title: '',
-          category: 'Painting',
-          imageUrl: '/images/gallery/gallery_1.jpg',
-          year: '2025',
-          description: '',
-          isFeatured: false
-        });
+        setNewGalleryItem({ title: '', category: 'Painting', imageUrl: '/images/gallery/gallery_1.jpg', year: '2025', description: '', isFeatured: false });
+        setGalleryImageFile(null);
+        setGalleryImageUrl('/images/gallery/gallery_1.jpg');
         fetchAdminData();
       } else {
         toast.error(data.message || 'Failed to create gallery artwork');
       }
-    } catch (err) {
-      toast.error('Error adding gallery artwork');
+    } catch (err: any) {
+      toast.error(err.message || 'Error adding gallery artwork');
     }
   };
 
@@ -370,12 +381,23 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
+      // Resolve final image URL: file upload or URL
+      let finalImage = productImageUrl.trim();
+      if (productImageFile) {
+        const upRes = await fetch(API + '/api/admin/artist-images/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ fileName: productImageFile.fileName, fileData: productImageFile.base64, contentType: productImageFile.fileType })
+        });
+        const upData = await upRes.json();
+        if (!upData.success) throw new Error(upData.message || 'Image upload failed');
+        finalImage = upData.image_url;
+      }
+      if (!finalImage) { toast.error('Please provide an image URL or upload a file.'); return; }
+
       const res = await fetch(API + '/api/admin/products', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({
           name: newProduct.name,
           price: Number(newProduct.price),
@@ -385,8 +407,8 @@ export default function AdminPortalPage() {
           medium: newProduct.medium,
           size: newProduct.size,
           artwork_type: newProduct.artwork_type,
-          images: [newProduct.image],
-          gallery: [newProduct.image],
+          images: [finalImage],
+          gallery: [finalImage],
           short_description: newProduct.short_description,
           description: newProduct.description
         })
@@ -395,24 +417,19 @@ export default function AdminPortalPage() {
       if (data.success) {
         toast.success('Masterwork added to catalog!');
         setIsAddModalOpen(false);
-        setNewProduct({
-          name: '',
-          price: 699,
-          regular_price: 999,
-          category: 'Original Masterworks',
-          medium: 'Mixed Media Archival Glazes',
-          size: 'A5',
-          artwork_type: 'Original Artwork',
-          image: '/images/shop/shop_1.jpg',
-          short_description: '',
-          description: ''
-        });
+        setNewProduct({ name: '', price: 699, regular_price: 999, category: 'Original Masterworks', medium: 'Mixed Media Archival Glazes', size: 'A5', artwork_type: 'Original Artwork', image: '/images/shop/shop_1.jpg', short_description: '', description: '' });
+        setProductImageFile(null);
+        setProductImageUrl('/images/shop/shop_1.jpg');
         fetchAdminData();
       } else {
         toast.error(data.message || 'Failed to add artwork');
       }
-    } catch (err) {
-      toast.error('Error creating product');
+    } catch (err: any) {
+      toast.error(err.message || 'Error creating product');
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
     }
   };
 
@@ -1186,13 +1203,13 @@ export default function AdminPortalPage() {
                 </div>
                 <div>
                   <label className="block text-[#a3b8af] mb-1">Image URL / Local Path *</label>
-                  <input
-                    type="text"
+                  <ImageInput
+                    label="Artwork Image"
                     required
-                    value={newGalleryItem.imageUrl}
-                    onChange={e => setNewGalleryItem({ ...newGalleryItem, imageUrl: e.target.value })}
-                    placeholder="/images/gallery/gallery_1.jpg"
-                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]"
+                    urlValue={galleryImageUrl}
+                    onUrlChange={url => { setGalleryImageUrl(url); setNewGalleryItem({ ...newGalleryItem, imageUrl: url }); }}
+                    selectedFile={galleryImageFile}
+                    onFileSelected={setGalleryImageFile}
                   />
                 </div>
                 <div>
@@ -1323,12 +1340,12 @@ export default function AdminPortalPage() {
                 </div>
                 <div>
                   <label className="block text-[#a3b8af] mb-1">Image Asset Path / URL</label>
-                  <input
-                    type="text"
-                    value={newProduct.image}
-                    onChange={e => setNewProduct({ ...newProduct, image: e.target.value })}
-                    placeholder="/images/shop/shop_1.jpg"
-                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]"
+                  <ImageInput
+                    label="Product Image"
+                    urlValue={productImageUrl}
+                    onUrlChange={url => { setProductImageUrl(url); setNewProduct({ ...newProduct, image: url }); }}
+                    selectedFile={productImageFile}
+                    onFileSelected={setProductImageFile}
                   />
                 </div>
                 <div>
