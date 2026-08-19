@@ -8,16 +8,19 @@ import { Footer } from '../components/Footer';
 import { ProductCard } from '../components/ProductCard';
 import { Sparkles, ArrowRight, Star, Palette, Feather, Shield } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
-import { useArtistImage } from '../hooks/useArtistImage';
+import { useHomeTransition } from '../hooks/useHomeTransition';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const SLIDE_DURATION = 900; // ms — must match hook
 
 export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { c } = useSiteContent('home');
-  // Auto-rotate artist images every 3 seconds on home page hero
-  const { src: heroSrc, alt: heroAlt, next: heroNext, transitioning, loading: imgLoading } = useArtistImage(true, 3000);
+  const {
+    current, next, direction, animating, loading: imgLoading,
+    currentSrc, currentAlt, hasFallback, slideNext, slidePrev,
+  } = useHomeTransition();
 
   useEffect(() => {
     fetch(`${API}/api/products`)
@@ -68,50 +71,80 @@ export default function HomePage() {
             <div className="lg:col-span-5 relative">
               <div className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-[#0a2319] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.85)]">
 
-                {/* Current image */}
-                {!imgLoading && (
-                  <Image
-                    src={heroSrc}
-                    alt={heroAlt}
-                    fill
-                    priority
-                    className="object-cover"
+                {/* ── Cinematic slide container ── */}
+                <div className="absolute inset-0" style={{ perspective: '1200px' }}>
+
+                  {/* Current image — slides out */}
+                  <div
+                    className="absolute inset-0"
                     style={{
-                      transition: 'opacity 0.8s ease-in-out',
-                      opacity: transitioning ? 0 : 1,
+                      transition: animating ? `transform ${SLIDE_DURATION}ms cubic-bezier(0.77,0,0.175,1), opacity ${SLIDE_DURATION}ms ease` : 'none',
+                      transform: animating
+                        ? direction === 'next' ? 'translateX(-105%)' : 'translateX(105%)'
+                        : 'translateX(0)',
+                      opacity: animating ? 0.4 : 1,
+                      zIndex: 1,
                     }}
-                  />
-                )}
+                  >
+                    {imgLoading ? (
+                      <div className="absolute inset-0 bg-[#0a2319] animate-pulse" />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={currentSrc}
+                        alt={currentAlt}
+                        className="w-full h-full object-cover"
+                        style={{ transform: animating ? 'scale(1.04)' : 'scale(1)', transition: `transform ${SLIDE_DURATION}ms ease` }}
+                      />
+                    )}
+                  </div>
 
-                {/* Next image (fades in during transition) */}
-                {heroNext && (
-                  <Image
-                    src={heroNext.image_url}
-                    alt={heroNext.title || heroAlt}
-                    fill
-                    className="object-cover"
-                    style={{
-                      transition: 'opacity 0.8s ease-in-out',
-                      opacity: transitioning ? 1 : 0,
-                    }}
-                  />
-                )}
+                  {/* Next image — slides in */}
+                  {next && (
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        transition: `transform ${SLIDE_DURATION}ms cubic-bezier(0.77,0,0.175,1), opacity ${SLIDE_DURATION}ms ease`,
+                        transform: animating
+                          ? 'translateX(0) scale(1)'
+                          : direction === 'next' ? 'translateX(105%)' : 'translateX(-105%)',
+                        opacity: animating ? 1 : 0,
+                        zIndex: 2,
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={next.image_url}
+                        alt={next.title || ''}
+                        className="w-full h-full object-cover"
+                        style={{ transform: animating ? 'scale(1)' : 'scale(1.04)', transition: `transform ${SLIDE_DURATION}ms ease` }}
+                      />
+                    </div>
+                  )}
 
-                {/* Fallback while loading */}
-                {imgLoading && (
-                  <Image
-                    src="/images/studio_hero.jpg"
-                    alt="Featured Fine Art Masterpiece"
-                    fill
-                    priority
-                    className="object-cover"
-                  />
-                )}
+                  {/* Fallback — only when no images uploaded */}
+                  {hasFallback && !imgLoading && (
+                    <div className="absolute inset-0" style={{ zIndex: 1 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/images/studio_hero.jpg" alt="Featured Fine Art Masterpiece" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </div>
 
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050f0b] via-transparent to-transparent pointer-events-none" />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050f0b] via-transparent to-transparent pointer-events-none" style={{ zIndex: 3 }} />
+
+                {/* Dot indicators — shown only when 2+ images */}
+                {!hasFallback && (
+                  <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-1.5 z-10">
+                    {Array.from({ length: Math.min(5, (current ? 1 : 0)) }).map((_, i) => (
+                      <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#e8c872]/60" />
+                    ))}
+                  </div>
+                )}
 
                 {/* Testimonial pill */}
-                <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-[#061810]/90 backdrop-blur-xl border border-[#e8c872]/30 shadow-xl space-y-1.5">
+                <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-[#061810]/90 backdrop-blur-xl border border-[#e8c872]/30 shadow-xl space-y-1.5" style={{ zIndex: 4 }}>
                   <div className="flex text-amber-300 gap-0.5">
                     {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 fill-amber-300" />)}
                   </div>

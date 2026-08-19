@@ -6,6 +6,7 @@ const { protectAdmin } = require('../middleware/authMiddleware');
 const artistImageController = require('../controllers/artistImageController');
 const siteContentController = require('../controllers/siteContentController');
 const journalController = require('../controllers/journalController');
+const homeTransitionController = require('../controllers/homeTransitionController');
 const productController = require('../controllers/productController');
 const galleryController = require('../controllers/galleryController');
 const orderController = require('../controllers/orderController');
@@ -60,5 +61,13 @@ router.get('/journal', protectAdmin, journalController.getAllStories);
 router.post('/journal', protectAdmin, journalController.createStory);
 router.put('/journal/:id', protectAdmin, journalController.updateStory);
 router.delete('/journal/:id', protectAdmin, journalController.deleteStory);
+
+// Home Transition Images (admin)
+router.get('/home-transition', protectAdmin, homeTransitionController.getAllImages);
+router.post('/home-transition', protectAdmin, homeTransitionController.uploadImage);
+router.put('/home-transition/reorder', protectAdmin, homeTransitionController.reorderImages);
+router.put('/home-transition/:id', protectAdmin, homeTransitionController.updateImage);
+router.put('/home-transition/:id/replace', protectAdmin, homeTransitionController.replaceImage);
+router.delete('/home-transition/:id', protectAdmin, homeTransitionController.deleteImage);
 
 module.exports = router;

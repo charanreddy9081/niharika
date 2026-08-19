@@ -7,12 +7,13 @@ import {
   LayoutDashboard, Package, ShoppingCart, MessageSquare, Images,
   Plus, Trash2, Sparkles, RefreshCw, Eye, LogOut, Lock, Mail,
   ShieldCheck, AlertCircle, TrendingUp, Search, Star, DownloadCloud,
-  KeyRound, X, CheckCircle2, EyeOff, ImageIcon, FileText
+  KeyRound, X, CheckCircle2, EyeOff, ImageIcon, FileText, Home
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminArtistImages from '../../components/admin/AdminArtistImages';
 import AdminSiteContent from '../../components/admin/AdminSiteContent';
 import AdminJournal from '../../components/admin/AdminJournal';
+import AdminHomeTransition from '../../components/admin/AdminHomeTransition';
 import ImageInput, { FileData } from '../../components/admin/ImageInput';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -42,13 +43,14 @@ export default function AdminPortalPage() {
   const [cpShowNew, setCpShowNew] = useState(false);
   const [cpShowConfirm, setCpShowConfirm] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'journal' | 'content'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'journal' | 'home_transition' | 'content'>('overview');
   const [products, setProducts] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [artistImages, setArtistImages] = useState<any[]>([]);
   const [journalStories, setJournalStories] = useState<any[]>([]);
+  const [homeTransitionImages, setHomeTransitionImages] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
 
@@ -142,6 +144,10 @@ export default function AdminPortalPage() {
       // Fetch journal stories
       const jRes = await fetch(API + '/api/admin/journal', { headers }).then(r => r.json());
       if (jRes.success) setJournalStories(jRes.data);
+
+      // Fetch home transition images
+      const htRes = await fetch(API + '/api/admin/home-transition', { headers }).then(r => r.json());
+      if (htRes.success) setHomeTransitionImages(htRes.data);
     } catch (e) {
       console.error('Error fetching admin data:', e);
       toast.error('Failed to refresh studio data');
@@ -752,6 +758,7 @@ export default function AdminPortalPage() {
             { id: 'inquiries', label: 'Commissions (' + inquiries.length + ')', icon: MessageSquare },
             { id: 'artist_images', label: 'Artist Images (' + artistImages.length + ')', icon: ImageIcon },
             { id: 'journal', label: 'Journal Stories (' + journalStories.length + ')', icon: FileText },
+            { id: 'home_transition', label: 'Home Slideshow (' + homeTransitionImages.length + ')', icon: Home },
             { id: 'content', label: 'Website Content', icon: FileText },
           ].map(tab => {
             const Icon = tab.icon;
@@ -1151,7 +1158,12 @@ export default function AdminPortalPage() {
           <AdminJournal stories={journalStories} onRefresh={fetchAdminData} />
         )}
 
-        {/* TAB 8: WEBSITE CONTENT */}
+        {/* TAB 8: HOME TRANSITION IMAGES */}
+        {activeTab === 'home_transition' && (
+          <AdminHomeTransition images={homeTransitionImages} onRefresh={fetchAdminData} />
+        )}
+
+        {/* TAB 9: WEBSITE CONTENT */}
         {activeTab === 'content' && (
           <AdminSiteContent />
         )}
