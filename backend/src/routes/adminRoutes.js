@@ -5,6 +5,7 @@ const { protectAdmin } = require('../middleware/authMiddleware');
 
 const artistImageController = require('../controllers/artistImageController');
 const siteContentController = require('../controllers/siteContentController');
+const journalController = require('../controllers/journalController');
 const productController = require('../controllers/productController');
 const galleryController = require('../controllers/galleryController');
 const orderController = require('../controllers/orderController');
@@ -53,5 +54,11 @@ router.delete('/artist-images/:id', protectAdmin, artistImageController.deleteAr
 router.get('/content', protectAdmin, siteContentController.getAllContent);
 router.put('/content/update', protectAdmin, siteContentController.updateContent);
 router.put('/content/bulk', protectAdmin, siteContentController.bulkUpdateContent);
+
+// Journal Stories (admin)
+router.get('/journal', protectAdmin, journalController.getAllStories);
+router.post('/journal', protectAdmin, journalController.createStory);
+router.put('/journal/:id', protectAdmin, journalController.updateStory);
+router.delete('/journal/:id', protectAdmin, journalController.deleteStory);
 
 module.exports = router;

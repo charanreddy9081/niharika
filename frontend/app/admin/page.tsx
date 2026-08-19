@@ -12,6 +12,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminArtistImages from '../../components/admin/AdminArtistImages';
 import AdminSiteContent from '../../components/admin/AdminSiteContent';
+import AdminJournal from '../../components/admin/AdminJournal';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -40,12 +41,13 @@ export default function AdminPortalPage() {
   const [cpShowNew, setCpShowNew] = useState(false);
   const [cpShowConfirm, setCpShowConfirm] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'content'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'journal' | 'content'>('overview');
   const [products, setProducts] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
   const [artistImages, setArtistImages] = useState<any[]>([]);
+  const [journalStories, setJournalStories] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
 
@@ -131,6 +133,10 @@ export default function AdminPortalPage() {
       // Fetch artist images
       const aiRes = await fetch(API + '/api/admin/artist-images', { headers }).then(r => r.json());
       if (aiRes.success) setArtistImages(aiRes.data);
+
+      // Fetch journal stories
+      const jRes = await fetch(API + '/api/admin/journal', { headers }).then(r => r.json());
+      if (jRes.success) setJournalStories(jRes.data);
     } catch (e) {
       console.error('Error fetching admin data:', e);
       toast.error('Failed to refresh studio data');
@@ -732,6 +738,7 @@ export default function AdminPortalPage() {
             { id: 'orders', label: 'Orders & Heirlooms (' + orders.length + ')', icon: ShoppingCart },
             { id: 'inquiries', label: 'Commissions (' + inquiries.length + ')', icon: MessageSquare },
             { id: 'artist_images', label: 'Artist Images (' + artistImages.length + ')', icon: ImageIcon },
+            { id: 'journal', label: 'Journal Stories (' + journalStories.length + ')', icon: FileText },
             { id: 'content', label: 'Website Content', icon: FileText },
           ].map(tab => {
             const Icon = tab.icon;
@@ -1126,7 +1133,12 @@ export default function AdminPortalPage() {
           <AdminArtistImages images={artistImages} onRefresh={fetchAdminData} />
         )}
 
-        {/* TAB 7: WEBSITE CONTENT */}
+        {/* TAB 7: JOURNAL STORIES */}
+        {activeTab === 'journal' && (
+          <AdminJournal stories={journalStories} onRefresh={fetchAdminData} />
+        )}
+
+        {/* TAB 8: WEBSITE CONTENT */}
         {activeTab === 'content' && (
           <AdminSiteContent />
         )}

@@ -44,6 +44,7 @@ app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/settings', require('./routes/settingRoutes'));
 app.use('/api/artist-images', require('./routes/artistImageRoutes'));
 app.use('/api/content', require('./routes/siteContentRoutes'));
+app.use('/api/journal', require('./routes/journalRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Error handling middleware
