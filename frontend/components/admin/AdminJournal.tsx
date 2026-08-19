@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Plus, Trash2, Pencil, Eye, EyeOff, X, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ImageInput, { FileData } from './ImageInput';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -31,6 +32,12 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
   const [editItem, setEditItem] = useState<Story | null>(null);
   const [form, setForm] = useState({ ...emptyForm });
   const [saving, setSaving] = useState(false);
+  // file state for add modal
+  const [addFile, setAddFile] = useState<FileData | null>(null);
+  const [addImageUrl, setAddImageUrl] = useState('/images/product_1_1.jpg');
+  // file state for edit modal
+  const [editFile, setEditFile] = useState<FileData | null>(null);
+  const [editImageUrl, setEditImageUrl] = useState('');
 
   const token = () => localStorage.getItem('niharikartist_admin_token') || '';
 
@@ -39,18 +46,34 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
     if (!form.title || !form.author || !form.excerpt) {
       toast.error('Title, author and excerpt are required.'); return;
     }
+    const finalUrl = addFile ? addFile.previewUrl : addImageUrl.trim();
+    if (!finalUrl) { toast.error('Please provide an image.'); return; }
     setSaving(true);
     try {
+      // If file selected, upload to Storage first via artist-images/upload endpoint
+      let imageUrl = addImageUrl.trim();
+      if (addFile) {
+        const upRes = await fetch(`${API}/api/admin/artist-images/upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+          body: JSON.stringify({ fileName: addFile.fileName, fileData: addFile.base64, contentType: addFile.fileType })
+        });
+        const upData = await upRes.json();
+        if (!upData.success) throw new Error(upData.message || 'Upload failed');
+        imageUrl = upData.image_url;
+      }
       const res = await fetch(`${API}/api/admin/journal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
-        body: JSON.stringify({ ...form, display_order: Number(form.display_order) })
+        body: JSON.stringify({ ...form, image_url: imageUrl, display_order: Number(form.display_order) })
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
       toast.success('Story added!');
       setIsAddOpen(false);
       setForm({ ...emptyForm });
+      setAddFile(null);
+      setAddImageUrl('/images/product_1_1.jpg');
       onRefresh();
     } catch (err: any) {
       toast.error(err.message || 'Failed to add story.');
@@ -62,12 +85,24 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
     if (!editItem) return;
     setSaving(true);
     try {
+      // If new file selected for edit, upload it first
+      let imageUrl = editImageUrl.trim() || editItem.image_url;
+      if (editFile) {
+        const upRes = await fetch(`${API}/api/admin/artist-images/upload`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+          body: JSON.stringify({ fileName: editFile.fileName, fileData: editFile.base64, contentType: editFile.fileType })
+        });
+        const upData = await upRes.json();
+        if (!upData.success) throw new Error(upData.message || 'Upload failed');
+        imageUrl = upData.image_url;
+      }
       const res = await fetch(`${API}/api/admin/journal/${editItem.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
         body: JSON.stringify({
           title: editItem.title, author: editItem.author, excerpt: editItem.excerpt,
-          image_url: editItem.image_url, is_active: editItem.is_active,
+          image_url: imageUrl, is_active: editItem.is_active,
           display_order: Number(editItem.display_order)
         })
       });
@@ -75,6 +110,7 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
       if (!data.success) throw new Error(data.message);
       toast.success('Story updated!');
       setEditItem(null);
+      setEditFile(null);
       onRefresh();
     } catch (err: any) {
       toast.error(err.message || 'Failed to update story.');
@@ -109,8 +145,8 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
     } catch (err: any) { toast.error(err.message || 'Delete failed.'); }
   };
 
-  // Shared form fields renderer
-  const FormFields = ({ val, set }: { val: typeof emptyForm | Story, set: (v: any) => void }) => (
+  // Shared text fields (image handled separately per modal)
+  const TextFields = ({ val, set }: { val: any, set: (v: any) => void }) => (
     <div className="space-y-3 text-xs">
       <div>
         <label className="block text-[#a3b8af] mb-1">Title *</label>
@@ -124,16 +160,6 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
         <label className="block text-[#a3b8af] mb-1">Excerpt / Story *</label>
         <textarea required rows={4} value={val.excerpt} onChange={e => set((p: any) => ({ ...p, excerpt: e.target.value }))} placeholder="The patron's story..." className={inputCls + ' resize-y'} />
       </div>
-      <div>
-        <label className="block text-[#a3b8af] mb-1">Image URL or Path</label>
-        <input type="text" value={val.image_url} onChange={e => set((p: any) => ({ ...p, image_url: e.target.value }))} placeholder="/images/product_1_1.jpg or https://..." className={inputCls} />
-        {val.image_url && (
-          <div className="relative w-20 h-16 mt-2 rounded-lg overflow-hidden border border-emerald-900/60">
-            <Image src={val.image_url} alt="preview" fill className="object-cover"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/images/product_1_1.jpg'; }} />
-          </div>
-        )}
-      </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-[#a3b8af] mb-1">Display Order</label>
@@ -141,7 +167,7 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
         </div>
         <div className="flex items-center gap-2 pt-6">
           <input type="checkbox" id="is_active_chk" checked={val.is_active} onChange={e => set((p: any) => ({ ...p, is_active: e.target.checked }))} className="rounded" />
-          <label htmlFor="is_active_chk" className="text-[#a3b8af] cursor-pointer">Published (visible on site)</label>
+          <label htmlFor="is_active_chk" className="text-[#a3b8af] cursor-pointer">Published</label>
         </div>
       </div>
     </div>
@@ -230,7 +256,10 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
               <button onClick={() => setIsAddOpen(false)} className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/10"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleAdd}>
-              <FormFields val={form} set={setForm} />
+              <div className="space-y-4">
+                <ImageInput label="Story Image" urlValue={addImageUrl} onUrlChange={setAddImageUrl} selectedFile={addFile} onFileSelected={setAddFile} />
+                <TextFields val={form} set={setForm} />
+              </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => setIsAddOpen(false)} className="px-4 py-2 text-[#a3b8af] hover:text-white text-xs">Cancel</button>
                 <button type="submit" disabled={saving} className="bg-[#e8c872] hover:bg-[#d4b055] disabled:opacity-60 text-black font-semibold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider btn-magnetic flex items-center gap-2">
@@ -251,9 +280,18 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
               <button onClick={() => setEditItem(null)} className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/10"><X className="w-4 h-4" /></button>
             </div>
             <form onSubmit={handleUpdate}>
-              <FormFields val={editItem} set={setEditItem} />
+              <div className="space-y-4">
+                <ImageInput
+                  label="Story Image (leave unchanged to keep existing)"
+                  urlValue={editImageUrl || editItem.image_url}
+                  onUrlChange={setEditImageUrl}
+                  selectedFile={editFile}
+                  onFileSelected={setEditFile}
+                />
+                <TextFields val={editItem} set={setEditItem} />
+              </div>
               <div className="flex justify-end gap-3 pt-4">
-                <button type="button" onClick={() => setEditItem(null)} className="px-4 py-2 text-[#a3b8af] hover:text-white text-xs">Cancel</button>
+                <button type="button" onClick={() => { setEditItem(null); setEditFile(null); }} className="px-4 py-2 text-[#a3b8af] hover:text-white text-xs">Cancel</button>
                 <button type="submit" disabled={saving} className="bg-[#e8c872] hover:bg-[#d4b055] disabled:opacity-60 text-black font-semibold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider btn-magnetic flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5" /><span>{saving ? 'Saving...' : 'Save Changes'}</span>
                 </button>
