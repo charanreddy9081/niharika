@@ -4,43 +4,47 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  MessageSquare,
-  Images,
-  Plus,
-  Trash2,
-  Sparkles,
-  RefreshCw,
-  Eye,
-  LogOut,
-  Lock,
-  Mail,
-  ShieldCheck,
-  AlertCircle,
-  TrendingUp,
-  Search,
-  Star,
-  DownloadCloud
+  LayoutDashboard, Package, ShoppingCart, MessageSquare, Images,
+  Plus, Trash2, Sparkles, RefreshCw, Eye, LogOut, Lock, Mail,
+  ShieldCheck, AlertCircle, TrendingUp, Search, Star, DownloadCloud,
+  KeyRound, X, CheckCircle2, EyeOff, ImageIcon, FileText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AdminArtistImages from '../../components/admin/AdminArtistImages';
+import AdminSiteContent from '../../components/admin/AdminSiteContent';
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function AdminPortalPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [adminUser, setAdminUser] = useState<any>(null);
 
-  const [loginEmail, setLoginEmail] = useState('admin@niharikartist.com');
+  const [loginEmail, setLoginEmail] = useState('niharikaananthoja@gmail.com');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries'>('overview');
+  // ── Login screen mode: 'login' | 'forgot' ────────────────────────────
+  const [loginMode, setLoginMode] = useState<'login' | 'forgot'>('login');
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
+  // ── Change Password modal (inside dashboard) ──────────────────────────
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [cpForm, setCpForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [cpLoading, setCpLoading] = useState(false);
+  const [cpShowCurrent, setCpShowCurrent] = useState(false);
+  const [cpShowNew, setCpShowNew] = useState(false);
+  const [cpShowConfirm, setCpShowConfirm] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'content'>('overview');
   const [products, setProducts] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
+  const [artistImages, setArtistImages] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
 
@@ -80,7 +84,7 @@ export default function AdminPortalPage() {
       return;
     }
 
-    fetch('http://localhost:5000/api/admin/me', {
+    fetch(API + '/api/admin/me', {
       headers: { 'Authorization': 'Bearer ' + token }
     })
       .then(res => res.json())
@@ -112,16 +116,20 @@ export default function AdminPortalPage() {
 
     try {
       const [pRes, gRes, oRes, iRes] = await Promise.all([
-        fetch('http://localhost:5000/api/admin/products', { headers }).then(r => r.json()),
-        fetch('http://localhost:5000/api/admin/gallery', { headers }).then(r => r.json()),
-        fetch('http://localhost:5000/api/admin/orders', { headers }).then(r => r.json()),
-        fetch('http://localhost:5000/api/admin/inquiries', { headers }).then(r => r.json())
+        fetch(API + '/api/admin/products', { headers }).then(r => r.json()),
+        fetch(API + '/api/admin/gallery', { headers }).then(r => r.json()),
+        fetch(API + '/api/admin/orders', { headers }).then(r => r.json()),
+        fetch(API + '/api/admin/inquiries', { headers }).then(r => r.json())
       ]);
 
       if (pRes.success) setProducts(pRes.data);
       if (gRes.success) setGallery(gRes.data);
       if (oRes.success) setOrders(oRes.data);
       if (iRes.success) setInquiries(iRes.data);
+
+      // Fetch artist images
+      const aiRes = await fetch(API + '/api/admin/artist-images', { headers }).then(r => r.json());
+      if (aiRes.success) setArtistImages(aiRes.data);
     } catch (e) {
       console.error('Error fetching admin data:', e);
       toast.error('Failed to refresh studio data');
@@ -136,7 +144,7 @@ export default function AdminPortalPage() {
     setLoginError('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/login', {
+      const res = await fetch(API + '/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
@@ -163,7 +171,7 @@ export default function AdminPortalPage() {
     const token = localStorage.getItem('niharikartist_admin_token');
     if (token) {
       try {
-        await fetch('http://localhost:5000/api/admin/logout', {
+        await fetch(API + '/api/admin/logout', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + token }
         });
@@ -177,6 +185,66 @@ export default function AdminPortalPage() {
     toast.success('Administrator logged out successfully');
   };
 
+  // ── Forgot Password ───────────────────────────────────────────────────
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) { toast.error('Please enter your email address.'); return; }
+    setForgotLoading(true);
+    try {
+      const res = await fetch(API + '/api/admin/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail.trim() })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForgotSent(true);
+      } else {
+        toast.error(data.message || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      toast.error('Could not connect to the server. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  // ── Change Password (logged-in admin) ─────────────────────────────────
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cpForm.currentPassword || !cpForm.newPassword || !cpForm.confirmPassword) {
+      toast.error('Please fill in all fields.'); return;
+    }
+    if (cpForm.newPassword !== cpForm.confirmPassword) {
+      toast.error('New password and confirmation do not match.'); return;
+    }
+    if (cpForm.newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters.'); return;
+    }
+    const token = localStorage.getItem('niharikartist_admin_token');
+    if (!token) return;
+    setCpLoading(true);
+    try {
+      const res = await fetch(API + '/api/admin/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(cpForm)
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Password updated successfully!');
+        setIsChangePasswordOpen(false);
+        setCpForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        toast.error(data.message || 'Failed to update password.');
+      }
+    } catch {
+      toast.error('Could not connect to the server. Please try again.');
+    } finally {
+      setCpLoading(false);
+    }
+  };
+
   // Reusable Sync Shop Products Handler
   const handleSyncShopProducts = async () => {
     const token = localStorage.getItem('niharikartist_admin_token');
@@ -184,7 +252,7 @@ export default function AdminPortalPage() {
 
     setSyncLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/admin/products/sync', {
+      const res = await fetch(API + '/api/admin/products/sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -214,7 +282,7 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/gallery', {
+      const res = await fetch(API + '/api/admin/gallery', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +317,7 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/gallery/' + id, {
+      const res = await fetch(API + '/api/admin/gallery/' + id, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
       });
@@ -270,7 +338,7 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/gallery/' + (item._id || item.id), {
+      const res = await fetch(API + '/api/admin/gallery/' + (item._id || item.id), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -295,7 +363,7 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/products', {
+      const res = await fetch(API + '/api/admin/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -347,7 +415,7 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/products/' + id, {
+      const res = await fetch(API + '/api/admin/products/' + id, {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
       });
@@ -368,7 +436,7 @@ export default function AdminPortalPage() {
     if (!token) return;
 
     try {
-      const res = await fetch('http://localhost:5000/api/admin/orders/' + id + '/status', {
+      const res = await fetch(API + '/api/admin/orders/' + id + '/status', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -416,76 +484,144 @@ export default function AdminPortalPage() {
 
         <main className="relative z-10 w-full max-w-md my-auto">
           <div className="bg-[#0a2319]/90 border border-[#e8c872]/30 rounded-3xl p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.85)] backdrop-blur-2xl space-y-6">
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#050f0b] border border-[#e8c872]/40 flex items-center justify-center mx-auto text-[#e8c872] shadow-inner">
-                <Lock className="w-5 h-5" />
-              </div>
-              <h1 className="font-display text-2xl sm:text-3xl text-zinc-100 font-light">Admin Studio</h1>
-              <p className="text-xs text-[#a3b8af]">Enter your administrator credentials to access the studio console.</p>
-            </div>
 
-            {loginError && (
-              <div className="bg-red-950/70 border border-red-800/80 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-red-200 animate-shake">
-                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                <span>{loginError}</span>
-              </div>
+            {/* ── LOGIN FORM ──────────────────────────────────────── */}
+            {loginMode === 'login' && (
+              <>
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-[#050f0b] border border-[#e8c872]/40 flex items-center justify-center mx-auto text-[#e8c872] shadow-inner">
+                    <Lock className="w-5 h-5" />
+                  </div>
+                  <h1 className="font-display text-2xl sm:text-3xl text-zinc-100 font-light">Admin Studio</h1>
+                  <p className="text-xs text-[#a3b8af]">Enter your administrator credentials to access the studio console.</p>
+                </div>
+
+                {loginError && (
+                  <div className="bg-red-950/70 border border-red-800/80 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-red-200">
+                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                    <span>{loginError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleLogin} className="space-y-4 text-xs">
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5 font-medium">Administrator Email</label>
+                    <div className="relative">
+                      <Mail className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="email"
+                        required
+                        value={loginEmail}
+                        onChange={e => setLoginEmail(e.target.value)}
+                        placeholder="admin@niharikartist.com"
+                        className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5 font-medium">Password</label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="password"
+                        required
+                        value={loginPassword}
+                        onChange={e => setLoginPassword(e.target.value)}
+                        placeholder="••••••••••••"
+                        className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loginLoading}
+                    className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3.5 rounded-xl uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2 mt-2"
+                  >
+                    {loginLoading ? (
+                      <><Sparkles className="w-4 h-4 animate-spin text-black" /><span>Authenticating...</span></>
+                    ) : (
+                      <><ShieldCheck className="w-4 h-4" /><span>Access Studio Console</span></>
+                    )}
+                  </button>
+                </form>
+
+                <div className="pt-3 border-t border-emerald-950 text-center">
+                  <button
+                    onClick={() => { setLoginMode('forgot'); setForgotSent(false); setForgotEmail(loginEmail); }}
+                    className="text-[11px] text-[#a3b8af] hover:text-[#e8c872] transition-colors uppercase tracking-wider"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              </>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-4 text-xs">
-              <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5 font-medium">Administrator Email</label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    value={loginEmail}
-                    onChange={e => setLoginEmail(e.target.value)}
-                    placeholder="admin@niharikartist.com"
-                    className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
-                  />
+            {/* ── FORGOT PASSWORD FORM ────────────────────────────── */}
+            {loginMode === 'forgot' && (
+              <>
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-[#050f0b] border border-[#e8c872]/40 flex items-center justify-center mx-auto text-[#e8c872] shadow-inner">
+                    <KeyRound className="w-5 h-5" />
+                  </div>
+                  <h1 className="font-display text-2xl text-zinc-100 font-light">Forgot Password</h1>
+                  <p className="text-xs text-[#a3b8af]">Enter your admin email and we&apos;ll send a secure reset link.</p>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5 font-medium">Password</label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="password"
-                    required
-                    value={loginPassword}
-                    onChange={e => setLoginPassword(e.target.value)}
-                    placeholder="••••••••••••"
-                    className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loginLoading}
-                className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3.5 rounded-xl uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2 mt-2"
-              >
-                {loginLoading ? (
-                  <>
-                    <Sparkles className="w-4 h-4 animate-spin text-black" />
-                    <span>Authenticating...</span>
-                  </>
+                {forgotSent ? (
+                  <div className="bg-emerald-950/70 border border-emerald-700/60 rounded-xl p-5 flex flex-col items-center gap-3 text-center">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                    <p className="text-sm text-emerald-200 font-medium">Reset link sent!</p>
+                    <p className="text-xs text-[#a3b8af]">
+                      If <strong className="text-zinc-200">{forgotEmail}</strong> is registered, a reset link has been sent. Check your inbox (and spam folder).
+                    </p>
+                    <button
+                      onClick={() => { setLoginMode('login'); setForgotSent(false); }}
+                      className="mt-2 text-xs text-[#e8c872] hover:underline uppercase tracking-wider"
+                    >
+                      ← Back to Login
+                    </button>
+                  </div>
                 ) : (
-                  <>
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Access Studio Console</span>
-                  </>
+                  <form onSubmit={handleForgotPassword} className="space-y-4 text-xs">
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5 font-medium">Admin Email Address</label>
+                      <div className="relative">
+                        <Mail className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="email"
+                          required
+                          value={forgotEmail}
+                          onChange={e => setForgotEmail(e.target.value)}
+                          placeholder="admin@niharikartist.com"
+                          className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-4 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3.5 rounded-xl uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2"
+                    >
+                      {forgotLoading ? (
+                        <><Sparkles className="w-4 h-4 animate-spin text-black" /><span>Sending...</span></>
+                      ) : (
+                        <><Mail className="w-4 h-4" /><span>Send Reset Link</span></>
+                      )}
+                    </button>
+                    <div className="text-center pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setLoginMode('login')}
+                        className="text-[11px] text-[#a3b8af] hover:text-[#e8c872] transition-colors uppercase tracking-wider"
+                      >
+                        ← Back to Login
+                      </button>
+                    </div>
+                  </form>
                 )}
-              </button>
-            </form>
+              </>
+            )}
 
-            <div className="pt-3 border-t border-emerald-950 text-center">
-              <span className="text-[10px] text-[#627a70] uppercase tracking-wider block">
-                Authorized Personnel Only • IP &amp; Access Logged
-              </span>
-            </div>
           </div>
         </main>
 
@@ -558,14 +694,22 @@ export default function AdminPortalPage() {
             </div>
 
             <button
+              onClick={() => { setIsChangePasswordOpen(true); setCpForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); }}
+              className="hidden sm:flex items-center gap-1.5 bg-[#0a2319] border border-emerald-800/80 hover:border-[#e8c872]/60 px-3.5 py-1.5 rounded-lg text-[#a3b8af] hover:text-[#e8c872] text-[11px] uppercase tracking-wider transition-colors btn-magnetic"
+              title="Change Admin Password"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Change Password</span>
+            </button>
+
+            <button
               onClick={handleLogout}
               className="bg-red-950/70 hover:bg-red-900/90 border border-red-800/60 text-red-200 px-3.5 py-1.5 rounded-lg text-xs uppercase tracking-wider font-medium flex items-center gap-1.5 transition-colors btn-magnetic"
               title="Sign Out of Admin Console"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Logout</span>
-            </button>
-          </div>
+            </button>          </div>
         </div>
       </header>
 
@@ -578,6 +722,8 @@ export default function AdminPortalPage() {
             { id: 'gallery', label: 'Gallery Artworks (' + gallery.length + ')', icon: Images },
             { id: 'orders', label: 'Orders & Heirlooms (' + orders.length + ')', icon: ShoppingCart },
             { id: 'inquiries', label: 'Commissions (' + inquiries.length + ')', icon: MessageSquare },
+            { id: 'artist_images', label: 'Artist Images (' + artistImages.length + ')', icon: ImageIcon },
+            { id: 'content', label: 'Website Content', icon: FileText },
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -932,8 +1078,7 @@ export default function AdminPortalPage() {
         )}
 
         {/* TAB 5: INQUIRIES */}
-        {activeTab === 'inquiries' && (
-          <div className="space-y-6">
+        {activeTab === 'inquiries' && (          <div className="space-y-6">
             <div>
               <h3 className="font-display text-2xl text-zinc-100">Bespoke Commissions &amp; Studio Inquiries ({inquiries.length})</h3>
               <p className="text-xs text-[#a3b8af]">Direct messages from patrons inquiring about custom portraits and exhibition bookings.</p>
@@ -965,6 +1110,16 @@ export default function AdminPortalPage() {
               )}
             </div>
           </div>
+        )}
+
+        {/* TAB 6: ARTIST IMAGES */}
+        {activeTab === 'artist_images' && (
+          <AdminArtistImages images={artistImages} onRefresh={fetchAdminData} />
+        )}
+
+        {/* TAB 7: WEBSITE CONTENT */}
+        {activeTab === 'content' && (
+          <AdminSiteContent />
         )}
 
         {/* Add Gallery Artwork Modal */}
@@ -1185,6 +1340,141 @@ export default function AdminPortalPage() {
           </div>
         )}
       </main>
+
+      {/* ── CHANGE PASSWORD MODAL ──────────────────────────────────────── */}
+      {isChangePasswordOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#081a13] border border-[#e8c872]/40 rounded-3xl p-6 sm:p-8 max-w-md w-full space-y-5 shadow-2xl">
+
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#050f0b] border border-[#e8c872]/40 flex items-center justify-center text-[#e8c872]">
+                  <KeyRound className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-display text-xl text-zinc-100">Change Password</h3>
+                  <p className="text-[10px] text-[#a3b8af] uppercase tracking-wider">Logged in as {adminUser?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsChangePasswordOpen(false)}
+                className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="space-y-4 text-xs">
+
+              {/* Current Password */}
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5">Current Password</label>
+                <div className="relative">
+                  <Lock className="w-3.5 h-3.5 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={cpShowCurrent ? 'text' : 'password'}
+                    required
+                    value={cpForm.currentPassword}
+                    onChange={e => setCpForm({ ...cpForm, currentPassword: e.target.value })}
+                    placeholder="Enter current password"
+                    className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-10 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
+                  />
+                  <button type="button" onClick={() => setCpShowCurrent(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
+                    {cpShowCurrent ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5">New Password</label>
+                <div className="relative">
+                  <KeyRound className="w-3.5 h-3.5 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={cpShowNew ? 'text' : 'password'}
+                    required
+                    value={cpForm.newPassword}
+                    onChange={e => setCpForm({ ...cpForm, newPassword: e.target.value })}
+                    placeholder="Minimum 8 characters"
+                    className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-10 pr-10 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors"
+                  />
+                  <button type="button" onClick={() => setCpShowNew(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
+                    {cpShowNew ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                {/* Strength indicator */}
+                {cpForm.newPassword && (
+                  <div className="mt-1.5 flex gap-1">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
+                        cpForm.newPassword.length >= (i + 1) * 3
+                          ? cpForm.newPassword.length >= 12 ? 'bg-emerald-500' : cpForm.newPassword.length >= 8 ? 'bg-[#e8c872]' : 'bg-red-500'
+                          : 'bg-zinc-800'
+                      }`} />
+                    ))}
+                    <span className="text-[10px] text-zinc-500 ml-1">
+                      {cpForm.newPassword.length < 8 ? 'Too short' : cpForm.newPassword.length < 12 ? 'Good' : 'Strong'}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-[11px] uppercase tracking-wider text-[#a3b8af] mb-1.5">Confirm New Password</label>
+                <div className="relative">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={cpShowConfirm ? 'text' : 'password'}
+                    required
+                    value={cpForm.confirmPassword}
+                    onChange={e => setCpForm({ ...cpForm, confirmPassword: e.target.value })}
+                    placeholder="Repeat new password"
+                    className={`w-full bg-[#050f0b] border rounded-xl pl-10 pr-10 py-3 text-zinc-100 placeholder-emerald-800 focus:outline-none transition-colors ${
+                      cpForm.confirmPassword && cpForm.newPassword !== cpForm.confirmPassword
+                        ? 'border-red-700 focus:border-red-500'
+                        : cpForm.confirmPassword && cpForm.newPassword === cpForm.confirmPassword
+                        ? 'border-emerald-600 focus:border-emerald-400'
+                        : 'border-emerald-900/80 focus:border-[#e8c872]'
+                    }`}
+                  />
+                  <button type="button" onClick={() => setCpShowConfirm(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300">
+                    {cpShowConfirm ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  </button>
+                  {cpForm.confirmPassword && cpForm.newPassword === cpForm.confirmPassword && (
+                    <CheckCircle2 className="absolute right-8 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-emerald-400" />
+                  )}
+                </div>
+                {cpForm.confirmPassword && cpForm.newPassword !== cpForm.confirmPassword && (
+                  <p className="text-[10px] text-red-400 mt-1">Passwords do not match</p>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsChangePasswordOpen(false)}
+                  className="px-5 py-2.5 text-[#a3b8af] hover:text-white text-xs uppercase tracking-wider transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={cpLoading}
+                  className="bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 disabled:opacity-60 text-black font-semibold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider btn-magnetic flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(232,200,114,0.3)]"
+                >
+                  {cpLoading ? (
+                    <><Sparkles className="w-3.5 h-3.5 animate-spin" /><span>Updating...</span></>
+                  ) : (
+                    <><KeyRound className="w-3.5 h-3.5" /><span>Update Password</span></>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <footer className="border-t border-emerald-950 py-4 text-center text-[10px] text-[#627a70] uppercase tracking-widest font-sans">
         niharikartist admin studio console • active session: {adminUser?.email || 'admin@niharikartist.com'}

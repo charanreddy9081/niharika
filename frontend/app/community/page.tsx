@@ -5,28 +5,31 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { Sparkles, Heart, ArrowRight, Star } from 'lucide-react';
+import { Sparkles, Heart, ArrowRight } from 'lucide-react';
+import { useSiteContent } from '../../hooks/useSiteContent';
 
 export default function CommunityPage() {
+  const { c } = useSiteContent('community');
+
   const stories = [
     {
-      title: 'A Bond Across Oceans: The London & Mumbai Connection',
-      author: 'Aarav & Meera S.',
-      image: '/images/product_1_1.jpg',
-      excerpt: 'Living 4,000 miles apart, opening the "Whispers of Twilight" keepsake frame on Raksha Bandhan brought our entire childhood back into our living room.'
+      title:  c('story1_title',  'A Bond Across Oceans: The London & Mumbai Connection'),
+      author: c('story1_author', 'Aarav & Meera S.'),
+      image:  '/images/product_1_1.jpg',
+      excerpt: c('story1_excerpt', 'Living 4,000 miles apart, opening the "Whispers of Twilight" keepsake frame on Raksha Bandhan brought our entire childhood back into our living room.'),
     },
     {
-      title: 'Sunlight in a Winter Apartment',
-      author: 'Dr. Ananya Roy',
-      image: '/images/product_2_1.jpg',
-      excerpt: 'The delicate hand-sculpted petals of "Solace in Golden Light" brighten every morning. It has become the spiritual focal point of our home library.'
+      title:  c('story2_title',  'Sunlight in a Winter Apartment'),
+      author: c('story2_author', 'Dr. Ananya Roy'),
+      image:  '/images/product_2_1.jpg',
+      excerpt: c('story2_excerpt', 'The delicate hand-sculpted petals of "Solace in Golden Light" brighten every morning. It has become the spiritual focal point of our home library.'),
     },
     {
-      title: 'An Unbroken Vow Inked in Gold Wax',
-      author: 'Kabir & Rohan V.',
-      image: '/images/product_7_1.jpg',
-      excerpt: 'Reading our personal letter handwritten in fountain script and breaking the gold wax seal felt like opening a historic heirloom from a century ago.'
-    }
+      title:  c('story3_title',  'An Unbroken Vow Inked in Gold Wax'),
+      author: c('story3_author', 'Kabir & Rohan V.'),
+      image:  '/images/product_7_1.jpg',
+      excerpt: c('story3_excerpt', 'Reading our personal letter handwritten in fountain script and breaking the gold wax seal felt like opening a historic heirloom from a century ago.'),
+    },
   ];
 
   return (
@@ -35,10 +38,14 @@ export default function CommunityPage() {
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">The Atelier Journal</span>
-          <h1 className="font-display text-4xl sm:text-5xl text-zinc-100 font-light">Patron Reflections &amp; Stories</h1>
+          <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
+            {c('page_label', 'The Atelier Journal')}
+          </span>
+          <h1 className="font-display text-4xl sm:text-5xl text-zinc-100 font-light">
+            {c('page_title', 'Patron Reflections & Stories')}
+          </h1>
           <p className="text-xs sm:text-sm text-[#a3b8af] max-w-lg mx-auto">
-            Behind every handpainted frame is an intimate tale of reunions, whispered gratitude, and quiet love.
+            {c('page_subtitle', 'Behind every handpainted frame is an intimate tale of reunions, whispered gratitude, and quiet love.')}
           </p>
         </div>
 
@@ -65,16 +72,15 @@ export default function CommunityPage() {
 
         <div className="bg-[#0b1f16] border border-[#e8c872]/25 rounded-3xl p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-4 shadow-2xl">
           <Sparkles className="w-8 h-8 text-[#e8c872] mx-auto" />
-          <h3 className="font-display text-3xl text-zinc-100 font-light">Share Your Atelier Memory</h3>
+          <h3 className="font-display text-3xl text-zinc-100 font-light">
+            {c('cta_title', 'Share Your Atelier Memory')}
+          </h3>
           <p className="text-xs text-[#a3b8af] leading-relaxed">
-            Did your niharikartist frame create a cherished moment? Send us your story or photo to be archived in our exhibition annals.
+            {c('cta_description', 'Did your niharikartist frame create a cherished moment? Send us your story or photo to be archived in our exhibition annals.')}
           </p>
           <div className="pt-2">
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 bg-[#e8c872] hover:bg-[#d4b055] text-black px-7 py-3 rounded-full text-xs font-semibold uppercase tracking-[0.2em] transition-colors btn-magnetic"
-            >
-              <span>Submit Chronicle</span>
+            <Link href="/contact" className="inline-flex items-center gap-2 bg-[#e8c872] hover:bg-[#d4b055] text-black px-7 py-3 rounded-full text-xs font-semibold uppercase tracking-[0.2em] transition-colors btn-magnetic">
+              <span>{c('cta_btn', 'Submit Chronicle')}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

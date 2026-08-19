@@ -6,18 +6,12 @@ import Link from 'next/link';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import {
-  Sparkles,
-  Search,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Maximize2,
-  Calendar,
-  Tag,
-  ArrowRight,
-  Send,
-  Eye
+  Sparkles, Search, X, ChevronLeft, ChevronRight,
+  Maximize2, ArrowRight, Send
 } from 'lucide-react';
+import { useSiteContent } from '../../hooks/useSiteContent';
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 interface GalleryItem {
   id: string;
@@ -39,9 +33,10 @@ export default function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const { c } = useSiteContent('gallery');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/gallery')
+    fetch(`${API}/api/gallery`)
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.data)) {
@@ -110,15 +105,15 @@ export default function GalleryPage() {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
           <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#0a2319] border border-[#e8c872]/35 text-[#fbf5e6] text-xs uppercase tracking-[0.25em] backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-[#e8c872] animate-pulse" />
-            <span>Masterworks Exhibition • Contemporary Portfolio</span>
+            <span>{c('page_label', 'Masterworks Exhibition • Contemporary Portfolio')}</span>
           </div>
 
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-zinc-100 font-light tracking-tight">
-            The Fine Art <span className="font-signature text-5xl sm:text-7xl text-[#fbf5e6] drop-shadow-[0_0_25px_rgba(232,200,114,0.45)]">Gallery</span>
+            {c('page_title', 'The Fine Art')} <span className="font-signature text-5xl sm:text-7xl text-[#fbf5e6] drop-shadow-[0_0_25px_rgba(232,200,114,0.45)]">Gallery</span>
           </h1>
 
           <p className="text-xs sm:text-sm text-[#a3b8af] leading-relaxed">
-            Explore authentic handpainted works, graphite &amp; colour pencil portraits, live caricature studies, and live wedding paintings created by artist Niharika.
+            {c('page_subtitle', 'Explore authentic handpainted works, graphite & colour pencil portraits, live caricature studies, and live wedding paintings created by artist Niharika.')}
           </p>
         </div>
 

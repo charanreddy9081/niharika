@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { loginAdmin, getAdminMe, logoutAdmin } = require('../controllers/adminAuthController');
+const { loginAdmin, getAdminMe, logoutAdmin, changePassword, forgotPassword, resetPassword } = require('../controllers/adminAuthController');
 const { protectAdmin } = require('../middleware/authMiddleware');
 
+const artistImageController = require('../controllers/artistImageController');
+const siteContentController = require('../controllers/siteContentController');
 const productController = require('../controllers/productController');
 const galleryController = require('../controllers/galleryController');
 const orderController = require('../controllers/orderController');
@@ -13,6 +15,11 @@ const settingController = require('../controllers/settingController');
 router.post('/login', loginAdmin);
 router.get('/me', protectAdmin, getAdminMe);
 router.post('/logout', protectAdmin, logoutAdmin);
+
+// Password management
+router.post('/change-password', protectAdmin, changePassword);  // requires JWT — logged-in admin
+router.post('/forgot-password', forgotPassword);                // public — sends reset email
+router.post('/reset-password', resetPassword);                  // public — consumes reset token
 
 // Protected Admin API Endpoints
 router.get('/products', protectAdmin, productController.getProducts);
@@ -34,5 +41,17 @@ router.get('/subscribers', protectAdmin, contactController.getSubscribers);
 
 router.get('/settings', protectAdmin, settingController.getSettings);
 router.put('/settings', protectAdmin, settingController.updateSettings);
+
+// Artist Images (admin)
+router.get('/artist-images', protectAdmin, artistImageController.getAllArtistImages);
+router.post('/artist-images', protectAdmin, artistImageController.createArtistImage);
+router.post('/artist-images/upload', protectAdmin, artistImageController.uploadArtistImageFile);
+router.put('/artist-images/:id', protectAdmin, artistImageController.updateArtistImage);
+router.delete('/artist-images/:id', protectAdmin, artistImageController.deleteArtistImage);
+
+// Site Content (admin)
+router.get('/content', protectAdmin, siteContentController.getAllContent);
+router.put('/content/update', protectAdmin, siteContentController.updateContent);
+router.put('/content/bulk', protectAdmin, siteContentController.bulkUpdateContent);
 
 module.exports = router;
