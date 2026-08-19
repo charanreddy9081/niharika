@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --c-bg: #050f0b;
+    --c-bg-card: rgba(10, 26, 20, 0.82);
+    --c-bg-card-hover: rgba(16, 40, 31, 0.95);
+    --c-champagne: #e8c872;
+    --c-champagne-light: #fbf5e6;
+    --c-gold-accent: #d4b055;
+    --c-gold-glow: rgba(232, 200, 114, 0.32);
+    --c-border-subtle: rgba(232, 200, 114, 0.22);
+    --c-border-hover: rgba(232, 200, 114, 0.6);
+    --c-text-primary: #fbf8f1;
+    --c-text-secondary: #a3b8af;
+    --c-text-muted: #627a70;
+  }
+
+  body {
+    background-color: var(--c-bg);
+    color: var(--c-text-primary);
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    letter-spacing: -0.01em;
+  }
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial), Georgia, serif;
+}
+
+.font-signature {
+  font-family: var(--font-signature), cursive;
+}
+
+.font-sans {
+  font-family: var(--font-sans), sans-serif;
+}
+
+.champagne-gradient-text {
+  background: linear-gradient(135deg, #fbf5e6 0%, #e8c872 45%, #c99c38 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass-atelier {
+  background: var(--c-bg-card);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--c-border-subtle);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-atelier:hover {
+  background: var(--c-bg-card-hover);
+  border-color: var(--c-border-hover);
+  transform: translateY(-3px);
+}
+
+@keyframes floatGentle1 {
+  0% { transform: translate(0px, 0px) rotate(0deg); }
+  50% { transform: translate(30px, -35px) rotate(3deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+@keyframes floatGentle2 {
+  0% { transform: translate(0px, 0px) rotate(0deg); }
+  50% { transform: translate(-35px, 30px) rotate(-3deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+.float-orb-1 {
+  animation: floatGentle1 18s ease-in-out infinite alternate;
+}
+
+.float-orb-2 {
+  animation: floatGentle2 22s ease-in-out infinite alternate;
+}
+
+.btn-magnetic {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-magnetic:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-magnetic:active {
+  transform: translateY(0px) scale(0.98);
+}
