@@ -261,11 +261,11 @@ exports.createOrder = async (req, res) => {
     };
 
     // ── 9. Send emails — fire-and-forget, never block response ────────────
-    Promise.all([
-      sendAdminOrderEmail(orderForEmail),
-      sendCustomerOrderConfirmation(orderForEmail)
-    ]).catch(err => {
-      console.error('Email dispatch error (order already saved):', err.message);
+    sendAdminOrderEmail(orderForEmail).catch(err => {
+      console.error('Admin email failed (order saved):', err.message);
+    });
+    sendCustomerOrderConfirmation(orderForEmail).catch(err => {
+      console.error('Customer email failed (order saved):', err.message);
     });
 
     // ── 10. Return success ────────────────────────────────────────────────

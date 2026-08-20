@@ -217,7 +217,7 @@ async function sendCustomerOrderConfirmation(order) {
     });
     console.log(`✅ Customer confirmation email sent to ${customer.email} for ${order_id}`);
   } catch (err) {
-    console.error(`❌ Customer email failed for ${order_id}:`, err.message);
+    console.error(`❌ Customer email failed for ${order_id} (to: ${customer.email}):`, err.message, err.responseCode || '');
     // Never throw — order is already saved
   }
 }
