@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
@@ -10,6 +9,7 @@ import {
   Maximize2, ArrowRight, Send
 } from 'lucide-react';
 import { useSiteContent } from '../../hooks/useSiteContent';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -35,17 +35,16 @@ export default function GalleryPage() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const { c } = useSiteContent('gallery');
 
-  useEffect(() => {
+  const fetchGallery = useCallback(() => {
     fetch(`${API}/api/gallery`)
       .then(res => res.json())
-      .then(data => {
-        if (data.success && Array.isArray(data.data)) {
-          setItems(data.data);
-        }
-      })
+      .then(data => { if (data.success && Array.isArray(data.data)) setItems(data.data); })
       .catch(err => console.error('Failed to fetch gallery:', err))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { fetchGallery(); }, [fetchGallery]);
+  useAutoRefresh(fetchGallery);
 
   const categories = useMemo(() => {
     const cats = new Set<string>();

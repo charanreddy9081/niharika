@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Header } from '../components/Header';
@@ -9,9 +9,10 @@ import { ProductCard } from '../components/ProductCard';
 import { Sparkles, ArrowRight, Star, Palette, Feather, Shield } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
 import { useHomeTransition } from '../hooks/useHomeTransition';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const SLIDE_DURATION = 900; // ms — must match hook
+const SLIDE_DURATION = 900;
 
 export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -19,18 +20,21 @@ export default function HomePage() {
   const { c } = useSiteContent('home');
   const {
     current, next, direction, animating, loading: imgLoading,
-    currentSrc, currentAlt, hasFallback, slideNext, slidePrev,
+    currentSrc, currentAlt, hasFallback,
   } = useHomeTransition();
 
-  useEffect(() => {
+  const fetchProducts = useCallback(() => {
     fetch(`${API}/api/products`)
       .then(res => res.json())
-      .then(data => {
-        if (data.success && Array.isArray(data.data)) setProducts(data.data);
-      })
+      .then(data => { if (data.success && Array.isArray(data.data)) setProducts(data.data); })
       .catch(err => console.error('Failed to fetch products:', err))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  // Auto-refresh: re-fetches when user returns to tab or network comes back
+  useAutoRefresh(fetchProducts);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#050f0b]">

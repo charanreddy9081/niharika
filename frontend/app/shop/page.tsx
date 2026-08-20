@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { ProductCard } from '../../components/ProductCard';
 import { Search, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 import { useSiteContent } from '../../hooks/useSiteContent';
+import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -22,7 +23,7 @@ function ShopContent() {
 
   useEffect(() => { if (initialCat) setActiveCategory(initialCat); }, [initialCat]);
 
-  useEffect(() => {
+  const fetchProducts = useCallback(() => {
     setLoading(true);
     let url = `${API}/api/products?`;
     if (activeCategory && activeCategory !== 'all') url += 'category=' + encodeURIComponent(activeCategory) + '&';
@@ -34,6 +35,11 @@ function ShopContent() {
       .catch(err => console.error('Failed to load products:', err))
       .finally(() => setLoading(false));
   }, [activeCategory, search, sort]);
+
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+
+  // Re-fetch when user returns to tab or comes back online
+  useAutoRefresh(fetchProducts);
 
   const categories = useMemo(() => [
     { id: 'all', label: 'All Store Artworks' },

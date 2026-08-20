@@ -5,6 +5,7 @@ import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import { CartDrawer } from '../components/CartDrawer';
 import { Toaster } from 'react-hot-toast';
+import KeepAlive from '../components/KeepAlive';
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -65,6 +66,7 @@ export default function RootLayout({
               }}
             />
             <CartDrawer />
+            <KeepAlive />
             {children}
           </WishlistProvider>
         </CartProvider>
