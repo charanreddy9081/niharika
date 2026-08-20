@@ -5,8 +5,11 @@ if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 }
 
-const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'orders@niharikartist.com';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@niharikartist.com';
+const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'orders@niharikartist.com';
+const FROM_NAME   = process.env.SENDGRID_FROM_NAME  || 'niharikartist Studio';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'niharikaananthoja@gmail.com';
+// Reply-To = admin's Gmail so any replies land in inbox
+const REPLY_TO    = process.env.ADMIN_EMAIL || 'niharikaananthoja@gmail.com';
 
 // ─── Shared brand styles ───────────────────────────────────────────────────
 const brandStyles = `
@@ -164,7 +167,8 @@ async function sendAdminOrderEmail(order) {
   try {
     await sgMail.send({
       to: ADMIN_EMAIL,
-      from: { email: FROM_EMAIL, name: 'niharikartist Studio' },
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO,
       subject: `New Order Received — ${order_id}`,
       html
     });
@@ -268,7 +272,8 @@ async function sendCustomerOrderConfirmation(order) {
   try {
     await sgMail.send({
       to: customer.email,
-      from: { email: FROM_EMAIL, name: 'niharikartist Studio' },
+      from: { email: FROM_EMAIL, name: FROM_NAME },
+      replyTo: REPLY_TO,
       subject: `Order Confirmation — ${order_id}`,
       html
     });
