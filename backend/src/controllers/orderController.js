@@ -1,5 +1,6 @@
 const { supabase } = require('../config/db');
 const { sendAdminOrderEmail, sendCustomerOrderConfirmation } = require('../services/emailService');
+const { sendOrderAlert } = require('../services/telegramService');
 
 /**
  * Existing orders table schema:
@@ -260,12 +261,15 @@ exports.createOrder = async (req, res) => {
       total: serverTotal
     };
 
-    // ── 9. Send emails — fire-and-forget, never block response ────────────
+    // ── 9. Send notifications — fire-and-forget, never block response ─────
     sendAdminOrderEmail(orderForEmail).catch(err => {
       console.error('Admin email failed (order saved):', err.message);
     });
     sendCustomerOrderConfirmation(orderForEmail).catch(err => {
       console.error('Customer email failed (order saved):', err.message);
+    });
+    sendOrderAlert(orderForEmail).catch(err => {
+      console.error('Telegram alert failed (order saved):', err.message);
     });
 
     // ── 10. Return success ────────────────────────────────────────────────
