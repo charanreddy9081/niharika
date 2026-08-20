@@ -121,67 +121,42 @@ const changePassword = async (req, res) => {
   }
 };
 
-// ─── Forgot Password — send reset token via SendGrid ─────────────────────
+// ─── Forgot Password — send reset token via Gmail SMTP ───────────────────
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Please provide your administrator email address.' });
-    }
+    if (!email) return res.status(400).json({ success: false, message: 'Please provide your administrator email address.' });
 
     const cleanEmail = email.toLowerCase().trim();
+    const { data: admin, error } = await supabase.from('admin_users').select('id, email, name').eq('email', cleanEmail).single();
 
-    const { data: admin, error } = await supabase
-      .from('admin_users')
-      .select('id, email, name')
-      .eq('email', cleanEmail)
-      .single();
-
-    // Always respond with success to prevent email enumeration
+    // Always return success to prevent enumeration
     if (error || !admin) {
-      return res.status(200).json({
-        success: true,
-        message: 'If that email is registered, a reset link has been sent.'
-      });
+      return res.status(200).json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
     }
 
-    // Generate a secure reset token (expires in 1 hour)
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
-    // Store hashed token + expiry in admin_users table
-    // These columns may not exist yet — if they don't, the email is still sent
-    // with manual instructions. Run the migration to add them.
-    const { error: tokenError } = await supabase
-      .from('admin_users')
-      .update({
-        reset_token: resetTokenHash,
-        reset_token_expiry: resetTokenExpiry
-      })
+    const { error: tokenError } = await supabase.from('admin_users')
+      .update({ reset_token: resetTokenHash, reset_token_expiry: resetTokenExpiry })
       .eq('id', admin.id);
 
-    if (tokenError) {
-      // Columns don't exist yet — still send email but log the issue
-      console.warn('⚠️  reset_token columns missing in admin_users. Run migration. Token not stored.');
-    }
+    if (tokenError) console.warn('⚠️  reset_token columns missing — token not stored.');
 
-    // Build reset URL
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
     const resetUrl = `${clientUrl}/admin/reset-password?token=${resetToken}&email=${encodeURIComponent(cleanEmail)}`;
 
-    // Send email via SendGrid
-    if (process.env.SENDGRID_API_KEY) {
-      const sgMail = require('@sendgrid/mail');
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    // Send via Gmail SMTP
+    const GMAIL_USER = process.env.GMAIL_USER || '';
+    const GMAIL_PASS = process.env.GMAIL_APP_PASSWORD || '';
 
-      const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'orders@niharikartist.com';
+    if (GMAIL_USER && GMAIL_PASS) {
+      const nodemailer = require('nodemailer');
+      const t = nodemailer.createTransport({ service: 'gmail', auth: { user: GMAIL_USER, pass: GMAIL_PASS } });
 
-      const html = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head><meta charset="UTF-8"><style>
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
         body{margin:0;padding:0;background:#050f0b;font-family:'Segoe UI',Arial,sans-serif;color:#fbf8f1;}
         .wrapper{max-width:560px;margin:0 auto;background:#071610;border:1px solid rgba(232,200,114,0.25);border-radius:16px;overflow:hidden;}
         .header{background:linear-gradient(135deg,#081d14,#0d2b1e);padding:32px 36px;text-align:center;border-bottom:1px solid rgba(232,200,114,0.2);}
@@ -192,52 +167,30 @@ const forgotPassword = async (req, res) => {
         .footer{background:#040e0a;padding:18px 36px;text-align:center;font-size:11px;color:#627a70;border-top:1px solid rgba(255,255,255,0.05);}
         .warn{background:#1a0a0a;border:1px solid rgba(220,38,38,0.3);border-radius:10px;padding:14px 18px;font-size:12px;color:#fca5a5;margin-top:20px;}
       </style></head>
-      <body>
-        <div class="wrapper">
-          <div class="header">
-            <div class="brand">niharikartist</div>
-            <div class="tagline">fine art atelier • admin portal</div>
-          </div>
-          <div class="body">
-            <h2 style="font-size:20px;font-weight:400;color:#fbf5e6;margin:0 0 8px;font-family:Georgia,serif;">Password Reset Request</h2>
-            <p style="color:#a3b8af;font-size:13px;margin:0 0 20px;">Hi ${admin.name || 'Administrator'}, we received a request to reset your admin portal password.</p>
-            <p style="color:#a3b8af;font-size:13px;margin:0 0 8px;">Click the button below to set a new password. This link expires in <strong style="color:#e8c872;">1 hour</strong>.</p>
-            <div style="text-align:center;">
-              <a href="${resetUrl}" class="btn">Reset My Password</a>
-            </div>
-            <p style="color:#627a70;font-size:11px;margin-top:12px;word-break:break-all;">
-              Or copy this URL into your browser:<br>
-              <span style="color:#a3b8af;">${resetUrl}</span>
-            </p>
-            <div class="warn">
-              <strong>Didn't request this?</strong> Ignore this email — your password will not change. If you're concerned, contact your studio administrator.
-            </div>
-          </div>
-          <div class="footer">&copy; 2026 niharikartist fine art atelier • Security Notification</div>
+      <body><div class="wrapper">
+        <div class="header"><div class="brand">niharikartist</div><div class="tagline">fine art atelier • admin portal</div></div>
+        <div class="body">
+          <h2 style="font-size:20px;font-weight:400;color:#fbf5e6;margin:0 0 8px;font-family:Georgia,serif;">Password Reset Request</h2>
+          <p style="color:#a3b8af;font-size:13px;margin:0 0 20px;">Hi ${admin.name || 'Administrator'}, we received a request to reset your admin portal password.</p>
+          <p style="color:#a3b8af;font-size:13px;margin:0 0 8px;">Click the button below. This link expires in <strong style="color:#e8c872;">1 hour</strong>.</p>
+          <div style="text-align:center;"><a href="${resetUrl}" class="btn">Reset My Password</a></div>
+          <p style="color:#627a70;font-size:11px;margin-top:12px;word-break:break-all;">Or copy: <span style="color:#a3b8af;">${resetUrl}</span></p>
+          <div class="warn"><strong>Didn't request this?</strong> Ignore this email — your password will not change.</div>
         </div>
-      </body>
-      </html>
-      `;
+        <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
+      </div></body></html>`;
 
       try {
-        await sgMail.send({
-          to: cleanEmail,
-          from: { email: fromEmail, name: 'niharikartist Studio' },
-          subject: 'Admin Password Reset — niharikartist Studio',
-          html
-        });
+        await t.sendMail({ from: '"niharikartist Studio" <' + GMAIL_USER + '>', to: cleanEmail, subject: 'Admin Password Reset — niharikartist Studio', html });
         console.log(`✅ Password reset email sent to ${cleanEmail}`);
       } catch (emailErr) {
-        console.error('Reset email send failed:', emailErr?.response?.body || emailErr.message);
+        console.error('Reset email send failed:', emailErr.message);
       }
     } else {
-      console.warn(`⚠️  SendGrid not configured. Reset URL for ${cleanEmail}: ${resetUrl}`);
+      console.warn(`⚠️  Gmail not configured. Reset URL for ${cleanEmail}: ${resetUrl}`);
     }
 
-    return res.status(200).json({
-      success: true,
-      message: 'If that email is registered, a reset link has been sent.'
-    });
+    return res.status(200).json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ success: false, message: 'Server error. Please try again.' });
