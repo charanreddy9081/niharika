@@ -199,6 +199,11 @@ export default function ProductDetailPage() {
                 <span className="text-[10px] text-emerald-400 block mt-1 font-sans">
                   • Complimentary Pan-India Insured Dispatch Included
                 </span>
+                {product.short_description && (
+                  <span className="text-[11px] text-[#e8c872] block mt-1 font-sans italic">
+                    {product.short_description}
+                  </span>
+                )}
               </div>
 
               <span className="px-3 py-1 rounded-full bg-[#050f0b] border border-emerald-800 text-[#e8c872] text-[10px] uppercase tracking-wider font-semibold">

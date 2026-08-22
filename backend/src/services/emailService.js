@@ -2,10 +2,6 @@
  * Email Service — uses SendGrid HTTPS API (works on Render free tier).
  * Gmail SMTP is blocked by Render's free tier (port 587 timeout).
  * SendGrid uses port 443 HTTPS which is never blocked.
- *
- * DMARC note: We send FROM niharikaananthoja@gmail.com but with
- * Reply-To set so replies land in your inbox.
- * Gmail's DMARC is p=none (monitoring only) so no hard block.
  */
 
 const sgMail = require('@sendgrid/mail');
@@ -20,7 +16,6 @@ const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.
 const FROM_NAME   = 'niharikartist Studio';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
 
-// ─── Shared brand styles ─────────────────────────────────────────────────
 const brandStyles = `
   body { margin:0; padding:0; background:#050f0b; font-family:'Segoe UI',Arial,sans-serif; color:#fbf8f1; }
   .wrapper { max-width:620px; margin:0 auto; background:#071610; border:1px solid rgba(232,200,114,0.25); border-radius:16px; overflow:hidden; }
@@ -54,8 +49,7 @@ function escapeHtml(str) {
 
 function buildItemsTable(items) {
   const rows = items.map(item => {
-    const imgSrc = item.image && item.image.startsWith('http')
-      ? item.image : 'https://niharikartist.shop/images/placeholder.jpg';
+    const imgSrc = item.image && item.image.startsWith('http') ? item.image : 'https://niharikartist.shop/images/placeholder.jpg';
     return `<tr>
       <td><img src="${imgSrc}" alt="${escapeHtml(item.name)}" /></td>
       <td style="padding-left:14px;">
@@ -73,10 +67,8 @@ function buildItemsTable(items) {
 // ─── Admin order notification ─────────────────────────────────────────────
 async function sendAdminOrderEmail(order) {
   if (!process.env.SENDGRID_API_KEY) { console.warn('⚠️ SENDGRID_API_KEY missing'); return; }
-
   const { order_id, customer, shipping_address, items, subtotal, shipping_fee, discount, total, order_status, created_at } = order;
   const placedAt = created_at ? new Date(created_at).toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' }) : new Date().toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' });
-
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><style>${brandStyles}</style></head>
   <body><div class="wrapper">
     <div class="header"><div class="brand">niharikartist</div><div class="tagline">fine art atelier • admin notification</div></div>
@@ -105,7 +97,6 @@ async function sendAdminOrderEmail(order) {
     </div>
     <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
   </div></body></html>`;
-
   try {
     await sgMail.send({ to: ADMIN_EMAIL, from: { email: FROM_EMAIL, name: FROM_NAME }, replyTo: FROM_EMAIL, subject: `New Order Received — ${order_id}`, html });
     console.log(`✅ Admin email sent for ${order_id}`);
@@ -117,16 +108,13 @@ async function sendAdminOrderEmail(order) {
 // ─── Customer order confirmation ──────────────────────────────────────────
 async function sendCustomerOrderConfirmation(order) {
   if (!process.env.SENDGRID_API_KEY) { console.warn('⚠️ SENDGRID_API_KEY missing'); return; }
-
   const { order_id, customer, shipping_address, items, subtotal, shipping_fee, discount, total, created_at } = order;
   const placedAt = created_at ? new Date(created_at).toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' }) : new Date().toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' });
-
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><style>${brandStyles}</style></head>
   <body><div class="wrapper">
     <div class="header"><div class="brand">niharikartist</div><div class="tagline">fine art atelier • order confirmation</div></div>
     <div class="body">
       <h2 style="font-size:24px;font-weight:400;color:#fbf5e6;margin:0 0 8px;font-family:Georgia,serif;">Thank you for your order, ${escapeHtml(customer.first_name)}!</h2>
-      <p style="color:#a3b8af;font-size:13px;margin:0 0 6px;">Your order has been placed successfully.</p>
       <p style="color:#a3b8af;font-size:13px;margin:0 0 28px;">Your handcrafted artwork will be delivered within <strong style="color:#fbf8f1;">5&#8211;7 business days</strong>.</p>
       <div style="background:#0a2319;border:1px solid rgba(232,200,114,0.3);border-radius:12px;padding:18px 20px;margin-bottom:28px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:3px;color:#a3b8af;margin-bottom:8px;">Order Reference</div>
@@ -143,8 +131,7 @@ async function sendCustomerOrderConfirmation(order) {
       </div>
       <div class="section-title" style="margin-top:28px;">Delivering To</div>
       <div class="address-box">${escapeHtml(customer.first_name)} ${escapeHtml(customer.last_name)}<br>${escapeHtml(shipping_address.street)}<br>${escapeHtml(shipping_address.city)}, ${escapeHtml(shipping_address.state)} — ${escapeHtml(shipping_address.pincode)}<br><span style="color:#a3b8af;">Phone: ${escapeHtml(customer.phone)}</span></div>
-      <div class="section-title" style="margin-top:28px;">Payment</div>
-      <div style="background:#0a2319;border-radius:10px;padding:16px 20px;font-size:13px;">
+      <div style="background:#0a2319;border-radius:10px;padding:16px 20px;font-size:13px;margin-top:20px;">
         <strong style="color:#fbf8f1;">Cash on Delivery</strong>
         <p style="margin:8px 0 0;color:#a3b8af;font-size:12px;">Pay when your order arrives. No payment needed right now.</p>
       </div>
@@ -155,7 +142,6 @@ async function sendCustomerOrderConfirmation(order) {
     </div>
     <div class="footer">&copy; 2026 niharikartist fine art atelier • Handmade in India</div>
   </div></body></html>`;
-
   try {
     await sgMail.send({ to: customer.email, from: { email: FROM_EMAIL, name: FROM_NAME }, replyTo: FROM_EMAIL, subject: `Order Confirmation — ${order_id}`, html });
     console.log(`✅ Customer email sent to ${customer.email} for ${order_id}`);
@@ -164,4 +150,59 @@ async function sendCustomerOrderConfirmation(order) {
   }
 }
 
-module.exports = { sendAdminOrderEmail, sendCustomerOrderConfirmation };
+// ─── Order status update email to customer ────────────────────────────────
+async function sendOrderStatusUpdate({ order_id, status, note, customer, total, items }) {
+  if (!process.env.SENDGRID_API_KEY) { console.warn('⚠️ SENDGRID_API_KEY missing'); return; }
+
+  const statusConfig = {
+    'Ordered':                    { emoji: '✅', title: 'Order Confirmed',        color: '#6ee7b7', msg: 'Your order has been received and added to our studio queue.' },
+    'Crafting in Studio':         { emoji: '🎨', title: 'Being Crafted in Studio', color: '#e8c872', msg: 'Our artist has started crafting your artwork with care.' },
+    'Dispatched':                 { emoji: '🚚', title: 'Order Dispatched',        color: '#60a5fa', msg: 'Your artwork has been dispatched and is on its way to you.' },
+    'Out for Delivery':           { emoji: '📦', title: 'Out for Delivery',        color: '#f97316', msg: 'Your artwork is out for delivery. Please be available to receive it.' },
+    'Delivered':                  { emoji: '🎉', title: 'Order Delivered',         color: '#34d399', msg: 'Your artwork has been delivered. We hope you love it!' },
+    'Cancelled by niharikartist': { emoji: '❌', title: 'Order Cancelled',         color: '#f87171', msg: 'We regret to inform you that your order has been cancelled by the studio. If you have any questions, please contact us.' },
+  };
+
+  const cfg = statusConfig[status] || { emoji: '📋', title: `Update: ${status}`, color: '#e8c872', msg: `Your order status has been updated to: ${status}` };
+  const itemLines = (items || []).map(i =>
+    `<li style="margin-bottom:6px;color:#d4d4d8;">${escapeHtml(i.name)} × ${i.quantity} — &#8377;${Number(i.price * i.quantity).toLocaleString('en-IN')}</li>`
+  ).join('');
+
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><style>${brandStyles}</style></head>
+  <body><div class="wrapper">
+    <div class="header"><div class="brand">niharikartist</div><div class="tagline">fine art atelier • order update</div></div>
+    <div class="body">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div style="font-size:48px;line-height:1;">${cfg.emoji}</div>
+        <h2 style="font-size:24px;font-weight:400;color:${cfg.color};margin:12px 0 4px;font-family:Georgia,serif;">${cfg.title}</h2>
+        <p style="color:#a3b8af;font-size:13px;margin:0;">Order <strong style="color:#e8c872;">${escapeHtml(order_id)}</strong></p>
+      </div>
+
+      <div style="background:#0a2319;border:1px solid rgba(232,200,114,0.2);border-radius:12px;padding:18px 20px;margin-bottom:24px;">
+        <p style="color:#fbf8f1;font-size:13px;margin:0;">Hi <strong>${escapeHtml(customer.first_name)}</strong>, ${cfg.msg}</p>
+        ${note ? `<p style="color:#a3b8af;font-size:12px;margin:12px 0 0;font-style:italic;">"${escapeHtml(note)}"</p>` : ''}
+      </div>
+
+      ${itemLines ? `
+        <div class="section-title">Your Order</div>
+        <ul style="margin:0 0 12px;padding-left:20px;font-size:13px;">${itemLines}</ul>
+        <div style="text-align:right;font-size:14px;color:#e8c872;font-weight:600;">Total: &#8377;${Number(total).toLocaleString('en-IN')}</div>
+      ` : ''}
+
+      <div style="text-align:center;margin-top:28px;">
+        <a href="https://niharikartist.netlify.app/track-order?orderId=${encodeURIComponent(order_id)}" class="cta-btn">Track Your Order</a>
+      </div>
+      <p style="margin-top:24px;font-size:12px;color:#627a70;text-align:center;">Questions? Contact us at <a href="mailto:${FROM_EMAIL}" style="color:#e8c872;">${FROM_EMAIL}</a></p>
+    </div>
+    <div class="footer">&copy; 2026 niharikartist fine art atelier • Handmade in India</div>
+  </div></body></html>`;
+
+  try {
+    await sgMail.send({ to: customer.email, from: { email: FROM_EMAIL, name: FROM_NAME }, replyTo: FROM_EMAIL, subject: `Order Update — ${cfg.title} — ${order_id}`, html });
+    console.log(`✅ Status update email sent to ${customer.email} for ${order_id} [${status}]`);
+  } catch (err) {
+    console.error(`❌ Status update email failed for ${order_id}:`, err?.response?.body?.errors || err.message);
+  }
+}
+
+module.exports = { sendAdminOrderEmail, sendCustomerOrderConfirmation, sendOrderStatusUpdate };

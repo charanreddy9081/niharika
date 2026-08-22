@@ -1082,6 +1082,7 @@ export default function AdminPortalPage() {
                           <option value="Dispatched">Dispatched (Air Courier)</option>
                           <option value="Out for Delivery">Out for Delivery</option>
                           <option value="Delivered">Delivered</option>
+                          <option value="Cancelled by niharikartist">Cancelled by niharikartist</option>
                         </select>
                       </div>
                     </div>
@@ -1297,6 +1298,18 @@ export default function AdminPortalPage() {
                       className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]"
                     />
                   </div>
+                </div>
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">
+                    Price Note <span className="text-zinc-600 font-normal normal-case text-[10px]">(shown near price — e.g. "Price is negotiable")</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newProduct.short_description}
+                    onChange={e => setNewProduct({ ...newProduct, short_description: e.target.value })}
+                    placeholder="e.g. Price is negotiable · Contact for bulk pricing"
+                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>

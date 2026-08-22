@@ -111,9 +111,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </h3>
           </Link>
 
-          {/* Story Snippet */}
+          {/* Story Snippet / Price Note */}
           {product.short_description && (
-            <p className="text-[11px] text-[#a3b8af] line-clamp-2 mt-1.5 leading-relaxed font-sans">
+            <p className="text-[11px] text-[#e8c872]/80 italic line-clamp-1 mt-1.5 leading-relaxed font-sans">
               {product.short_description}
             </p>
           )}

@@ -1,5 +1,5 @@
 const { supabase } = require('../config/db');
-const { sendAdminOrderEmail, sendCustomerOrderConfirmation } = require('../services/emailService');
+const { sendAdminOrderEmail, sendCustomerOrderConfirmation, sendOrderStatusUpdate } = require('../services/emailService');
 const { sendOrderAlert } = require('../services/telegramService');
 
 /**
@@ -343,7 +343,6 @@ exports.updateOrderStatus = async (req, res) => {
 
     const updatePayload = { status };
 
-    // Update timeline if the column exists
     if (order.timeline !== undefined) {
       const newTimeline = [...(order.timeline || []), {
         status,
@@ -361,6 +360,27 @@ exports.updateOrderStatus = async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // Send status update email to customer
+    const customerEmail = updatedOrder.customer_email || order.customer_email;
+    if (customerEmail) {
+      const emailData = {
+        order_id: updatedOrder.order_id || order.order_id,
+        status,
+        note: note || '',
+        customer: mapId(updatedOrder).customer || {
+          first_name: (updatedOrder.customer_name || '').split(' ')[0],
+          last_name: (updatedOrder.customer_name || '').split(' ').slice(1).join(' '),
+          email: customerEmail,
+          phone: updatedOrder.customer_phone || ''
+        },
+        total: updatedOrder.total_amount || order.total_amount,
+        items: updatedOrder.items || order.items || []
+      };
+      sendOrderStatusUpdate(emailData).catch(err => {
+        console.error('Status update email failed:', err.message);
+      });
+    }
 
     return res.json({ success: true, data: mapId(updatedOrder) });
   } catch (error) {
