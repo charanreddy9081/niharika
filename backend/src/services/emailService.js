@@ -12,16 +12,17 @@ let transporter = null;
 function getTransporter() {
   if (transporter) return transporter;
   if (!GMAIL_USER || !GMAIL_PASS) {
-    console.warn('⚠️  GMAIL_USER or GMAIL_APP_PASSWORD not set — emails will not be sent.');
+    console.error('❌ GMAIL_USER or GMAIL_APP_PASSWORD env vars are missing — emails cannot be sent. Add them to Render environment variables.');
     return null;
   }
   transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: GMAIL_USER,
-      pass: GMAIL_PASS,   // 16-char App Password (no spaces)
+      pass: GMAIL_PASS,
     },
   });
+  console.log(`✅ Gmail SMTP transporter ready for ${GMAIL_USER}`);
   return transporter;
 }
 
