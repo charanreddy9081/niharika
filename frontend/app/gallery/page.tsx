@@ -280,28 +280,35 @@ export default function GalleryPage() {
             <X className="w-6 h-6" />
           </button>
 
-          {/* Previous Button */}
+          {/* Prev Button — desktop only (mobile arrows are on image) */}
           <button
             onClick={handlePrev}
-            className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+            className="hidden lg:flex absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
             aria-label="Previous artwork"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
 
-          {/* Next Button */}
+          {/* Next Button — desktop only */}
           <button
             onClick={handleNext}
-            className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+            className="hidden lg:flex absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
             aria-label="Next artwork"
           >
             <ChevronRight className="w-6 h-6" />
           </button>
 
           {/* Lightbox Content Container */}
-          <div className="max-w-5xl w-full max-h-[90vh] bg-[#071710] border border-[#e8c872]/35 rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12 flex-col">
-            {/* Image Showcase */}
-            <div className="lg:col-span-7 relative aspect-[3/4] sm:aspect-[4/3] lg:aspect-auto lg:h-[75vh] bg-black/60 flex items-center justify-center overflow-hidden">
+          <div className="max-w-5xl w-full max-h-[95vh] bg-[#071710] border border-[#e8c872]/35 rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12">
+
+            {/* Image Showcase — compact on mobile */}
+            <div className="lg:col-span-7 relative bg-black/60 flex items-center justify-center overflow-hidden"
+              style={{ height: 'clamp(200px, 42vh, 500px)' }}
+              // On desktop: auto height from grid
+            >
+              <div className="lg:hidden absolute inset-0">
+                {/* Mobile: fixed height compact image */}
+              </div>
               <Image
                 src={activeItem.imageUrl}
                 alt={activeItem.title}
@@ -310,18 +317,39 @@ export default function GalleryPage() {
                 className="object-contain p-2"
                 priority
               />
+              {/* Mobile: prev/next arrows overlaid ON the image */}
+              <button
+                onClick={handlePrev}
+                className="lg:hidden absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] transition-colors shadow-xl"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleNext}
+                className="lg:hidden absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] transition-colors shadow-xl"
+                aria-label="Next"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              {/* Desktop image height */}
+              <style>{`@media(min-width:1024px){.lb-img{height:75vh!important}}`}</style>
             </div>
 
-            {/* Artwork Story & Details */}
-            <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto max-h-[50vh] lg:max-h-[75vh] space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="px-3 py-1 rounded-full bg-[#0a2319] border border-[#e8c872]/40 text-[#e8c872] font-semibold uppercase tracking-wider text-[10px]">
+            {/* Artwork Story & Details — compact on mobile */}
+            <div className="lg:col-span-5 flex flex-col justify-between overflow-y-auto space-y-3
+              p-4 sm:p-5 lg:p-8
+              max-h-[53vh] lg:max-h-[75vh]">
+
+              <div className="space-y-2 lg:space-y-4">
+                {/* Tags row */}
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <span className="px-2.5 py-1 rounded-full bg-[#0a2319] border border-[#e8c872]/40 text-[#e8c872] font-semibold uppercase tracking-wider text-[10px]">
                     {activeItem.category}
                   </span>
                   {activeItem.year && (
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-[#a3b8af] border border-emerald-900 text-[10px]">
-                      Year {activeItem.year}
+                    <span className="px-2 py-1 rounded-full bg-emerald-950 text-[#a3b8af] border border-emerald-900 text-[10px]">
+                      {activeItem.year}
                     </span>
                   )}
                   <span className="text-zinc-500 text-[10px] ml-auto font-mono">
@@ -329,35 +357,34 @@ export default function GalleryPage() {
                   </span>
                 </div>
 
-                <h2 className="font-display text-2xl sm:text-3xl text-zinc-100 font-light leading-tight">
+                {/* Title — smaller on mobile */}
+                <h2 className="font-display text-xl sm:text-2xl lg:text-3xl text-zinc-100 font-light leading-tight">
                   {activeItem.title}
                 </h2>
 
                 <div className="h-[1px] bg-gradient-to-r from-[#e8c872]/40 via-emerald-900 to-transparent" />
 
+                {/* Description — line-clamped on mobile, scrollable */}
                 {activeItem.description ? (
-                  <div className="text-xs sm:text-sm text-zinc-300 space-y-2 whitespace-pre-line leading-relaxed font-sans">
+                  <div className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-line line-clamp-6 lg:line-clamp-none">
                     {activeItem.description}
                   </div>
                 ) : (
                   <p className="text-xs text-[#a3b8af] italic">
-                    Original archival artwork created by Niharika. Handcrafted with bespoke attention to emotion and timeless storytelling.
+                    Original archival artwork created by Niharika.
                   </p>
                 )}
               </div>
 
-              {/* Commission Inquiry Action */}
-              <div className="pt-4 border-t border-emerald-950 space-y-3">
+              {/* Commission CTA */}
+              <div className="pt-3 border-t border-emerald-950 space-y-2">
                 <Link
                   href={`/contact?subject=Inquiry%20regarding%20${encodeURIComponent(activeItem.title)}`}
-                  className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   <span>Inquire for Commission</span>
                 </Link>
-                <span className="text-[10px] text-[#627a70] text-center block">
-                  Original hand-drawn commissions tailored to your intimate memories.
-                </span>
               </div>
             </div>
           </div>
