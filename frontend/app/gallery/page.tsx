@@ -188,7 +188,8 @@ export default function GalleryPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {visibleItems.map((item, index) => (
               <div
                 key={item.id || item._id || item.slug}
@@ -250,19 +251,20 @@ export default function GalleryPage() {
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* Load More button */}
-          {hasMore && (
-            <div className="text-center mt-10">
-              <button
-                onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
-                className="bg-[#0a2319] hover:bg-[#123627] border border-[#e8c872]/40 text-[#fbf5e6] px-8 py-3 rounded-full text-xs uppercase tracking-[0.2em] transition-all btn-magnetic"
-              >
-                Load More ({filteredItems.length - visibleCount} remaining)
-              </button>
             </div>
-          )}
+
+            {/* Load More button */}
+            {hasMore && (
+              <div className="text-center mt-10">
+                <button
+                  onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
+                  className="bg-[#0a2319] hover:bg-[#123627] border border-[#e8c872]/40 text-[#fbf5e6] px-8 py-3 rounded-full text-xs uppercase tracking-[0.2em] transition-all btn-magnetic"
+                >
+                  Load More ({filteredItems.length - visibleCount} remaining)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
 
