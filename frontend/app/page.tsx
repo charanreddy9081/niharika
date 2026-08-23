@@ -10,6 +10,7 @@ import { Sparkles, ArrowRight, Star, Palette, Feather, Shield } from 'lucide-rea
 import { useSiteContent } from '../hooks/useSiteContent';
 import { useHomeTransition } from '../hooks/useHomeTransition';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import FeaturedCarousel from '../components/FeaturedCarousel';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const SLIDE_DURATION = 900;
@@ -161,6 +162,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Featured Artwork Carousel */}
+        <FeaturedCarousel />
 
         {/* Artist Manifesto */}
         <section className="py-20 bg-gradient-to-b from-[#081d14] to-[#050f0b] border-t border-white/[0.08]">
