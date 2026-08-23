@@ -345,7 +345,7 @@ export default function CheckoutPage() {
                     <div className="flex gap-2">
                       <input type="email" autoComplete="email" value={form.email} onChange={e => updateField('email', e.target.value)} placeholder="priya@example.com" className={inputCls} />
                       {needsOtp && otpStep !== 'verified' && (
-                        <button type="button" onClick={sendOTP} disabled={otpStep === 'sending' || otpStep === 'sent' || otpStep === 'verifying'}
+                        <button type="button" onClick={() => sendOTP()} disabled={otpStep === 'sending' || otpStep === 'sent' || otpStep === 'verifying'}
                           className="flex-shrink-0 bg-[#0a2319] border border-[#d4af37]/50 hover:border-[#d4af37] text-[#d4af37] px-3 py-2 rounded-lg text-[10px] uppercase tracking-wider transition-colors flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50">
                           {otpStep === 'sending' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
                           {otpStep === 'sent' || otpStep === 'verifying' ? 'Resend' : 'Send OTP'}
@@ -382,7 +382,7 @@ export default function CheckoutPage() {
                       </button>
                     </div>
                     {otpError && <p className="text-xs text-red-400">{otpError}</p>}
-                    <button type="button" onClick={sendOTP} className="text-[11px] text-zinc-500 hover:text-[#d4af37] flex items-center gap-1 transition-colors">
+                    <button type="button" onClick={() => sendOTP()} className="text-[11px] text-zinc-500 hover:text-[#d4af37] flex items-center gap-1 transition-colors">
                       <RefreshCw className="w-3 h-3" /> Resend code
                     </button>
                   </div>
