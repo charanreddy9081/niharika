@@ -270,40 +270,34 @@ export default function GalleryPage() {
 
       {/* Lightbox Modal */}
       {activeItem && lightboxIndex !== null && (
-        <div className="fixed inset-0 z-50 bg-black/96 backdrop-blur-xl flex flex-col items-center justify-start overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/96 backdrop-blur-xl overflow-y-auto">
 
-          {/* Close Button */}
+          {/* Close Button — fixed top-right */}
           <button
             onClick={() => setLightboxIndex(null)}
-            className="fixed top-4 right-4 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+            className="fixed top-4 right-4 z-[60] p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Prev / Next — fixed sides */}
-          <button
-            onClick={handlePrev}
-            className="fixed left-2 sm:left-6 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
-            aria-label="Previous artwork"
-          >
-            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-          <button
-            onClick={handleNext}
-            className="fixed right-2 sm:right-6 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
-            aria-label="Next artwork"
-          >
-            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-
-          {/* Content — centered, scrollable on mobile */}
+          {/* Content wrapper — centered column */}
           <div className="w-full max-w-3xl mx-auto px-4 sm:px-8 py-16 sm:py-12 flex flex-col items-center gap-6">
 
-            {/* Image — prominent, centered */}
-            <div className="w-full flex items-center justify-center">
-              <div className="relative rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-[#e8c872]/20"
-                style={{ maxHeight: '70vh', maxWidth: '100%' }}>
+            {/* Image + side arrows — relative container */}
+            <div className="relative w-full flex items-center justify-center">
+
+              {/* Prev arrow — absolute to this container */}
+              <button
+                onClick={handlePrev}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+                aria-label="Previous artwork"
+              >
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+
+              {/* Image */}
+              <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-[#e8c872]/20 mx-10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={activeItem.imageUrl}
@@ -319,6 +313,15 @@ export default function GalleryPage() {
                   onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg'; }}
                 />
               </div>
+
+              {/* Next arrow — absolute to this container */}
+              <button
+                onClick={handleNext}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+                aria-label="Next artwork"
+              >
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
             </div>
 
             {/* Details below image */}
