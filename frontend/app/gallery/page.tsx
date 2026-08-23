@@ -270,123 +270,101 @@ export default function GalleryPage() {
 
       {/* Lightbox Modal */}
       {activeItem && lightboxIndex !== null && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
+        <div className="fixed inset-0 z-50 bg-black/96 backdrop-blur-xl flex flex-col items-center justify-start overflow-y-auto">
+
           {/* Close Button */}
           <button
             onClick={() => setLightboxIndex(null)}
-            className="absolute top-6 right-6 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+            className="fixed top-4 right-4 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
             aria-label="Close"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
 
-          {/* Prev Button — desktop only (mobile arrows are on image) */}
+          {/* Prev / Next — fixed sides */}
           <button
             onClick={handlePrev}
-            className="hidden lg:flex absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+            className="fixed left-2 sm:left-6 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
             aria-label="Previous artwork"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-
-          {/* Next Button — desktop only */}
           <button
             onClick={handleNext}
-            className="hidden lg:flex absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+            className="fixed right-2 sm:right-6 top-1/2 -translate-y-1/2 z-50 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
             aria-label="Next artwork"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
-          {/* Lightbox Content Container */}
-          <div className="max-w-5xl w-full max-h-[95vh] bg-[#071710] border border-[#e8c872]/35 rounded-3xl overflow-hidden shadow-2xl grid grid-cols-1 lg:grid-cols-12">
+          {/* Content — centered, scrollable on mobile */}
+          <div className="w-full max-w-3xl mx-auto px-4 sm:px-8 py-16 sm:py-12 flex flex-col items-center gap-6">
 
-            {/* Image Showcase — compact on mobile */}
-            <div className="lg:col-span-7 relative bg-black/60 flex items-center justify-center overflow-hidden"
-              style={{ height: 'clamp(200px, 42vh, 500px)' }}
-              // On desktop: auto height from grid
-            >
-              <div className="lg:hidden absolute inset-0">
-                {/* Mobile: fixed height compact image */}
+            {/* Image — prominent, centered */}
+            <div className="w-full flex items-center justify-center">
+              <div className="relative rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-[#e8c872]/20"
+                style={{ maxHeight: '70vh', maxWidth: '100%' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={activeItem.imageUrl}
+                  alt={activeItem.title}
+                  style={{
+                    maxHeight: '70vh',
+                    maxWidth: '100%',
+                    width: 'auto',
+                    height: 'auto',
+                    display: 'block',
+                    objectFit: 'contain',
+                  }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg'; }}
+                />
               </div>
-              <Image
-                src={activeItem.imageUrl}
-                alt={activeItem.title}
-                fill
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                className="object-contain p-2"
-                priority
-              />
-              {/* Mobile: prev/next arrows overlaid ON the image */}
-              <button
-                onClick={handlePrev}
-                className="lg:hidden absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] transition-colors shadow-xl"
-                aria-label="Previous"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleNext}
-                className="lg:hidden absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2.5 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] transition-colors shadow-xl"
-                aria-label="Next"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-              {/* Desktop image height */}
-              <style>{`@media(min-width:1024px){.lb-img{height:75vh!important}}`}</style>
             </div>
 
-            {/* Artwork Story & Details — compact on mobile */}
-            <div className="lg:col-span-5 flex flex-col justify-between overflow-y-auto space-y-3
-              p-4 sm:p-5 lg:p-8
-              max-h-[53vh] lg:max-h-[75vh]">
-
-              <div className="space-y-2 lg:space-y-4">
-                {/* Tags row */}
-                <div className="flex items-center gap-2 flex-wrap text-xs">
-                  <span className="px-2.5 py-1 rounded-full bg-[#0a2319] border border-[#e8c872]/40 text-[#e8c872] font-semibold uppercase tracking-wider text-[10px]">
-                    {activeItem.category}
+            {/* Details below image */}
+            <div className="w-full bg-[#071710]/80 border border-[#e8c872]/20 rounded-2xl p-5 sm:p-7 space-y-4">
+              {/* Tags + counter */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-3 py-1 rounded-full bg-[#0a2319] border border-[#e8c872]/40 text-[#e8c872] font-semibold uppercase tracking-wider text-[10px]">
+                  {activeItem.category}
+                </span>
+                {activeItem.year && (
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-[#a3b8af] border border-emerald-900 text-[10px]">
+                    {activeItem.year}
                   </span>
-                  {activeItem.year && (
-                    <span className="px-2 py-1 rounded-full bg-emerald-950 text-[#a3b8af] border border-emerald-900 text-[10px]">
-                      {activeItem.year}
-                    </span>
-                  )}
-                  <span className="text-zinc-500 text-[10px] ml-auto font-mono">
-                    {lightboxIndex + 1} of {filteredItems.length}
-                  </span>
-                </div>
-
-                {/* Title — smaller on mobile */}
-                <h2 className="font-display text-xl sm:text-2xl lg:text-3xl text-zinc-100 font-light leading-tight">
-                  {activeItem.title}
-                </h2>
-
-                <div className="h-[1px] bg-gradient-to-r from-[#e8c872]/40 via-emerald-900 to-transparent" />
-
-                {/* Description — line-clamped on mobile, scrollable */}
-                {activeItem.description ? (
-                  <div className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-line line-clamp-6 lg:line-clamp-none">
-                    {activeItem.description}
-                  </div>
-                ) : (
-                  <p className="text-xs text-[#a3b8af] italic">
-                    Original archival artwork created by Niharika.
-                  </p>
                 )}
+                <span className="ml-auto text-zinc-500 text-[10px] font-mono">
+                  {lightboxIndex + 1} of {filteredItems.length}
+                </span>
               </div>
 
-              {/* Commission CTA */}
-              <div className="pt-3 border-t border-emerald-950 space-y-2">
-                <Link
-                  href={`/contact?subject=Inquiry%20regarding%20${encodeURIComponent(activeItem.title)}`}
-                  className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Inquire for Commission</span>
-                </Link>
-              </div>
+              <h2 className="font-display text-2xl sm:text-3xl text-zinc-100 font-light leading-tight">
+                {activeItem.title}
+              </h2>
+
+              <div className="h-px bg-gradient-to-r from-[#e8c872]/40 via-emerald-900 to-transparent" />
+
+              {activeItem.description ? (
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans whitespace-pre-line">
+                  {activeItem.description}
+                </p>
+              ) : (
+                <p className="text-xs text-[#a3b8af] italic">
+                  Original archival artwork created by Niharika. Handcrafted with bespoke attention to emotion.
+                </p>
+              )}
+
+              {/* CTA */}
+              <Link
+                href={`/contact?subject=Inquiry%20regarding%20${encodeURIComponent(activeItem.title)}`}
+                onClick={() => setLightboxIndex(null)}
+                className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2 mt-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Inquire for Commission</span>
+              </Link>
             </div>
+
           </div>
         </div>
       )}
