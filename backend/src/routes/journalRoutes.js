@@ -5,9 +5,10 @@ const { protectAdmin } = require('../middleware/authMiddleware');
 
 // Public
 router.get('/', ctrl.getStories);
+router.get('/:slug', ctrl.getStoryBySlug);
 
 // Admin
-router.get('/all', protectAdmin, ctrl.getAllStories);
+router.get('/admin/all', protectAdmin, ctrl.getAllStories);
 router.post('/', protectAdmin, ctrl.createStory);
 router.put('/:id', protectAdmin, ctrl.updateStory);
 router.delete('/:id', protectAdmin, ctrl.deleteStory);
