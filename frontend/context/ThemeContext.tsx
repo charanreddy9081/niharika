@@ -35,6 +35,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setResolved(actual);
       document.documentElement.classList.toggle('dark', isDark);
       document.documentElement.classList.toggle('light', !isDark);
+      // Also set data-theme for CSS targeting
+      document.documentElement.setAttribute('data-theme', actual);
     };
 
     apply(theme);

@@ -176,129 +176,88 @@
   animation: pageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ─── LIGHT MODE — Universal overrides ─────────────────────────────────── */
-/*
- * Since Tailwind v4 escapes class names differently, we use broad
- * element + context selectors that reliably override dark colors.
- */
+/* ─── LIGHT MODE — data-theme approach ─────────────────────────────────── */
 
-/* Body background */
-.light body { background-color: #f8f4ec !important; color: #1a120a !important; }
-
-/* All elements with dark green hex backgrounds */
-.light [style*="background"],
-.light * { box-sizing: border-box; }
-
-/* Universal: any element inside .light that has a dark emerald background */
-.light section,
-.light main,
-.light article,
-.light aside { background-color: transparent !important; }
-
-/* Override all inline background-color on dark sections */
-@layer utilities {
-  .light .bg-page    { background-color: #f8f4ec; }
-  .light .bg-surface { background-color: #ede7d9; }
+[data-theme="light"] body {
+  background-color: #f8f4ec !important;
+  color: #1a120a !important;
 }
 
-/* Headers */
-.light header { 
-  background-color: rgba(248,244,236,0.97) !important; 
+[data-theme="light"] header {
+  background-color: rgba(248,244,236,0.97) !important;
   border-bottom-color: rgba(139,110,50,0.25) !important;
 }
 
-/* All text */
-.light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
+[data-theme="light"] * {
+  --tw-text-opacity: 1;
+  color: #1a120a;
+  border-color: rgba(139,110,50,0.2);
+}
+
+[data-theme="light"] section,
+[data-theme="light"] main,
+[data-theme="light"] div:not([class*="bg-gradient"]) {
+  background-color: transparent;
+}
+
+/* Body and major containers */
+[data-theme="light"] body > * { background-color: #f8f4ec; }
+[data-theme="light"] .min-h-screen { background-color: #f8f4ec !important; }
+
+/* All rounded cards → cream */
+[data-theme="light"] .rounded-3xl,
+[data-theme="light"] .rounded-2xl {
+  background-color: #ede7d9 !important;
   color: #1a120a !important;
-}
-.light p, .light span:not([class*="bg-"]):not([class*="text-[#e8"]):not([class*="text-emerald"]):not([class*="text-amber"]) {
-  color: #3a2e1a !important;
-}
-.light a { color: #3a2e1a !important; }
-.light a:hover { color: #8a6520 !important; }
-
-/* Nav specifically */
-.light nav a, .light nav span, .light nav button span { 
-  color: #1a120a !important; 
+  border-color: rgba(139,110,50,0.25) !important;
 }
 
-/* Gold accent text — slightly darker to be visible on light */
-.light [class*="text-[#e8c"] { color: #8a6520 !important; }
-.light [class*="text-[#d4b"] { color: #7a5510 !important; }
-.light [class*="text-emerald-4"] { color: #2d5a1e !important; }
-.light [class*="text-amber"] { color: #8a6520 !important; }
+/* Headings */
+[data-theme="light"] h1, [data-theme="light"] h2,
+[data-theme="light"] h3, [data-theme="light"] h4,
+[data-theme="light"] h5, [data-theme="light"] h6 { color: #1a120a !important; }
 
-/* Borders */
-.light [class*="border-emerald"] { border-color: rgba(139,110,50,0.25) !important; }
-.light [class*="border-white"] { border-color: rgba(139,110,50,0.2) !important; }
-.light [class*="border-[#e8c"] { border-color: rgba(139,110,50,0.45) !important; }
+/* All text / spans */
+[data-theme="light"] p, [data-theme="light"] span,
+[data-theme="light"] a, [data-theme="light"] label,
+[data-theme="light"] li { color: #3a2e1a !important; }
 
-/* ALL dark backgrounds → cream */
-.light [class*="bg-[#0"] { background-color: #f0ebe0 !important; }
-.light [class*="bg-[#04"] { background-color: #e8e0ce !important; }
-.light [class*="bg-emerald-9"] { background-color: #e8e0ce !important; }
-.light [class*="bg-emerald-95"] { background-color: #ddd6c4 !important; }
-.light [class*="bg-black"] { background-color: rgba(45,32,16,0.85) !important; }
-.light [class*="bg-zinc-9"] { background-color: #ede7d9 !important; }
-.light [class*="bg-zinc-95"] { background-color: #e8e0ce !important; }
+/* Nav links */
+[data-theme="light"] nav a { color: #1a120a !important; }
+[data-theme="light"] nav a:hover { color: #8a6520 !important; }
 
-/* Keep gold buttons gold */
-.light [class*="bg-[#e8c872]"] { background-color: #c4921a !important; }
-.light [class*="bg-[#d4af37]"] { background-color: #c4921a !important; }
-.light [class*="bg-[#d4b055]"] { background-color: #b8820e !important; }
-.light [class*="bg-[#25D366]"] { background-color: #25D366 !important; }
-.light [class*="bg-red"] { background-color: rgba(180,30,30,0.85) !important; }
-.light [class*="bg-amber"] { background-color: rgba(180,130,20,0.15) !important; }
+/* Gold text → darker */
+[data-theme="light"] [class*="text-\[#e8c"],
+[data-theme="light"] [class*="text-\[#d4"] { color: #8a6520 !important; }
 
-/* Product cards specifically */
-.light [class*="bg-[#0b1a13]"] { 
-  background-color: #ffffff !important; 
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
-}
-
-/* Category pill on product card image */
-.light [class*="bg-[#06120d]/85"],
-.light [class*="backdrop-blur"] [class*="bg-[#06"] {
-  background-color: rgba(45,74,30,0.88) !important;
-}
+/* Emerald text */
+[data-theme="light"] [class*="text-emerald"] { color: #1e4d20 !important; }
 
 /* Footer */
-.light footer { 
-  background-color: #e8e0ce !important; 
-  border-top-color: rgba(139,110,50,0.25) !important;
-}
-.light footer * { color: #3a2e1a !important; }
-.light footer a:hover { color: #8a6520 !important; }
-.light footer [class*="bg-white/[0.02]"] { 
-  background-color: #faf7f0 !important; 
-  border-color: rgba(139,110,50,0.2) !important;
-}
-
-/* Hero image caption box — keep dark for readability over image */
-.light [class*="backdrop-blur-xl"][class*="border-white/10"],
-.light [class*="bg-[#061810]/90"],
-.light [class*="bg-[#081a13]/90"] {
-  background-color: rgba(30,20,8,0.88) !important;
-}
-.light [class*="backdrop-blur-xl"][class*="border-white/10"] * { color: #fbf5e6 !important; }
+[data-theme="light"] footer { background-color: #e4dcc8 !important; }
+[data-theme="light"] footer * { color: #3a2e1a !important; border-color: rgba(139,110,50,0.2) !important; }
 
 /* Inputs */
-.light input, .light textarea, .light select {
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
   background-color: #faf7f0 !important;
   color: #1a120a !important;
   border-color: rgba(139,110,50,0.35) !important;
 }
-.light input::placeholder, .light textarea::placeholder { color: #9a8a6a !important; }
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder { color: #9a8a6a !important; }
 
-/* Status pills / badges */
-.light [class*="bg-emerald-950"][class*="text-emerald"] {
-  background-color: rgba(45,74,30,0.15) !important;
-  color: #2d5a1e !important;
-  border-color: rgba(45,74,30,0.3) !important;
-}
+/* Keep gold gradient buttons */
+[data-theme="light"] [class*="bg-gradient"] { color: #1a120a !important; }
+
+/* Keep dark image overlays (quote boxes on images) */
+[data-theme="light"] [class*="backdrop-blur"] { background-color: rgba(30,20,8,0.85) !important; }
+[data-theme="light"] [class*="backdrop-blur"] * { color: #fbf5e6 !important; }
 
 /* Scrollbar */
-.light ::-webkit-scrollbar { background: #f0ebe0; }
-.light ::-webkit-scrollbar-thumb { background: rgba(139,110,50,0.4); border-radius: 4px; }
+[data-theme="light"] ::-webkit-scrollbar { background: #ede7d9; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(139,110,50,0.4); border-radius: 4px; }
+
 
 
