@@ -1,6 +1,7 @@
 const { supabase } = require('../config/db');
 const { sendAdminOrderEmail, sendCustomerOrderConfirmation, sendOrderStatusUpdate } = require('../services/emailService');
 const { sendOrderAlert } = require('../services/telegramService');
+const { isEmailVerified, clearOTP } = require('./paymentController');
 
 /**
  * Existing orders table schema:
@@ -153,13 +154,29 @@ exports.createOrder = async (req, res) => {
     const order_id = 'NA-' + Math.floor(10000 + Math.random() * 90000);
     const tracking_number = 'SR-' + Math.floor(100000000 + Math.random() * 900000000);
 
+    // ── 5a. Payment method handling ───────────────────────────────────────
+    const isOnlinePayment = paymentMethod === 'Razorpay' || paymentMethod === 'Online';
+    const razorpayPaymentId = req.body.razorpay_payment_id || null;
+    const razorpayOrderId   = req.body.razorpay_order_id   || null;
+
+    // For online payments, verify OTP was completed
+    if (isOnlinePayment && !isEmailVerified(customer.email.toLowerCase().trim())) {
+      return res.status(403).json({
+        success: false,
+        message: 'Email verification required for online payment. Please complete OTP verification.'
+      });
+    }
+
+    const paymentStatus = isOnlinePayment ? 'paid' : 'pending';
+    const finalPaymentMethod = isOnlinePayment ? 'Online (Razorpay)' : 'Cash on Delivery';
+
     const timelineEntry = {
       status: 'Ordered',
       timestamp: new Date().toISOString(),
-      note: 'Order confirmed (Cash on Delivery)'
+      note: isOnlinePayment ? 'Order confirmed (Online Payment - Razorpay)' : 'Order confirmed (Cash on Delivery)'
     };
 
-    // ── 6. Build insert payload — map to ACTUAL table columns ─────────────
+    // ── 6. Build insert payload ───────────────────────────────────────────
     const orderData = {
       order_id,
       customer_name: `${customer.firstName.trim()} ${customer.lastName.trim()}`,
@@ -175,11 +192,9 @@ exports.createOrder = async (req, res) => {
       items: verifiedItems,
       total_amount: serverTotal,
       status: 'Ordered',
-      payment_method: 'Cash on Delivery',
-      payment_status: 'pending',
-      // Extended columns — inserted only if they exist in the schema.
-      // If the migration has not been run yet, Supabase will return an error
-      // and we fall back to saving without them below.
+      payment_method: finalPaymentMethod,
+      payment_status: paymentStatus,
+      razorpay_order_id: razorpayOrderId,
       tracking_number,
       subtotal: serverSubtotal,
       shipping_fee: serverShippingFee,
@@ -262,6 +277,8 @@ exports.createOrder = async (req, res) => {
     };
 
     // ── 9. Send notifications — fire-and-forget, never block response ─────
+    // Clear OTP after successful order (for online payments)
+    if (isOnlinePayment) clearOTP(customer.email.toLowerCase().trim());
     sendAdminOrderEmail(orderForEmail).catch(err => {
       console.error('Admin email failed (order saved):', err.message);
     });
