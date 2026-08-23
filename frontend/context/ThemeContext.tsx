@@ -35,8 +35,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setResolved(actual);
       document.documentElement.classList.toggle('dark', isDark);
       document.documentElement.classList.toggle('light', !isDark);
-      // Also set data-theme for CSS targeting
       document.documentElement.setAttribute('data-theme', actual);
+
+      // Apply/remove filter on #theme-root (not body) so fixed modals work
+      const root = document.getElementById('theme-root');
+      const isAdmin = document.body.getAttribute('data-page') === 'admin';
+      if (root && !isDark && !isAdmin) {
+        root.style.filter = 'invert(1) hue-rotate(180deg) sepia(15%) brightness(1.05)';
+        root.style.backgroundColor = '#050f0b';
+      } else if (root) {
+        root.style.filter = '';
+        root.style.backgroundColor = '';
+      }
     };
 
     apply(theme);

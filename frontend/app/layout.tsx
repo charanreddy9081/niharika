@@ -62,9 +62,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   },
                 }}
               />
+              {/* Fixed elements OUTSIDE theme-root so they're unaffected by filter */}
               <CartDrawer />
               <KeepAlive />
-              <div className="page-enter">
+              {/* theme-root gets the light mode filter applied via JS */}
+              <div id="theme-root">
                 {children}
               </div>
             </WishlistProvider>

@@ -169,33 +169,33 @@
 
 /* ─── Page transition fade ──────────────────────────────────────────────── */
 @keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-.page-enter {
-  animation: pageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+/* Apply fade to body — opacity doesn't break fixed positioning */
+body {
+  animation: pageFadeIn 0.4s ease forwards;
 }
 
 /* ─── LIGHT MODE ────────────────────────────────────────────────────────── */
 /*
- * Strategy: Apply a warm sepia CSS filter to the entire page in light mode.
- * This reliably transforms ALL dark green/black elements to warm cream tones
- * without needing to override every individual Tailwind class.
- * Images are excluded from the filter via a counter-filter.
- * Admin pages are excluded — they always stay dark.
+ * Light mode filter is applied via JavaScript (ThemeContext) to #theme-root.
+ * This avoids filter on body which breaks position:fixed modals/drawers.
  */
 
-/* Apply filter only on non-admin pages */
-[data-theme="light"] body:not([data-page="admin"]) {
-  filter: invert(1) hue-rotate(180deg) sepia(15%) brightness(1.05);
-  background-color: #050f0b;
+/* Restore images inside theme-root to natural colors when filter is active */
+#theme-root img,
+#theme-root video,
+#theme-root iframe,
+#theme-root canvas {
+  /* counter-filter applied only when parent has invert */
+  filter: var(--img-counter-filter, none);
 }
 
-/* Restore images, videos to natural colors */
-[data-theme="light"] body:not([data-page="admin"]) img,
-[data-theme="light"] body:not([data-page="admin"]) video,
-[data-theme="light"] body:not([data-page="admin"]) iframe,
-[data-theme="light"] body:not([data-page="admin"]) canvas {
+[data-theme="light"] #theme-root img,
+[data-theme="light"] #theme-root video,
+[data-theme="light"] #theme-root iframe {
   filter: invert(1) hue-rotate(180deg) sepia(0%) brightness(0.97);
 }
 
