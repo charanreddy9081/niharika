@@ -2,10 +2,16 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { supabase } = require('../config/db');
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Lazy-init Razorpay so missing env vars don't crash the server on startup
+function getRazorpay() {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error('Razorpay keys not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in environment variables.');
+  }
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+}
 
 // In-memory OTP store (use Redis in production)
 // Map: email -> { otp, expiresAt, attempts }
@@ -152,7 +158,7 @@ exports.createRazorpayOrder = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Email not verified. Please complete OTP verification.' });
     }
 
-    const order = await razorpay.orders.create({
+    const order = await getRazorpay().orders.create({
       amount: Math.round(amount * 100), // paise
       currency,
       receipt: receipt || `rcpt_${Date.now()}`,
