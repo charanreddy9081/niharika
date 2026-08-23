@@ -7,6 +7,7 @@ import { ShoppingBag, Heart, Menu, X, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useSiteContent } from '../hooks/useSiteContent';
+import ThemeToggle from './ThemeToggle';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
@@ -95,6 +96,9 @@ export const Header: React.FC = () => {
                 <span className="absolute top-1 right-1 w-4 h-4 bg-[#e8c872] text-black text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse shadow-md">{totalItemsCount}</span>
               )}
             </button>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
           </div>
         </div>
 

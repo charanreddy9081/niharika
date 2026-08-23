@@ -10,6 +10,7 @@ import { Sparkles, ArrowRight, Star, Palette, Feather, Shield } from 'lucide-rea
 import { useSiteContent } from '../hooks/useSiteContent';
 import { useHomeTransition } from '../hooks/useHomeTransition';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
+import { useScrollReveal } from '../hooks/useScrollReveal';
 import FeaturedCarousel from '../components/FeaturedCarousel';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -36,6 +37,11 @@ export default function HomePage() {
 
   // Auto-refresh: re-fetches when user returns to tab or network comes back
   useAutoRefresh(fetchProducts);
+
+  // Scroll reveal refs — sections pop up as user scrolls
+  const manifestoRef = useScrollReveal() as React.RefObject<HTMLElement>;
+  const featuredRef  = useScrollReveal() as React.RefObject<HTMLElement>;
+  const pillarsRef   = useScrollReveal() as React.RefObject<HTMLElement>;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#050f0b]">
@@ -167,9 +173,9 @@ export default function HomePage() {
         <FeaturedCarousel />
 
         {/* Artist Manifesto */}
-        <section className="py-20 bg-gradient-to-b from-[#081d14] to-[#050f0b] border-t border-white/[0.08]">
+        <section ref={manifestoRef as any} className="py-20 bg-gradient-to-b from-[#081d14] to-[#050f0b] border-t border-white/[0.08]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-[#e8c872]/30 shadow-2xl bg-[#0a2319]">
+            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-[#e8c872]/30 shadow-2xl bg-[#0a2319] reveal reveal-left">
               <Image src="/images/artist_working.jpg" alt="Artist Niharika at Studio Easel" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#061810]/90 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
@@ -182,7 +188,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="space-y-6 text-left">
+            <div className="space-y-6 text-left reveal reveal-right">
               <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
                 {c('manifesto_label', 'The Studio Philosophy')}
               </span>
@@ -204,8 +210,8 @@ export default function HomePage() {
         </section>
 
         {/* Featured Artworks */}
-        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-white/[0.06]">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+        <section ref={featuredRef as any} className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-white/[0.06]">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4 reveal">
             <div>
               <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block mb-2">
                 {c('featured_label', 'Original Handcraft')}
@@ -234,9 +240,9 @@ export default function HomePage() {
         </section>
 
         {/* 4 Pillars */}
-        <section className="py-20 bg-gradient-to-b from-[#050f0b] via-[#081b13] to-[#050f0b] border-t border-white/[0.06]">
+        <section ref={pillarsRef as any} className="py-20 bg-gradient-to-b from-[#050f0b] via-[#081b13] to-[#050f0b] border-t border-white/[0.06]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3 reveal">
               <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
                 {c('pillars_label', 'Studio Standards')}
               </span>
@@ -252,7 +258,7 @@ export default function HomePage() {
                 { icon: <Shield className="w-6 h-6" />, title: '3. Teakwood Framing', desc: 'Solid seasoned wood framing with seamless corners and anti-glare shield.' },
                 { icon: <Feather className="w-6 h-6" />, title: '4. Gold Wax Seal', desc: 'Complimentary personal note penned on vintage parchment and sealed in gold.' },
               ].map((p, i) => (
-                <div key={i} className="bg-[#0a2319]/70 border border-emerald-900/60 p-8 rounded-3xl space-y-3 shadow-xl">
+                <div key={i} className={`bg-[#0a2319]/70 border border-emerald-900/60 p-8 rounded-3xl space-y-3 shadow-xl reveal reveal-delay-${i + 1}`}>
                   <div className="w-12 h-12 rounded-2xl bg-emerald-950/80 border border-[#e8c872]/30 flex items-center justify-center mx-auto text-[#e8c872]">
                     {p.icon}
                   </div>
