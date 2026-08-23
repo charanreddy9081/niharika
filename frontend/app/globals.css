@@ -407,7 +407,7 @@ body {
   --tw-gradient-to: #A94F6B !important;
   background-color: #A94F6B !important;
 }
-[data-theme="pink"] [class*="from-[#081b13"]"] * ,
+[data-theme="pink"] [class*="from-[#081b13]"] * ,
 [data-theme="pink"] [class*="via-[#102d21]"] * { color: #fff !important; }
 
 /* ── Glass card ──────────────────────────────────────────────────────────── */
