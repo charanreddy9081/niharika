@@ -56,6 +56,11 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'razorpay'>('razorpay');
   const [submitting, setSubmitting] = useState(false);
 
+  // Proactively wake the Render backend as soon as checkout loads
+  useEffect(() => {
+    fetch(`${API}/api/health`, { cache: 'no-store' }).catch(() => {});
+  }, []);
+
   // OTP state
   const [otpStep, setOtpStep] = useState<'idle' | 'sending' | 'sent' | 'verifying' | 'verified'>('idle');
   const [otp, setOtp] = useState('');
@@ -84,18 +89,22 @@ export default function CheckoutPage() {
   };
 
   // ── OTP: Send ──────────────────────────────────────────────────────────
-  const sendOTP = async () => {
+  const sendOTP = async (retryCount = 0) => {
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       toast.error('Please enter a valid email address first.'); return;
     }
     setOtpStep('sending');
     setOtpError('');
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 60000); // 60s — enough for Render cold start
       const res = await fetch(`${API}/api/payment/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email.trim(), firstName: form.firstName.trim() })
+        body: JSON.stringify({ email: form.email.trim(), firstName: form.firstName.trim() }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       const data = await res.json();
       if (data.success) {
         setOtpStep('sent');
@@ -109,13 +118,14 @@ export default function CheckoutPage() {
         setOtpStep('idle');
         toast.error(data.message || 'Failed to send OTP.');
       }
-    } catch (err) {
+    } catch (err: any) {
       setOtpStep('idle');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        toast.error('Server not configured. Please contact support.');
+      // Render cold start can take up to 50s — auto-retry once
+      if (retryCount < 1) {
+        toast.loading('Server is waking up, retrying…', { id: 'otp-retry', duration: 4000 });
+        setTimeout(() => sendOTP(retryCount + 1), 4000);
       } else {
-        toast.error('Could not reach server. Please try again.');
+        toast.error('Server is taking too long. Please try again in a moment.');
       }
     }
   };
