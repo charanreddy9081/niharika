@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';import Image from 'next/image';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
@@ -12,6 +13,7 @@ import { useSiteContent } from '../../hooks/useSiteContent';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const PAGE_SIZE = 16; // Load 16 at a time instead of all 50 at once
 
 interface GalleryItem {
   id: string;
@@ -30,6 +32,7 @@ interface GalleryItem {
 export default function GalleryPage() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -67,6 +70,13 @@ export default function GalleryPage() {
       return matchCat && matchSearch;
     });
   }, [items, selectedCategory, searchQuery]);
+
+  // Reset pagination when filter/search changes
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [selectedCategory, searchQuery]);
+
+  // Paginated slice — only render what's visible
+  const visibleItems = useMemo(() => filteredItems.slice(0, visibleCount), [filteredItems, visibleCount]);
+  const hasMore = visibleCount < filteredItems.length;
 
   const activeItem = lightboxIndex !== null ? filteredItems[lightboxIndex] : null;
 
@@ -179,7 +189,7 @@ export default function GalleryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredItems.map((item, index) => (
+            {visibleItems.map((item, index) => (
               <div
                 key={item.id || item._id || item.slug}
                 onClick={() => setLightboxIndex(index)}
@@ -241,6 +251,18 @@ export default function GalleryPage() {
               </div>
             ))}
           </div>
+
+          {/* Load More button */}
+          {hasMore && (
+            <div className="text-center mt-10">
+              <button
+                onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
+                className="bg-[#0a2319] hover:bg-[#123627] border border-[#e8c872]/40 text-[#fbf5e6] px-8 py-3 rounded-full text-xs uppercase tracking-[0.2em] transition-all btn-magnetic"
+              >
+                Load More ({filteredItems.length - visibleCount} remaining)
+              </button>
+            </div>
+          )}
         )}
       </main>
 
