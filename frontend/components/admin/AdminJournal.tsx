@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React, { useState, useCallback } from 'react';
 import { Plus, Trash2, Pencil, Eye, EyeOff, X, CheckCircle2, Star, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageInput, { FileData } from './ImageInput';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+const inputCls = 'w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl px-3 py-2.5 text-xs text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors';
+
+const CATEGORIES = ['Patron Chronicle', 'Studio Journal', 'Behind the Canvas', 'Artist Note', 'Exhibition Review', 'Commission Story'];
 
 interface Story {
   id: string;
@@ -28,21 +31,156 @@ interface Story {
 
 interface Props { stories: Story[]; onRefresh: () => void; }
 
-const inputCls = 'w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl px-3 py-2.5 text-xs text-zinc-100 placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] transition-colors';
+// ─── ArticleFields extracted OUTSIDE AdminJournal ─────────────────────────
+// This is CRITICAL — defining it inside would cause remount on every keystroke
+interface FieldProps {
+  val: Record<string, any>;
+  onChange: (key: string, value: any) => void;
+}
 
-const emptyForm = {
+function ArticleFields({ val, onChange }: FieldProps) {
+  return (
+    <div className="space-y-3 text-xs">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[#a3b8af] mb-1">Title *</label>
+          <input
+            type="text"
+            required
+            value={val.title || ''}
+            onChange={e => onChange('title', e.target.value)}
+            placeholder="Article title"
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className="block text-[#a3b8af] mb-1">Category</label>
+          <select
+            value={val.category || 'Patron Chronicle'}
+            onChange={e => onChange('category', e.target.value)}
+            className={inputCls}
+          >
+            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-[#a3b8af] mb-1">Subtitle / Tagline</label>
+        <input
+          type="text"
+          value={val.subtitle || ''}
+          onChange={e => onChange('subtitle', e.target.value)}
+          placeholder="Optional subtitle"
+          className={inputCls}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[#a3b8af] mb-1">Author *</label>
+          <input
+            type="text"
+            required
+            value={val.author || ''}
+            onChange={e => onChange('author', e.target.value)}
+            placeholder="Author name"
+            className={inputCls}
+          />
+        </div>
+        <div>
+          <label className="block text-[#a3b8af] mb-1">Date</label>
+          <input
+            type="date"
+            value={val.article_date || ''}
+            onChange={e => onChange('article_date', e.target.value)}
+            className={inputCls}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-[#a3b8af] mb-1">Excerpt * <span className="text-zinc-600 font-normal">(shown on listing page)</span></label>
+        <textarea
+          rows={3}
+          required
+          value={val.excerpt || ''}
+          onChange={e => onChange('excerpt', e.target.value)}
+          placeholder="Short excerpt for the journal listing..."
+          className={inputCls + ' resize-y'}
+        />
+      </div>
+
+      <div>
+        <label className="block text-[#a3b8af] mb-1">Full Article Content</label>
+        <textarea
+          rows={8}
+          value={val.content || ''}
+          onChange={e => onChange('content', e.target.value)}
+          placeholder="Full article text (shown on article detail page)..."
+          className={inputCls + ' resize-y'}
+        />
+      </div>
+
+      <div>
+        <label className="block text-[#a3b8af] mb-1">Pull Quote <span className="text-zinc-600 font-normal">(optional — shown prominently)</span></label>
+        <input
+          type="text"
+          value={val.quote || ''}
+          onChange={e => onChange('quote', e.target.value)}
+          placeholder="A memorable line from the article..."
+          className={inputCls}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-[#a3b8af] mb-1">Display Order</label>
+          <input
+            type="number"
+            min={0}
+            value={val.display_order ?? 0}
+            onChange={e => onChange('display_order', Number(e.target.value))}
+            className={inputCls}
+          />
+        </div>
+        <div className="flex flex-col gap-2 pt-5">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!!val.is_featured}
+              onChange={e => onChange('is_featured', e.target.checked)}
+              className="rounded"
+            />
+            <span className="text-[#a3b8af]">⭐ Featured article</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={val.is_published !== false}
+              onChange={e => onChange('is_published', e.target.checked)}
+              className="rounded"
+            />
+            <span className="text-[#a3b8af]">Published (visible on site)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
+// ──────────────────────────────────────────────────────────────────────────
+
+const emptyForm: Record<string, any> = {
   title: '', subtitle: '', category: 'Patron Chronicle', author: 'Niharika',
   article_date: new Date().toISOString().split('T')[0],
   excerpt: '', content: '', quote: '',
   is_featured: false, is_published: true, display_order: 0
 };
 
-const CATEGORIES = ['Patron Chronicle', 'Studio Journal', 'Behind the Canvas', 'Artist Note', 'Exhibition Review', 'Commission Story'];
-
 export default function AdminJournal({ stories, onRefresh }: Props) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editItem, setEditItem] = useState<Story | null>(null);
-  const [form, setForm] = useState({ ...emptyForm });
+  const [form, setForm] = useState<Record<string, any>>({ ...emptyForm });
   const [addFile, setAddFile] = useState<FileData | null>(null);
   const [addImageUrl, setAddImageUrl] = useState('/images/product_1_1.jpg');
   const [editFile, setEditFile] = useState<FileData | null>(null);
@@ -50,6 +188,15 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
   const [saving, setSaving] = useState(false);
 
   const token = () => localStorage.getItem('niharikartist_admin_token') || '';
+
+  // Stable onChange handlers — won't cause remounts
+  const handleFormChange = useCallback((key: string, value: any) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleEditChange = useCallback((key: string, value: any) => {
+    setEditItem(prev => prev ? { ...prev, [key]: value } as Story : prev);
+  }, []);
 
   const uploadImageIfNeeded = async (file: FileData | null, urlFallback: string): Promise<string> => {
     if (file) {
@@ -95,7 +242,6 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
     try {
       let imageUrl = editImageUrl.trim() || editItem.image_url;
       if (editFile) imageUrl = await uploadImageIfNeeded(editFile, imageUrl);
-
       const res = await fetch(`${API}/api/admin/journal/${editItem.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
@@ -139,66 +285,6 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
     } catch (err: any) { toast.error(err.message || 'Delete failed.'); }
   };
 
-  // Shared text fields
-  const ArticleFields = ({ val, set }: { val: any, set: (v: any) => void }) => (
-    <div className="space-y-3 text-xs">
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-[#a3b8af] mb-1">Title *</label>
-          <input type="text" required value={val.title} onChange={e => set((p: any) => ({ ...p, title: e.target.value }))} placeholder="Article title" className={inputCls} />
-        </div>
-        <div>
-          <label className="block text-[#a3b8af] mb-1">Category</label>
-          <select value={val.category || 'Patron Chronicle'} onChange={e => set((p: any) => ({ ...p, category: e.target.value }))} className={inputCls}>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-      </div>
-      <div>
-        <label className="block text-[#a3b8af] mb-1">Subtitle / Tagline</label>
-        <input type="text" value={val.subtitle || ''} onChange={e => set((p: any) => ({ ...p, subtitle: e.target.value }))} placeholder="Optional subtitle" className={inputCls} />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-[#a3b8af] mb-1">Author *</label>
-          <input type="text" required value={val.author} onChange={e => set((p: any) => ({ ...p, author: e.target.value }))} placeholder="Author name" className={inputCls} />
-        </div>
-        <div>
-          <label className="block text-[#a3b8af] mb-1">Date</label>
-          <input type="date" value={val.article_date || ''} onChange={e => set((p: any) => ({ ...p, article_date: e.target.value }))} className={inputCls} />
-        </div>
-      </div>
-      <div>
-        <label className="block text-[#a3b8af] mb-1">Excerpt * <span className="text-zinc-600 font-normal">(shown on listing page)</span></label>
-        <textarea rows={3} required value={val.excerpt} onChange={e => set((p: any) => ({ ...p, excerpt: e.target.value }))} placeholder="Short excerpt for the journal listing..." className={inputCls + ' resize-y'} />
-      </div>
-      <div>
-        <label className="block text-[#a3b8af] mb-1">Full Article Content</label>
-        <textarea rows={8} value={val.content || ''} onChange={e => set((p: any) => ({ ...p, content: e.target.value }))} placeholder="Full article text (shown on article detail page)..." className={inputCls + ' resize-y'} />
-      </div>
-      <div>
-        <label className="block text-[#a3b8af] mb-1">Pull Quote <span className="text-zinc-600 font-normal">(optional — shown prominently)</span></label>
-        <input type="text" value={val.quote || ''} onChange={e => set((p: any) => ({ ...p, quote: e.target.value }))} placeholder="A memorable line from the article..." className={inputCls} />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-[#a3b8af] mb-1">Display Order</label>
-          <input type="number" min={0} value={val.display_order} onChange={e => set((p: any) => ({ ...p, display_order: Number(e.target.value) }))} className={inputCls} />
-        </div>
-        <div className="flex flex-col gap-2 pt-5">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={!!val.is_featured} onChange={e => set((p: any) => ({ ...p, is_featured: e.target.checked }))} className="rounded" />
-            <span className="text-[#a3b8af]">⭐ Featured article</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={val.is_published !== false} onChange={e => set((p: any) => ({ ...p, is_published: e.target.checked }))} className="rounded" />
-            <span className="text-[#a3b8af]">Published (visible on site)</span>
-          </label>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -206,8 +292,10 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
           <h3 className="font-display text-2xl text-zinc-100">Journal Stories ({stories.length})</h3>
           <p className="text-xs text-[#a3b8af] mt-0.5">Editorial articles shown on the Journal page. Featured article gets the large hero layout.</p>
         </div>
-        <button onClick={() => { setIsAddOpen(true); setForm({ ...emptyForm }); setAddFile(null); setAddImageUrl('/images/product_1_1.jpg'); }}
-          className="bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-4 py-2 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 btn-magnetic shadow-lg">
+        <button
+          onClick={() => { setIsAddOpen(true); setForm({ ...emptyForm }); setAddFile(null); setAddImageUrl('/images/product_1_1.jpg'); }}
+          className="bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-4 py-2 rounded-xl text-xs uppercase tracking-wider flex items-center gap-1.5 btn-magnetic shadow-lg"
+        >
           <Plus className="w-4 h-4" /><span>New Article</span>
         </button>
       </div>
@@ -252,15 +340,13 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
                     </td>
                     <td className="p-4 text-center">
                       <button onClick={() => handleToggle(story, 'is_featured')}
-                        className={`p-1.5 rounded-lg border transition-colors ${story.is_featured ? 'bg-amber-950/60 border-amber-600/80 text-amber-300' : 'bg-[#050f0b] border-zinc-800 text-zinc-600'}`}
-                        title="Toggle featured">
+                        className={`p-1.5 rounded-lg border transition-colors ${story.is_featured ? 'bg-amber-950/60 border-amber-600/80 text-amber-300' : 'bg-[#050f0b] border-zinc-800 text-zinc-600'}`}>
                         <Star className="w-3.5 h-3.5" />
                       </button>
                     </td>
                     <td className="p-4 text-center">
                       <button onClick={() => handleToggle(story, 'is_published')}
-                        className={`p-1.5 rounded-lg border transition-colors ${(story.is_published || story.is_active) ? 'bg-emerald-950/60 border-emerald-700/80 text-emerald-400' : 'bg-[#050f0b] border-zinc-800 text-zinc-600'}`}
-                        title={story.is_published || story.is_active ? 'Unpublish' : 'Publish'}>
+                        className={`p-1.5 rounded-lg border transition-colors ${(story.is_published || story.is_active) ? 'bg-emerald-950/60 border-emerald-700/80 text-emerald-400' : 'bg-[#050f0b] border-zinc-800 text-zinc-600'}`}>
                         {(story.is_published || story.is_active) ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                       </button>
                     </td>
@@ -268,11 +354,18 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <a href={`/journal/${story.slug || story.id}`} target="_blank" rel="noreferrer"
-                          className="p-1.5 text-zinc-500 hover:text-[#e8c872] transition-colors" title="Preview"><FileText className="w-3.5 h-3.5" /></a>
-                        <button onClick={() => { setEditItem({ ...story }); setEditFile(null); setEditImageUrl(story.image_url || ''); }}
-                          className="p-1.5 text-zinc-400 hover:text-[#e8c872] transition-colors" title="Edit"><Pencil className="w-3.5 h-3.5" /></button>
+                          className="p-1.5 text-zinc-500 hover:text-[#e8c872] transition-colors" title="Preview">
+                          <FileText className="w-3.5 h-3.5" />
+                        </a>
+                        <button
+                          onClick={() => { setEditItem({ ...story }); setEditFile(null); setEditImageUrl(story.image_url || ''); }}
+                          className="p-1.5 text-zinc-400 hover:text-[#e8c872] transition-colors" title="Edit">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
                         <button onClick={() => handleDelete(story)}
-                          className="p-1.5 text-red-400/80 hover:text-red-300 transition-colors" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>
+                          className="p-1.5 text-red-400/80 hover:text-red-300 transition-colors" title="Delete">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -283,23 +376,34 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
         )}
       </div>
 
-      {/* Add Modal */}
+      {/* ── ADD MODAL ─────────────────────────────────────────────── */}
       {isAddOpen && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-start justify-center p-4 overflow-y-auto pt-10">
           <div className="bg-[#081a13] border border-[#e8c872]/40 rounded-3xl p-6 sm:p-8 max-w-2xl w-full space-y-4 shadow-2xl mb-10">
             <div className="flex items-center justify-between">
               <h3 className="font-display text-xl text-zinc-100">New Journal Article</h3>
-              <button onClick={() => setIsAddOpen(false)} className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/10"><X className="w-4 h-4" /></button>
+              <button onClick={() => setIsAddOpen(false)} className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/10">
+                <X className="w-4 h-4" />
+              </button>
             </div>
             <form onSubmit={handleAdd}>
               <div className="space-y-4">
-                <ImageInput label="Cover Image" urlValue={addImageUrl} onUrlChange={setAddImageUrl} selectedFile={addFile} onFileSelected={setAddFile} />
-                <ArticleFields val={form} set={setForm} />
+                <ImageInput
+                  label="Cover Image"
+                  urlValue={addImageUrl}
+                  onUrlChange={setAddImageUrl}
+                  selectedFile={addFile}
+                  onFileSelected={setAddFile}
+                />
+                {/* ArticleFields is a stable top-level component — no remount on keystroke */}
+                <ArticleFields val={form} onChange={handleFormChange} />
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => setIsAddOpen(false)} className="px-4 py-2 text-[#a3b8af] hover:text-white text-xs">Cancel</button>
-                <button type="submit" disabled={saving} className="bg-[#e8c872] hover:bg-[#d4b055] disabled:opacity-60 text-black font-semibold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider btn-magnetic flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5" /><span>{saving ? 'Publishing...' : 'Publish Article'}</span>
+                <button type="submit" disabled={saving}
+                  className="bg-[#e8c872] hover:bg-[#d4b055] disabled:opacity-60 text-black font-semibold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider btn-magnetic flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{saving ? 'Publishing...' : 'Publish Article'}</span>
                 </button>
               </div>
             </form>
@@ -307,23 +411,34 @@ export default function AdminJournal({ stories, onRefresh }: Props) {
         </div>
       )}
 
-      {/* Edit Modal */}
+      {/* ── EDIT MODAL ─────────────────────────────────────────────── */}
       {editItem && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-start justify-center p-4 overflow-y-auto pt-10">
           <div className="bg-[#081a13] border border-[#e8c872]/40 rounded-3xl p-6 sm:p-8 max-w-2xl w-full space-y-4 shadow-2xl mb-10">
             <div className="flex items-center justify-between">
               <h3 className="font-display text-xl text-zinc-100">Edit Article</h3>
-              <button onClick={() => { setEditItem(null); setEditFile(null); }} className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/10"><X className="w-4 h-4" /></button>
+              <button onClick={() => { setEditItem(null); setEditFile(null); }} className="p-1.5 text-zinc-500 hover:text-white rounded-lg hover:bg-white/10">
+                <X className="w-4 h-4" />
+              </button>
             </div>
             <form onSubmit={handleUpdate}>
               <div className="space-y-4">
-                <ImageInput label="Cover Image" urlValue={editImageUrl} onUrlChange={setEditImageUrl} selectedFile={editFile} onFileSelected={setEditFile} />
-                <ArticleFields val={editItem} set={setEditItem} />
+                <ImageInput
+                  label="Cover Image"
+                  urlValue={editImageUrl}
+                  onUrlChange={setEditImageUrl}
+                  selectedFile={editFile}
+                  onFileSelected={setEditFile}
+                />
+                {/* Same stable ArticleFields component */}
+                <ArticleFields val={editItem as Record<string, any>} onChange={handleEditChange} />
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button type="button" onClick={() => { setEditItem(null); setEditFile(null); }} className="px-4 py-2 text-[#a3b8af] hover:text-white text-xs">Cancel</button>
-                <button type="submit" disabled={saving} className="bg-[#e8c872] hover:bg-[#d4b055] disabled:opacity-60 text-black font-semibold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider btn-magnetic flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5" /><span>{saving ? 'Saving...' : 'Save Changes'}</span>
+                <button type="submit" disabled={saving}
+                  className="bg-[#e8c872] hover:bg-[#d4b055] disabled:opacity-60 text-black font-semibold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider btn-magnetic flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{saving ? 'Saving...' : 'Save Changes'}</span>
                 </button>
               </div>
             </form>
