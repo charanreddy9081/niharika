@@ -22,6 +22,11 @@ function ResetPasswordContent() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    document.body.setAttribute('data-page', 'admin');
+    return () => document.body.removeAttribute('data-page');
+  }, []);
+
+  useEffect(() => {
     if (!token || !email) {
       setError('Invalid or missing reset link. Please request a new one.');
     }

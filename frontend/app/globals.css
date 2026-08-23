@@ -182,33 +182,27 @@
  * This reliably transforms ALL dark green/black elements to warm cream tones
  * without needing to override every individual Tailwind class.
  * Images are excluded from the filter via a counter-filter.
+ * Admin pages are excluded — they always stay dark.
  */
 
-[data-theme="light"] body {
-  /* Invert colors, then shift hue to warm cream instead of cyan */
+/* Apply filter only on non-admin pages */
+[data-theme="light"] body:not([data-page="admin"]) {
   filter: invert(1) hue-rotate(180deg) sepia(15%) brightness(1.05);
   background-color: #050f0b;
 }
 
-/* Restore images, videos, and iframes to natural colors */
-[data-theme="light"] img,
-[data-theme="light"] video,
-[data-theme="light"] iframe,
-[data-theme="light"] canvas,
-[data-theme="light"] [style*="background-image"] {
+/* Restore images, videos to natural colors */
+[data-theme="light"] body:not([data-page="admin"]) img,
+[data-theme="light"] body:not([data-page="admin"]) video,
+[data-theme="light"] body:not([data-page="admin"]) iframe,
+[data-theme="light"] body:not([data-page="admin"]) canvas {
   filter: invert(1) hue-rotate(180deg) sepia(0%) brightness(0.97);
 }
 
-/* Gold/champagne colors stay warm after filter */
-/* Input text stays readable */
-[data-theme="light"] input::placeholder,
-[data-theme="light"] textarea::placeholder {
-  opacity: 0.6;
-}
-
 /* Scrollbar */
-[data-theme="light"] ::-webkit-scrollbar { background: #f0ebe0; }
+[data-theme="light"] ::-webkit-scrollbar { background: #ede7d9; }
 [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(139,110,50,0.4); border-radius: 4px; }
+
 
 
 

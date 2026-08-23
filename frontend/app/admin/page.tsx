@@ -87,6 +87,12 @@ export default function AdminPortalPage() {
   });
 
   useEffect(() => {
+    // Mark this page as admin so light theme filter doesn't apply
+    document.body.setAttribute('data-page', 'admin');
+    return () => document.body.removeAttribute('data-page');
+  }, []);
+
+  useEffect(() => {
     const token = localStorage.getItem('niharikartist_admin_token');
     if (!token) {
       setIsAuthenticated(false);
