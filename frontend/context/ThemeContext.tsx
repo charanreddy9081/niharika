@@ -2,58 +2,66 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Theme = 'dark' | 'light' | 'system';
+export type Theme = 'dark' | 'light' | 'system' | 'pink';
 
 interface ThemeContextType {
   theme: Theme;
-  resolved: 'dark' | 'light'; // actual applied theme
   setTheme: (t: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: 'dark',
-  resolved: 'dark',
   setTheme: () => {},
 });
 
+function getResolved(t: Theme): 'dark' | 'light' | 'pink' {
+  if (t === 'system') {
+    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark' : 'light';
+  }
+  return t;
+}
+
+function applyTheme(t: Theme) {
+  const resolved = getResolved(t);
+  const html = document.documentElement;
+
+  // Strip all theme classes and attrs
+  html.classList.remove('dark', 'light', 'pink');
+  html.setAttribute('data-theme', resolved);
+  html.classList.add(resolved);
+
+  // Reset #theme-root filter
+  const root = document.getElementById('theme-root');
+  if (root) {
+    root.style.filter = '';
+    root.style.backgroundColor = '';
+  }
+
+  // Light theme uses CSS filter inversion
+  if (resolved === 'light') {
+    const isAdmin = document.body.getAttribute('data-page') === 'admin';
+    if (root && !isAdmin) {
+      root.style.filter = 'invert(1) hue-rotate(180deg) sepia(15%) brightness(1.05)';
+      root.style.backgroundColor = '#050f0b';
+    }
+  }
+  // Pink and dark use CSS variables only — no filter
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
-  const [resolved, setResolved] = useState<'dark' | 'light'>('dark');
 
-  // Load saved preference
   useEffect(() => {
     const saved = (localStorage.getItem('nha_theme') as Theme) || 'dark';
     setThemeState(saved);
+    applyTheme(saved);
   }, []);
 
-  // Apply theme to <html> whenever theme or system pref changes
   useEffect(() => {
-    const apply = (t: Theme) => {
-      const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const isDark = t === 'dark' || (t === 'system' && sysDark);
-      const actual: 'dark' | 'light' = isDark ? 'dark' : 'light';
-      setResolved(actual);
-      document.documentElement.classList.toggle('dark', isDark);
-      document.documentElement.classList.toggle('light', !isDark);
-      document.documentElement.setAttribute('data-theme', actual);
-
-      // Apply/remove filter on #theme-root (not body) so fixed modals work
-      const root = document.getElementById('theme-root');
-      const isAdmin = document.body.getAttribute('data-page') === 'admin';
-      if (root && !isDark && !isAdmin) {
-        root.style.filter = 'invert(1) hue-rotate(180deg) sepia(15%) brightness(1.05)';
-        root.style.backgroundColor = '#050f0b';
-      } else if (root) {
-        root.style.filter = '';
-        root.style.backgroundColor = '';
-      }
-    };
-
-    apply(theme);
-
-    // Re-apply when system preference changes (only relevant for 'system' mode)
+    applyTheme(theme);
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => { if (theme === 'system') apply(theme); };
+    const handler = () => { if (theme === 'system') applyTheme(theme); };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, [theme]);
@@ -64,7 +72,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, resolved, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

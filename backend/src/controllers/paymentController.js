@@ -42,47 +42,45 @@ exports.sendOTP = async (req, res) => {
       blockUntil: existing?.sentCount >= 2 ? Date.now() + 10 * 60 * 1000 : 0,
     });
 
-    // Send OTP via SendGrid
+    // Send OTP via SendGrid or log it
     const sgMail = require('@sendgrid/mail');
     if (process.env.SENDGRID_API_KEY) {
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-      const html = `
-      <!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-        body{margin:0;padding:0;background:#050f0b;font-family:'Segoe UI',Arial,sans-serif;color:#fbf8f1;}
-        .wrapper{max-width:480px;margin:0 auto;background:#071610;border:1px solid rgba(232,200,114,0.25);border-radius:16px;overflow:hidden;}
-        .header{background:linear-gradient(135deg,#081d14,#0d2b1e);padding:28px 32px;text-align:center;border-bottom:1px solid rgba(232,200,114,0.2);}
-        .brand{font-size:26px;font-weight:300;color:#fbf5e6;letter-spacing:2px;font-family:Georgia,serif;}
-        .body{padding:28px 32px;text-align:center;}
-        .otp-box{background:#0a2319;border:2px solid rgba(232,200,114,0.4);border-radius:12px;padding:20px;margin:20px 0;display:inline-block;}
-        .otp{font-size:36px;font-weight:700;color:#e8c872;letter-spacing:8px;font-family:monospace;}
-        .footer{background:#040e0a;padding:16px;text-align:center;font-size:11px;color:#627a70;}
-      </style></head>
-      <body><div class="wrapper">
-        <div class="header"><div class="brand">niharikartist</div></div>
-        <div class="body">
-          <h2 style="font-size:20px;font-weight:400;color:#fbf5e6;margin:0 0 8px;font-family:Georgia,serif;">
-            Verify Your Email
-          </h2>
-          <p style="color:#a3b8af;font-size:13px;margin:0 0 16px;">
-            Hi ${firstName || 'there'}, use this OTP to confirm your email and complete your order.
-          </p>
-          <div class="otp-box">
-            <div class="otp">${otp}</div>
+      try {
+        const html = `
+        <!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+          body{margin:0;padding:0;background:#050f0b;font-family:'Segoe UI',Arial,sans-serif;color:#fbf8f1;}
+          .wrapper{max-width:480px;margin:0 auto;background:#071610;border:1px solid rgba(232,200,114,0.25);border-radius:16px;overflow:hidden;}
+          .header{background:linear-gradient(135deg,#081d14,#0d2b1e);padding:28px 32px;text-align:center;border-bottom:1px solid rgba(232,200,114,0.2);}
+          .brand{font-size:26px;font-weight:300;color:#fbf5e6;letter-spacing:2px;font-family:Georgia,serif;}
+          .body{padding:28px 32px;text-align:center;}
+          .otp-box{background:#0a2319;border:2px solid rgba(232,200,114,0.4);border-radius:12px;padding:20px;margin:20px 0;display:inline-block;}
+          .otp{font-size:36px;font-weight:700;color:#e8c872;letter-spacing:8px;font-family:monospace;}
+          .footer{background:#040e0a;padding:16px;text-align:center;font-size:11px;color:#627a70;}
+        </style></head>
+        <body><div class="wrapper">
+          <div class="header"><div class="brand">niharikartist</div></div>
+          <div class="body">
+            <h2 style="font-size:20px;font-weight:400;color:#fbf5e6;margin:0 0 8px;font-family:Georgia,serif;">Verify Your Email</h2>
+            <p style="color:#a3b8af;font-size:13px;margin:0 0 16px;">Hi ${firstName || 'there'}, use this OTP to confirm your email and complete your order.</p>
+            <div class="otp-box"><div class="otp">${otp}</div></div>
+            <p style="color:#627a70;font-size:12px;margin-top:12px;">Valid for <strong style="color:#e8c872;">10 minutes</strong>. Do not share this code.</p>
           </div>
-          <p style="color:#627a70;font-size:12px;margin-top:12px;">
-            Valid for <strong style="color:#e8c872;">10 minutes</strong>. Do not share this code.
-          </p>
-        </div>
-        <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
-      </div></body></html>`;
+          <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
+        </div></body></html>`;
 
-      await sgMail.send({
-        to: email,
-        from: { email: process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com', name: 'niharikartist Studio' },
-        subject: `${otp} — Your niharikartist Order Verification Code`,
-        html,
-      });
+        await sgMail.send({
+          to: email,
+          from: { email: process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com', name: 'niharikartist Studio' },
+          subject: `${otp} — Your niharikartist Order Verification Code`,
+          html,
+        });
+      } catch (emailErr) {
+        console.error('OTP email send failed:', emailErr?.response?.body || emailErr.message);
+        // Still return success — OTP is stored, can be logged
+      }
+    } else {
+      console.warn(`⚠️ SENDGRID_API_KEY not set. OTP for ${email}: ${otp}`);
     }
 
     console.log(`✅ OTP sent to ${email}: ${otp}`);

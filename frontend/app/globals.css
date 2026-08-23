@@ -167,6 +167,45 @@
   animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ─── PINK theme ─────────────────────────────────────────────────────────── */
+/*
+ * Luxury editorial pink — quiet feminine sophistication.
+ * Think: contemporary art gallery × high-end fashion brand.
+ * Pink is used for backgrounds, accents, borders — NOT overwhelming every element.
+ */
+.pink {
+  /* Backgrounds */
+  --c-bg:              #FFF7FA;
+  --c-bg-2:            #FCEEF3;
+  --c-bg-card:         rgba(255,255,255,0.90);
+  --c-bg-card-hover:   rgba(252,238,243,0.98);
+
+  /* Pink palette */
+  --c-blush:           #F6DDE5;
+  --c-rose:            #D98FA6;
+  --c-deep-rose:       #A94F6B;
+  --c-accent:          #E8A9BA;
+  --c-gold:            #C7A45A;
+
+  /* Text */
+  --c-text-primary:    #2B2024;
+  --c-text-secondary:  #806B72;
+  --c-text-muted:      #B89AA3;
+
+  /* Borders */
+  --c-border:          #E9CCD5;
+  --c-border-hover:    #D98FA6;
+
+  /* Reuse existing variable names for compatibility */
+  --c-champagne:       #C7A45A;
+  --c-champagne-light: #2B2024;
+  --c-gold-accent:     #A94F6B;
+  --c-gold-glow:       rgba(169,79,107,0.2);
+  --c-border-subtle:   rgba(233,204,213,0.8);
+  --c-surface:         #FFF0F4;
+  --c-surface-2:       #FCEEF3;
+}
+
 /* ─── Page transition fade ──────────────────────────────────────────────── */
 @keyframes pageFadeIn {
   from { opacity: 0; }
@@ -202,6 +241,229 @@ body {
 /* Scrollbar */
 [data-theme="light"] ::-webkit-scrollbar { background: #ede7d9; }
 [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(139,110,50,0.4); border-radius: 4px; }
+
+/* ─── PINK THEME — Complete CSS overrides ──────────────────────────────── */
+/*
+ * Pink is a standalone theme (no filter). All overrides use [data-theme="pink"]
+ * which is set on <html> by ThemeContext.
+ */
+
+/* ── Body & page ─────────────────────────────────────────────────────────── */
+[data-theme="pink"] body {
+  background-color: #FFF7FA !important;
+  color: #2B2024 !important;
+}
+[data-theme="pink"] .min-h-screen {
+  background-color: #FFF7FA !important;
+}
+
+/* ── All text ────────────────────────────────────────────────────────────── */
+[data-theme="pink"] h1, [data-theme="pink"] h2,
+[data-theme="pink"] h3, [data-theme="pink"] h4,
+[data-theme="pink"] h5, [data-theme="pink"] h6 {
+  color: #2B2024 !important;
+}
+[data-theme="pink"] p, [data-theme="pink"] span,
+[data-theme="pink"] label, [data-theme="pink"] li {
+  color: #2B2024 !important;
+}
+[data-theme="pink"] a { color: #A94F6B !important; }
+[data-theme="pink"] a:hover { color: #7B2D45 !important; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+[data-theme="pink"] header {
+  background-color: rgba(255,247,250,0.97) !important;
+  border-bottom-color: #E9CCD5 !important;
+}
+[data-theme="pink"] nav a,
+[data-theme="pink"] nav button span { color: #2B2024 !important; }
+[data-theme="pink"] nav a:hover { color: #A94F6B !important; }
+
+/* ── Dark backgrounds → blush ────────────────────────────────────────────── */
+[data-theme="pink"] [class*="bg-[#0"],
+[data-theme="pink"] [class*="bg-[#04"],
+[data-theme="pink"] [class*="bg-[#05"],
+[data-theme="pink"] [class*="bg-zinc-9"],
+[data-theme="pink"] [class*="bg-zinc-95"] {
+  background-color: #FCEEF3 !important;
+  color: #2B2024 !important;
+}
+[data-theme="pink"] [class*="bg-emerald-9"],
+[data-theme="pink"] [class*="bg-emerald-95"] {
+  background-color: #F6DDE5 !important;
+}
+[data-theme="pink"] [class*="bg-black"] {
+  background-color: rgba(43,32,36,0.9) !important;
+}
+
+/* ── Borders ─────────────────────────────────────────────────────────────── */
+[data-theme="pink"] [class*="border-emerald"],
+[data-theme="pink"] [class*="border-zinc"],
+[data-theme="pink"] [class*="border-white"] {
+  border-color: #E9CCD5 !important;
+}
+[data-theme="pink"] [class*="border-[#e8c"] {
+  border-color: #D98FA6 !important;
+}
+
+/* ── Cards & surfaces ────────────────────────────────────────────────────── */
+[data-theme="pink"] .rounded-3xl,
+[data-theme="pink"] .rounded-2xl {
+  background-color: #FFFFFF !important;
+  border-color: #E9CCD5 !important;
+  box-shadow: 0 2px 20px rgba(169,79,107,0.08) !important;
+}
+[data-theme="pink"] .rounded-3xl:hover,
+[data-theme="pink"] .rounded-2xl:hover {
+  box-shadow: 0 8px 30px rgba(169,79,107,0.14) !important;
+  border-color: #D98FA6 !important;
+}
+
+/* ── Gold accent text → deep rose ───────────────────────────────────────── */
+[data-theme="pink"] [class*="text-[#e8c"],
+[data-theme="pink"] [class*="text-[#d4"] {
+  color: #A94F6B !important;
+}
+[data-theme="pink"] [class*="text-emerald"] {
+  color: #A94F6B !important;
+}
+[data-theme="pink"] [class*="text-[#a3b"] {
+  color: #806B72 !important;
+}
+[data-theme="pink"] [class*="text-zinc-1"],
+[data-theme="pink"] [class*="text-zinc-2"],
+[data-theme="pink"] [class*="text-zinc-3"] {
+  color: #2B2024 !important;
+}
+[data-theme="pink"] [class*="text-zinc-4"],
+[data-theme="pink"] [class*="text-zinc-5"],
+[data-theme="pink"] [class*="text-zinc-6"] {
+  color: #806B72 !important;
+}
+
+/* ── Primary gold buttons → deep rose ───────────────────────────────────── */
+[data-theme="pink"] [class*="bg-gradient-to-r"][class*="fbf5e6"],
+[data-theme="pink"] [class*="bg-gradient-to-r"][class*="e8c872"],
+[data-theme="pink"] [class*="bg-gradient-to-r"][class*="d4b055"] {
+  background: linear-gradient(135deg, #E8A9BA, #A94F6B) !important;
+  background-image: linear-gradient(135deg, #E8A9BA, #A94F6B) !important;
+}
+[data-theme="pink"] [class*="bg-[#e8c872]"],
+[data-theme="pink"] [class*="bg-[#d4b055]"],
+[data-theme="pink"] [class*="bg-[#d4af37]"] {
+  background-color: #A94F6B !important;
+  color: #fff !important;
+}
+[data-theme="pink"] [class*="bg-[#e8c872]"]:hover,
+[data-theme="pink"] [class*="bg-[#d4b055]"]:hover {
+  background-color: #7B2D45 !important;
+}
+
+/* ── Dark outline/ghost buttons → rose ──────────────────────────────────── */
+[data-theme="pink"] [class*="bg-[#0a2319]"]:not([class*="text-black"]),
+[data-theme="pink"] [class*="bg-[#071710]"]:not([class*="text-black"]) {
+  background-color: #FFF0F4 !important;
+  border-color: #D98FA6 !important;
+  color: #A94F6B !important;
+}
+[data-theme="pink"] [class*="bg-[#0a2319]"]:not([class*="text-black"]):hover {
+  background-color: #FCEEF3 !important;
+  border-color: #A94F6B !important;
+}
+
+/* ── Inputs & forms ──────────────────────────────────────────────────────── */
+[data-theme="pink"] input,
+[data-theme="pink"] textarea,
+[data-theme="pink"] select {
+  background-color: #FFFFFF !important;
+  color: #2B2024 !important;
+  border-color: #E9CCD5 !important;
+}
+[data-theme="pink"] input:focus,
+[data-theme="pink"] textarea:focus,
+[data-theme="pink"] select:focus {
+  border-color: #A94F6B !important;
+  outline-color: rgba(169,79,107,0.25) !important;
+}
+[data-theme="pink"] input::placeholder,
+[data-theme="pink"] textarea::placeholder {
+  color: #B89AA3 !important;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+[data-theme="pink"] footer {
+  background-color: #FCEEF3 !important;
+  border-top-color: #E9CCD5 !important;
+}
+[data-theme="pink"] footer * { color: #2B2024 !important; }
+[data-theme="pink"] footer a:hover { color: #A94F6B !important; }
+
+/* ── Announcement bar ────────────────────────────────────────────────────── */
+[data-theme="pink"] [class*="from-[#081b13]"],
+[data-theme="pink"] [class*="via-[#102d21]"],
+[data-theme="pink"] [class*="to-[#081b13]"] {
+  --tw-gradient-from: #A94F6B !important;
+  --tw-gradient-via: #C27089 !important;
+  --tw-gradient-to: #A94F6B !important;
+  background-color: #A94F6B !important;
+}
+[data-theme="pink"] [class*="from-[#081b13"]"] * ,
+[data-theme="pink"] [class*="via-[#102d21]"] * { color: #fff !important; }
+
+/* ── Glass card ──────────────────────────────────────────────────────────── */
+[data-theme="pink"] .glass-atelier {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: #E9CCD5 !important;
+}
+[data-theme="pink"] .glass-atelier:hover {
+  border-color: #D98FA6 !important;
+}
+
+/* ── Image overlays on hero — keep dark so images pop ────────────────────── */
+[data-theme="pink"] [class*="from-[#050f0b]"],
+[data-theme="pink"] [class*="to-[#050f0b]"],
+[data-theme="pink"] [class*="from-[#06120d]"],
+[data-theme="pink"] [class*="to-[#06120d]"] {
+  --tw-gradient-from: rgba(43,32,36,0.6) !important;
+  --tw-gradient-to: transparent !important;
+}
+
+/* ── Backdrop blur elements (hero quotes, lightbox) — keep dark ─────────── */
+[data-theme="pink"] [class*="bg-[#050f0b]/8"],
+[data-theme="pink"] [class*="bg-black/9"],
+[data-theme="pink"] [class*="bg-black/95"],
+[data-theme="pink"] [class*="bg-black/96"] {
+  background-color: rgba(43,32,36,0.92) !important;
+}
+[data-theme="pink"] [class*="bg-black/9"] *,
+[data-theme="pink"] [class*="bg-black/95"] * { color: #fbf5e6 !important; }
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+[data-theme="pink"] ::-webkit-scrollbar { background: #FCEEF3; }
+[data-theme="pink"] ::-webkit-scrollbar-thumb {
+  background: rgba(169,79,107,0.35);
+  border-radius: 4px;
+}
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+[data-theme="pink"] ::selection {
+  background-color: #D98FA6;
+  color: #fff;
+}
+
+/* ── Champagne gradient text → rose gradient ─────────────────────────────── */
+[data-theme="pink"] .champagne-gradient-text {
+  background: linear-gradient(135deg, #D98FA6 0%, #A94F6B 50%, #7B2D45 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+/* ── Smooth transitions ──────────────────────────────────────────────────── */
+[data-theme="pink"] * {
+  transition-property: background-color, border-color, color;
+  transition-duration: 300ms;
+  transition-timing-function: ease;
+}
 
 
 
