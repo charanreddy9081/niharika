@@ -176,141 +176,129 @@
   animation: pageFadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ─── Light mode overrides for dark Tailwind classes ───────────────────── */
+/* ─── LIGHT MODE — Universal overrides ─────────────────────────────────── */
+/*
+ * Since Tailwind v4 escapes class names differently, we use broad
+ * element + context selectors that reliably override dark colors.
+ */
 
-/* Backgrounds */
-.light .bg-\[\#050f0b\],
-.light .bg-\[\#06120d\],
-.light .bg-\[\#070709\],
-.light .bg-\[\#081d14\],
-.light .bg-\[\#081812\],
-.light .bg-\[\#081a12\],
-.light .bg-\[\#081a13\] { background-color: #f5f0e8 !important; }
+/* Body background */
+.light body { background-color: #f8f4ec !important; color: #1a120a !important; }
 
-.light .bg-\[\#0a2319\],
-.light .bg-\[\#0c241a\],
-.light .bg-\[\#0b1f16\],
-.light .bg-\[\#0d241a\],
-.light .bg-\[\#0d241c\],
-.light .bg-\[\#071610\],
-.light .bg-\[\#071710\] { background-color: #ede7d9 !important; }
+/* All elements with dark green hex backgrounds */
+.light [style*="background"],
+.light * { box-sizing: border-box; }
 
-.light .bg-\[\#0e271e\],
-.light .bg-\[\#061810\],
-.light .bg-\[\#061810\]\/90,
-.light .bg-\[\#06120d\]\/90 { background-color: #e8e0ce !important; }
+/* Universal: any element inside .light that has a dark emerald background */
+.light section,
+.light main,
+.light article,
+.light aside { background-color: transparent !important; }
 
-/* Sticky/fixed header */
-.light header,
-.light .bg-\[\#050f0b\]\/95,
-.light .bg-\[\#071710\]\/95 {
-  background-color: rgba(245,240,232,0.97) !important;
-  border-bottom-color: rgba(184,146,42,0.3) !important;
+/* Override all inline background-color on dark sections */
+@layer utilities {
+  .light .bg-page    { background-color: #f8f4ec; }
+  .light .bg-surface { background-color: #ede7d9; }
 }
 
-/* Announcement ribbon */
-.light .from-\[\#081b13\],
-.light .via-\[\#102d21\],
-.light .to-\[\#081b13\] {
-  --tw-gradient-from: #2d4a1e !important;
-  --tw-gradient-via: #3a6028 !important;
-  --tw-gradient-to: #2d4a1e !important;
+/* Headers */
+.light header { 
+  background-color: rgba(248,244,236,0.97) !important; 
+  border-bottom-color: rgba(139,110,50,0.25) !important;
 }
 
-/* Text colors */
-.light .text-zinc-100,
-.light .text-\[\#fbf5e6\],
-.light .text-\[\#fbf8f1\],
-.light .text-white { color: #1a120a !important; }
+/* All text */
+.light h1, .light h2, .light h3, .light h4, .light h5, .light h6 {
+  color: #1a120a !important;
+}
+.light p, .light span:not([class*="bg-"]):not([class*="text-[#e8"]):not([class*="text-emerald"]):not([class*="text-amber"]) {
+  color: #3a2e1a !important;
+}
+.light a { color: #3a2e1a !important; }
+.light a:hover { color: #8a6520 !important; }
 
-.light .text-zinc-200,
-.light .text-zinc-300 { color: #2d2010 !important; }
+/* Nav specifically */
+.light nav a, .light nav span, .light nav button span { 
+  color: #1a120a !important; 
+}
 
-.light .text-zinc-400,
-.light .text-\[\#a3b8af\] { color: #5a4e38 !important; }
-
-.light .text-zinc-500,
-.light .text-\[\#627a70\] { color: #7a6a50 !important; }
-
-.light .text-zinc-100.font-display,
-.light .font-display { color: #1a120a !important; }
-
-/* Nav links */
-.light nav a,
-.light nav span { color: #2d2010 !important; }
-.light nav a:hover { color: #8a6520 !important; }
-
-/* Gold accent stays gold but darker */
-.light .text-\[\#e8c872\],
-.light .gold { color: #8a6520 !important; }
+/* Gold accent text — slightly darker to be visible on light */
+.light [class*="text-[#e8c"] { color: #8a6520 !important; }
+.light [class*="text-[#d4b"] { color: #7a5510 !important; }
+.light [class*="text-emerald-4"] { color: #2d5a1e !important; }
+.light [class*="text-amber"] { color: #8a6520 !important; }
 
 /* Borders */
-.light .border-emerald-900\/60,
-.light .border-emerald-900\/80,
-.light .border-emerald-950,
-.light .border-emerald-900 { border-color: rgba(139,110,50,0.3) !important; }
+.light [class*="border-emerald"] { border-color: rgba(139,110,50,0.25) !important; }
+.light [class*="border-white"] { border-color: rgba(139,110,50,0.2) !important; }
+.light [class*="border-[#e8c"] { border-color: rgba(139,110,50,0.45) !important; }
 
-.light .border-white\/\[0\.08\],
-.light .border-white\/\[0\.06\] { border-color: rgba(139,110,50,0.15) !important; }
+/* ALL dark backgrounds → cream */
+.light [class*="bg-[#0"] { background-color: #f0ebe0 !important; }
+.light [class*="bg-[#04"] { background-color: #e8e0ce !important; }
+.light [class*="bg-emerald-9"] { background-color: #e8e0ce !important; }
+.light [class*="bg-emerald-95"] { background-color: #ddd6c4 !important; }
+.light [class*="bg-black"] { background-color: rgba(45,32,16,0.85) !important; }
+.light [class*="bg-zinc-9"] { background-color: #ede7d9 !important; }
+.light [class*="bg-zinc-95"] { background-color: #e8e0ce !important; }
 
-/* Cards */
-.light .bg-\[\#0a2319\]\/70,
-.light .bg-\[\#0a2319\]\/80,
-.light .bg-\[\#0a2319\]\/90,
-.light .bg-\[\#0c241a\]\/80,
-.light .bg-\[\#0c241a\]\/85,
-.light .bg-\[\#0c241a\]\/90 {
-  background-color: rgba(237,231,217,0.9) !important;
-  border-color: rgba(139,110,50,0.25) !important;
+/* Keep gold buttons gold */
+.light [class*="bg-[#e8c872]"] { background-color: #c4921a !important; }
+.light [class*="bg-[#d4af37]"] { background-color: #c4921a !important; }
+.light [class*="bg-[#d4b055]"] { background-color: #b8820e !important; }
+.light [class*="bg-[#25D366]"] { background-color: #25D366 !important; }
+.light [class*="bg-red"] { background-color: rgba(180,30,30,0.85) !important; }
+.light [class*="bg-amber"] { background-color: rgba(180,130,20,0.15) !important; }
+
+/* Product cards specifically */
+.light [class*="bg-[#0b1a13]"] { 
+  background-color: #ffffff !important; 
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
 }
 
-/* Cart drawer */
-.light .bg-\[\#081812\],
-.light .bg-\[\#071610\] { background-color: #f0ebe0 !important; }
+/* Category pill on product card image */
+.light [class*="bg-[#06120d]/85"],
+.light [class*="backdrop-blur"] [class*="bg-[#06"] {
+  background-color: rgba(45,74,30,0.88) !important;
+}
+
+/* Footer */
+.light footer { 
+  background-color: #e8e0ce !important; 
+  border-top-color: rgba(139,110,50,0.25) !important;
+}
+.light footer * { color: #3a2e1a !important; }
+.light footer a:hover { color: #8a6520 !important; }
+.light footer [class*="bg-white/[0.02]"] { 
+  background-color: #faf7f0 !important; 
+  border-color: rgba(139,110,50,0.2) !important;
+}
+
+/* Hero image caption box — keep dark for readability over image */
+.light [class*="backdrop-blur-xl"][class*="border-white/10"],
+.light [class*="bg-[#061810]/90"],
+.light [class*="bg-[#081a13]/90"] {
+  background-color: rgba(30,20,8,0.88) !important;
+}
+.light [class*="backdrop-blur-xl"][class*="border-white/10"] * { color: #fbf5e6 !important; }
 
 /* Inputs */
 .light input, .light textarea, .light select {
   background-color: #faf7f0 !important;
   color: #1a120a !important;
-  border-color: rgba(139,110,50,0.4) !important;
+  border-color: rgba(139,110,50,0.35) !important;
 }
-.light input::placeholder, .light textarea::placeholder {
-  color: #9a8a6a !important;
-}
+.light input::placeholder, .light textarea::placeholder { color: #9a8a6a !important; }
 
-/* Buttons */
-.light .bg-\[\#0a2319\]:not(.text-black),
-.light .bg-\[\#0d261e\]:not(.text-black) {
-  background-color: #ede7d9 !important;
-  color: #1a120a !important;
+/* Status pills / badges */
+.light [class*="bg-emerald-950"][class*="text-emerald"] {
+  background-color: rgba(45,74,30,0.15) !important;
+  color: #2d5a1e !important;
+  border-color: rgba(45,74,30,0.3) !important;
 }
 
-/* Product / gallery cards */
-.light .bg-\[\#0b1a13\]\/90 { background-color: rgba(237,231,217,0.95) !important; }
-
-/* Gradients on sections */
-.light .from-\[\#050f0b\],
-.light .to-\[\#050f0b\] {
-  --tw-gradient-from: #f5f0e8 !important;
-  --tw-gradient-to: #f5f0e8 !important;
-}
-.light .from-\[\#081d14\] { --tw-gradient-from: #ede7d9 !important; }
-.light .via-\[\#081b13\]  { --tw-gradient-via: #f0ebe0 !important; }
-
-/* Footer */
-.light footer {
-  background-color: #e8e0ce !important;
-  border-top-color: rgba(139,110,50,0.3) !important;
-}
-.light footer h4 { color: #1a120a !important; }
-.light footer a   { color: #5a4e38 !important; }
-.light footer a:hover { color: #8a6520 !important; }
-.light footer p   { color: #7a6a50 !important; }
-
-/* Dropdown/modal backgrounds */
-.light .bg-\[\#081a13\] { background-color: #faf7f0 !important; }
-
-/* Scrollbar in light mode */
+/* Scrollbar */
 .light ::-webkit-scrollbar { background: #f0ebe0; }
 .light ::-webkit-scrollbar-thumb { background: rgba(139,110,50,0.4); border-radius: 4px; }
+
 
