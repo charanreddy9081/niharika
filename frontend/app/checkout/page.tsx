@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL;
+if (!API) console.error('❌ NEXT_PUBLIC_API_URL is not set — API calls will fail in production');
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
 
 declare global {
@@ -108,9 +109,14 @@ export default function CheckoutPage() {
         setOtpStep('idle');
         toast.error(data.message || 'Failed to send OTP.');
       }
-    } catch {
+    } catch (err) {
       setOtpStep('idle');
-      toast.error('Could not send OTP. Check your connection.');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        toast.error('Server not configured. Please contact support.');
+      } else {
+        toast.error('Could not reach server. Please try again.');
+      }
     }
   };
 
