@@ -140,6 +140,8 @@ export default function FeaturedCarousel() {
                         src={art.imageUrl}
                         alt={art.title}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                        fetchPriority={i === 0 ? 'high' : 'low'}
                         onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg'; }}
                       />
                       <div style={{
