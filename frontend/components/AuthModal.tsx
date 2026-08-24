@@ -23,6 +23,13 @@ export default function AuthModal({ onClose, onSuccess, reason }: AuthModalProps
   const { signIn, register } = useAuth();
   const [mode, setMode] = useState<Mode>('signin');
 
+  // Lock body scroll when modal is open (prevents background scroll on mobile)
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
   // ── Sign-in state ──────────────────────────────────────────────────
   const [siLoading, setSiLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -196,10 +203,22 @@ export default function AuthModal({ onClose, onSuccess, reason }: AuthModalProps
   };
 
   return (
-    /* Backdrop — fixed, scrollable */
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      {/* Centering wrapper */}
-      <div className="flex min-h-full items-start sm:items-center justify-center p-4 py-8">
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal — fixed, always starts at top, scrolls internally */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-6 pb-6"
+        style={{ maxHeight: '100dvh', overflowY: 'auto' }}
+        onClick={onClose}
+      >
         <div
           className="relative w-full max-w-md bg-[#0a0f0c] border border-zinc-800 rounded-2xl shadow-2xl"
           onClick={e => e.stopPropagation()}
@@ -427,14 +446,12 @@ export default function AuthModal({ onClose, onSuccess, reason }: AuthModalProps
             <p className="text-center text-xs text-zinc-600 mt-5">
               {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
               <button type="button" onClick={() => switchMode(mode === 'signin' ? 'register' : 'signin')}
-                className="text-[#d4af37] hover:underline font-medium">
-                {mode === 'signin' ? 'Register here' : 'Sign in'}
               </button>
             </p>
           )}
-        </div>
-        </div>
-      </div>
-    </div>
+        </div>{/* end p-6 sm:p-8 */}
+        </div>{/* end modal card */}
+      </div>{/* end scroll wrapper */}
+    </>
   );
 }
