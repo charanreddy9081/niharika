@@ -1,37 +1,35 @@
 /**
- * Email Service — uses SendGrid HTTPS API (works on Render free tier).
- * Gmail SMTP is blocked by Render's free tier (port 587 timeout).
- * SendGrid uses port 443 HTTPS which is never blocked.
+ * Email Service — uses Gmail SMTP via nodemailer.
+ * Gmail SMTP on port 465 (SSL) works on Render free tier.
+ * FROM domain matches DKIM domain → DMARC PASS → inbox delivery.
  */
 
-const sgMail = require('@sendgrid/mail');
-
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-} else {
-  console.error('❌ SENDGRID_API_KEY not set — emails will not send');
-}
+const nodemailer = require('nodemailer');
 
 const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
 const FROM_NAME   = 'niharikartist Studio';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
 
-// SendGrid mail options helper — adds headers that reduce spam score
-function mailOptions(to, subject, html, replyToEmail) {
-  return {
+// Create Gmail SMTP transporter
+function getTransporter() {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER || FROM_EMAIL,
+      pass: process.env.GMAIL_APP_PASSWORD, // Gmail App Password (not regular password)
+    },
+  });
+}
+
+async function sendMail(to, subject, html, replyTo) {
+  const transporter = getTransporter();
+  await transporter.sendMail({
+    from: `"${FROM_NAME}" <${process.env.GMAIL_USER || FROM_EMAIL}>`,
     to,
-    from: { email: FROM_EMAIL, name: FROM_NAME },
-    replyTo: replyToEmail || FROM_EMAIL,
+    replyTo: replyTo || FROM_EMAIL,
     subject,
     html,
-    headers: {
-      'X-Entity-Ref-ID': `niharikartist-${Date.now()}`,
-    },
-    trackingSettings: {
-      clickTracking: { enable: false, enableText: false },
-      openTracking: { enable: false },
-    },
-  };
+  });
 }
 
 const brandStyles = `
@@ -124,7 +122,7 @@ async function sendAdminOrderEmail(order) {
     <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
   </div></body></html>`;
   try {
-    await sgMail.send(mailOptions(ADMIN_EMAIL, `New Order — ${order_id} | ${isOnline ? '✅ Paid Online' : '🚚 COD'}`, html));
+    await sendMail(ADMIN_EMAIL, `New Order — ${order_id} | ${isOnline ? '✅ Paid Online' : '🚚 COD'}`, html);
     console.log(`✅ Admin email sent for ${order_id}`);
   } catch (err) {
     console.error(`❌ Admin email failed for ${order_id}:`, err?.response?.body?.errors || err.message);
@@ -178,7 +176,7 @@ async function sendCustomerOrderConfirmation(order) {
     <div class="footer">&copy; 2026 niharikartist fine art atelier • Handmade in India</div>
   </div></body></html>`;
   try {
-    await sgMail.send(mailOptions(customer.email, `Order Confirmed — ${order_id} | niharikartist`, html, FROM_EMAIL));
+    await sendMail(customer.email, `Order Confirmed — ${order_id} | niharikartist`, html, FROM_EMAIL);
     console.log(`✅ Customer email sent to ${customer.email} for ${order_id}`);
   } catch (err) {
     console.error(`❌ Customer email failed for ${order_id} (to: ${customer.email}):`, err?.response?.body?.errors || err.message);
@@ -233,7 +231,7 @@ async function sendOrderStatusUpdate({ order_id, status, note, customer, total, 
   </div></body></html>`;
 
   try {
-    await sgMail.send(mailOptions(customer.email, `Order Update — ${cfg.title} — ${order_id}`, html, FROM_EMAIL));
+    await sendMail(customer.email, `Order Update — ${cfg.title} — ${order_id}`, html, FROM_EMAIL);
     console.log(`✅ Status update email sent to ${customer.email} for ${order_id} [${status}]`);
   } catch (err) {
     console.error(`❌ Status update email failed for ${order_id}:`, err?.response?.body?.errors || err.message);

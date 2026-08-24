@@ -48,10 +48,16 @@ exports.sendOTP = async (req, res) => {
       blockUntil: existing?.sentCount >= 4 ? Date.now() + 10 * 60 * 1000 : 0,
     });
 
-    // Send OTP via SendGrid or log it
-    const sgMail = require('@sendgrid/mail');
-    if (process.env.SENDGRID_API_KEY) {
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    // Send OTP via Gmail SMTP
+    const nodemailer = require('nodemailer');
+    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_APP_PASSWORD,
+        },
+      });
       try {
         const html = `
         <!DOCTYPE html><html><head><meta charset="UTF-8"><style>
@@ -75,18 +81,18 @@ exports.sendOTP = async (req, res) => {
           <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
         </div></body></html>`;
 
-        await sgMail.send({
+        await transporter.sendMail({
+          from: `"niharikartist Studio" <${process.env.GMAIL_USER}>`,
           to: email,
-          from: { email: process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com', name: 'niharikartist Studio' },
           subject: `${otp} — Your niharikartist Verification Code`,
           html,
         });
+        console.log(`✅ OTP email sent to ${email}`);
       } catch (emailErr) {
-        console.error('OTP email send failed:', emailErr?.response?.body || emailErr.message);
-        // Still return success — OTP is stored, can be logged
+        console.error('OTP email send failed:', emailErr.message);
       }
     } else {
-      console.warn(`⚠️ SENDGRID_API_KEY not set. OTP for ${email}: ${otp}`);
+      console.warn(`⚠️ GMAIL credentials not set. OTP for ${email}: ${otp}`);
     }
 
     console.log(`✅ OTP sent to ${email}: ${otp}`);

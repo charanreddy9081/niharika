@@ -1,10 +1,18 @@
 const { supabase } = require('../config/db');
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 
-if (process.env.SENDGRID_API_KEY) sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
+const FROM_EMAIL  = process.env.GMAIL_USER || process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
+
+function getTransporter() {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
+}
 
 exports.submitInquiry = async (req, res) => {
   try {
@@ -18,14 +26,14 @@ exports.submitInquiry = async (req, res) => {
     const mapped = { ...inquiry, _id: inquiry.id };
 
     // Send email notification to admin — fire-and-forget
-    if (process.env.SENDGRID_API_KEY) {
+    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
       const { name, email, phone, message, commission_subject, inquiry_type, artistic_vision } = req.body;
       const body = message || artistic_vision || '';
       const subject = commission_subject || inquiry_type || 'Studio Inquiry';
 
-      sgMail.send({
+      getTransporter().sendMail({
+        from: `"niharikartist Studio" <${FROM_EMAIL}>`,
         to: ADMIN_EMAIL,
-        from: { email: FROM_EMAIL, name: 'niharikartist Studio' },
         replyTo: email || FROM_EMAIL,
         subject: `📩 New Commission: ${subject} — ${name}`,
         html: `
@@ -43,7 +51,7 @@ exports.submitInquiry = async (req, res) => {
               Submitted via niharikartist.shop/contact
             </div>
           </div>`,
-      }).catch(err => console.error('Commission email failed:', err?.response?.body || err.message));
+      }).catch(err => console.error('Commission email failed:', err.message));
     }
 
     return res.status(201).json({ success: true, message: 'Your message has been received! Our studio will be in touch shortly.', data: mapped });
