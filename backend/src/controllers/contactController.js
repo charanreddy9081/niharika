@@ -1,20 +1,10 @@
 const { supabase } = require('../config/db');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-const FROM_EMAIL  = process.env.GMAIL_USER || process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
+if (process.env.SENDGRID_API_KEY) sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
-
-function getTransporter() {
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-}
 
 exports.submitInquiry = async (req, res) => {
   try {
@@ -28,16 +18,17 @@ exports.submitInquiry = async (req, res) => {
     const mapped = { ...inquiry, _id: inquiry.id };
 
     // Send email notification to admin — fire-and-forget
-    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+    if (process.env.SENDGRID_API_KEY) {
       const { name, email, phone, message, commission_subject, inquiry_type, artistic_vision } = req.body;
       const body = message || artistic_vision || '';
       const subject = commission_subject || inquiry_type || 'Studio Inquiry';
 
-      getTransporter().sendMail({
-        from: `"niharikartist Studio" <${FROM_EMAIL}>`,
+      sgMail.send({
         to: ADMIN_EMAIL,
+        from: { email: FROM_EMAIL, name: 'niharikartist Studio' },
         replyTo: email || FROM_EMAIL,
         subject: `📩 New Commission: ${subject} — ${name}`,
+        trackingSettings: { clickTracking: { enable: false }, openTracking: { enable: false } },
         html: `
           <div style="font-family:'Segoe UI',Arial,sans-serif;background:#050f0b;color:#fbf8f1;padding:32px;border-radius:12px;max-width:600px;margin:0 auto;border:1px solid rgba(232,200,114,0.25)">
             <h2 style="color:#e8c872;font-weight:300;margin:0 0 20px">New Studio Commission Inquiry</h2>
@@ -53,7 +44,7 @@ exports.submitInquiry = async (req, res) => {
               Submitted via niharikartist.shop/contact
             </div>
           </div>`,
-      }).catch(err => console.error('Commission email failed:', err.message));
+      }).catch(err => console.error('Commission email failed:', err?.response?.body?.errors || err.message));
     }
 
     return res.status(201).json({ success: true, message: 'Your message has been received! Our studio will be in touch shortly.', data: mapped });

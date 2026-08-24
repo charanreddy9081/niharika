@@ -49,17 +49,10 @@ exports.sendOTP = async (req, res) => {
     });
 
     // Send OTP via Gmail SMTP
-    const nodemailer = require('nodemailer');
-    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
-      const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_APP_PASSWORD,
-        },
-      });
+    // Send OTP via SendGrid (HTTPS port 443 — works on Render)
+    const sgMail = require('@sendgrid/mail');
+    if (process.env.SENDGRID_API_KEY) {
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
       try {
         const html = `
         <!DOCTYPE html><html><head><meta charset="UTF-8"><style>
@@ -83,18 +76,19 @@ exports.sendOTP = async (req, res) => {
           <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
         </div></body></html>`;
 
-        await transporter.sendMail({
-          from: `"niharikartist Studio" <${process.env.GMAIL_USER}>`,
+        await sgMail.send({
           to: email,
+          from: { email: process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com', name: 'niharikartist Studio' },
           subject: `${otp} — Your niharikartist Verification Code`,
           html,
+          trackingSettings: { clickTracking: { enable: false }, openTracking: { enable: false } },
         });
         console.log(`✅ OTP email sent to ${email}`);
       } catch (emailErr) {
-        console.error('OTP email send failed:', emailErr.message);
+        console.error('OTP email send failed:', emailErr?.response?.body?.errors || emailErr.message);
       }
     } else {
-      console.warn(`⚠️ GMAIL credentials not set. OTP for ${email}: ${otp}`);
+      console.warn(`⚠️ SENDGRID_API_KEY not set. OTP for ${email}: ${otp}`);
     }
 
     console.log(`✅ OTP sent to ${email}: ${otp}`);

@@ -1,36 +1,40 @@
 /**
- * Email Service — uses Gmail SMTP via nodemailer.
- * Gmail SMTP on port 465 (SSL) works on Render free tier.
- * FROM domain matches DKIM domain → DMARC PASS → inbox delivery.
+ * Email Service — SendGrid HTTPS API (port 443, works on Render free tier).
+ * Domain authentication set up for niharikartist.shop via SendGrid.
+ * DKIM signs with niharikartist.shop → DMARC PASS.
  */
 
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+} else {
+  console.error('❌ SENDGRID_API_KEY not set — emails will not send');
+}
 
 const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
 const FROM_NAME   = 'niharikartist Studio';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
 
-// Create Gmail SMTP transporter using port 465 (SSL) — works on Render free tier
-function getTransporter() {
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // SSL
-    auth: {
-      user: process.env.GMAIL_USER || FROM_EMAIL,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-}
+// Use domain-authenticated sender if available, fall back to gmail
+// When FROM_EMAIL ends in @niharikartist.shop, SendGrid signs with niharikartist.shop DKIM → DMARC PASS
+const SENDER_EMAIL = process.env.SENDGRID_SENDER_EMAIL || FROM_EMAIL;
 
 async function sendMail(to, subject, html, replyTo) {
-  const transporter = getTransporter();
-  await transporter.sendMail({
-    from: `"${FROM_NAME}" <${process.env.GMAIL_USER || FROM_EMAIL}>`,
+  if (!process.env.SENDGRID_API_KEY) {
+    console.warn('⚠️ SENDGRID_API_KEY missing — email not sent');
+    return;
+  }
+  await sgMail.send({
     to,
-    replyTo: replyTo || FROM_EMAIL,
+    from: { email: SENDER_EMAIL, name: FROM_NAME },
+    replyTo: replyTo || ADMIN_EMAIL,
     subject,
     html,
+    trackingSettings: {
+      clickTracking: { enable: false, enableText: false },
+      openTracking: { enable: false },
+    },
   });
 }
 
