@@ -253,10 +253,10 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
               {[
-                { icon: <Palette className="w-6 h-6" />, title: '1. Charcoal Draft', desc: 'Hand-sketched with artist charcoal to capture intimate posture and emotion.' },
-                { icon: <Sparkles className="w-6 h-6" />, title: '2. Archival Glazes', desc: 'Multi-layered lightfast acrylics and protective anti-UV museum varnish.' },
-                { icon: <Shield className="w-6 h-6" />, title: '3. Teakwood Framing', desc: 'Solid seasoned wood framing with seamless corners and anti-glare shield.' },
-                { icon: <Feather className="w-6 h-6" />, title: '4. Gold Wax Seal', desc: 'Complimentary personal note penned on vintage parchment and sealed in gold.' },
+                { icon: <Palette className="w-6 h-6" />, title: c('pillars_step1_title', '1. Charcoal Draft'), desc: c('pillars_step1_desc', 'Hand-sketched with artist charcoal to capture intimate posture and emotion.') },
+                { icon: <Sparkles className="w-6 h-6" />, title: c('pillars_step2_title', '2. Archival Glazes'), desc: c('pillars_step2_desc', 'Multi-layered lightfast acrylics and protective anti-UV museum varnish.') },
+                { icon: <Shield className="w-6 h-6" />, title: c('pillars_step3_title', '3. Teakwood Framing'), desc: c('pillars_step3_desc', 'Solid seasoned wood framing with seamless corners and anti-glare shield.') },
+                { icon: <Feather className="w-6 h-6" />, title: c('pillars_step4_title', '4. Gold Wax Seal'), desc: c('pillars_step4_desc', 'Complimentary personal note penned on vintage parchment and sealed in gold.') },
               ].map((p, i) => (
                 <div key={i} className={`bg-[#0a2319]/70 border border-emerald-900/60 p-8 rounded-3xl space-y-3 shadow-xl reveal reveal-delay-${i + 1}`}>
                   <div className="w-12 h-12 rounded-2xl bg-emerald-950/80 border border-[#e8c872]/30 flex items-center justify-center mx-auto text-[#e8c872]">

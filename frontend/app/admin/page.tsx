@@ -54,6 +54,12 @@ export default function AdminPortalPage() {
   const [dataLoading, setDataLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
 
+  // Gallery categories state
+  const [galleryCategories, setGalleryCategories] = useState<{id: string; name: string}[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+
   // Gallery search & modal state
   const [gallerySearch, setGallerySearch] = useState('');
   const [isAddGalleryModalOpen, setIsAddGalleryModalOpen] = useState(false);
@@ -123,6 +129,54 @@ export default function AdminPortalPage() {
       });
   }, []);
 
+  const fetchGalleryCategories = async (tokenOverride?: string) => {
+    const token = tokenOverride || localStorage.getItem('niharikartist_admin_token');
+    if (!token) return;
+    try {
+      const res = await fetch(API + '/api/admin/gallery-categories', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(r => r.json());
+      if (res.success) setGalleryCategories(res.data);
+    } catch {}
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) { toast.error('Enter a category name.'); return; }
+    const token = localStorage.getItem('niharikartist_admin_token');
+    if (!token) return;
+    setAddingCategory(true);
+    try {
+      const res = await fetch(API + '/api/admin/gallery-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ name: newCategoryName.trim() })
+      }).then(r => r.json());
+      if (res.success) {
+        toast.success(`Category "${newCategoryName.trim()}" added!`);
+        setNewCategoryName('');
+        setShowAddCategory(false);
+        fetchGalleryCategories();
+      } else {
+        toast.error(res.message || 'Failed to add category.');
+      }
+    } catch { toast.error('Network error.'); }
+    finally { setAddingCategory(false); }
+  };
+
+  const handleDeleteCategory = async (id: string, name: string) => {
+    if (!confirm(`Delete category "${name}"? Existing artworks with this category are not affected.`)) return;
+    const token = localStorage.getItem('niharikartist_admin_token');
+    if (!token) return;
+    try {
+      const res = await fetch(API + '/api/admin/gallery-categories/' + id, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(r => r.json());
+      if (res.success) { toast.success('Category deleted.'); fetchGalleryCategories(); }
+      else toast.error(res.message);
+    } catch { toast.error('Network error.'); }
+  };
+
   const fetchAdminData = async (tokenOverride?: string) => {
     const token = tokenOverride || localStorage.getItem('niharikartist_admin_token');
     if (!token) return;
@@ -154,6 +208,9 @@ export default function AdminPortalPage() {
       // Fetch home transition images
       const htRes = await fetch(API + '/api/admin/home-transition', { headers }).then(r => r.json());
       if (htRes.success) setHomeTransitionImages(htRes.data);
+
+      // Fetch gallery categories
+      await fetchGalleryCategories(token);
     } catch (e) {
       console.error('Error fetching admin data:', e);
       toast.error('Failed to refresh studio data');
@@ -1021,6 +1078,51 @@ export default function AdminPortalPage() {
         {/* TAB 3: GALLERY PORTFOLIO */}
         {activeTab === 'gallery' && (
           <div className="space-y-6">
+
+            {/* ── Category Management ─────────────────────────────────── */}
+            <div className="bg-[#0a2319]/80 border border-emerald-900/60 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="font-display text-lg text-zinc-100">Painting Categories</h4>
+                <button type="button" onClick={() => setShowAddCategory(v => !v)}
+                  className="flex items-center gap-1.5 bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider transition-colors">
+                  <Plus className="w-3.5 h-3.5" />
+                  {showAddCategory ? 'Cancel' : 'Add Category'}
+                </button>
+              </div>
+              {showAddCategory && (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={e => setNewCategoryName(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleAddCategory()}
+                    placeholder="e.g. Acrylic Paintings, Anime Fanart…"
+                    className="flex-1 bg-[#050f0b] border border-[#e8c872]/50 rounded-xl px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872]"
+                    autoFocus
+                  />
+                  <button onClick={handleAddCategory} disabled={addingCategory}
+                    className="bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider disabled:opacity-50 transition-colors">
+                    {addingCategory ? '…' : 'Add'}
+                  </button>
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {galleryCategories.length === 0 ? (
+                  <span className="text-xs text-zinc-500">No categories yet — run the SQL migration or add one above.</span>
+                ) : (
+                  galleryCategories.map(cat => (
+                    <div key={cat.id} className="flex items-center gap-1.5 bg-[#050f0b] border border-emerald-900/60 rounded-full px-3 py-1 text-xs text-zinc-300">
+                      <span>{cat.name}</span>
+                      <button onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                        className="text-zinc-600 hover:text-red-400 transition-colors ml-1" title="Delete category">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="font-display text-2xl text-zinc-100">Gallery Portfolio Management ({gallery.length})</h3>
@@ -1262,16 +1364,48 @@ export default function AdminPortalPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[#a3b8af] mb-1">Category *</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[#a3b8af]">Category *</label>
+                      <button type="button" onClick={() => setShowAddCategory(v => !v)}
+                        className="text-[10px] text-[#e8c872] hover:underline uppercase tracking-wider">
+                        {showAddCategory ? '✕ Cancel' : '+ New Category'}
+                      </button>
+                    </div>
+                    {/* Add new category inline */}
+                    {showAddCategory && (
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          type="text"
+                          value={newCategoryName}
+                          onChange={e => setNewCategoryName(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleAddCategory()}
+                          placeholder="e.g. Acrylic Paintings"
+                          className="flex-1 bg-[#050f0b] border border-[#e8c872]/50 rounded-xl px-3 py-2 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872]"
+                        />
+                        <button type="button" onClick={handleAddCategory} disabled={addingCategory}
+                          className="bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-3 py-2 rounded-xl text-xs disabled:opacity-50">
+                          {addingCategory ? '…' : 'Add'}
+                        </button>
+                      </div>
+                    )}
                     <select
                       value={newGalleryItem.category}
                       onChange={e => setNewGalleryItem({ ...newGalleryItem, category: e.target.value })}
                       className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]"
                     >
-                      <option value="Painting">Painting</option>
-                      <option value="Pencil Portraits">Pencil Portraits</option>
-                      <option value="Caricature">Caricature</option>
-                      <option value="Live Wedding Painting">Live Wedding Painting</option>
+                      {galleryCategories.length > 0
+                        ? galleryCategories.map(cat => (
+                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                          ))
+                        : (
+                          <>
+                            <option value="Painting">Painting</option>
+                            <option value="Pencil Portraits">Pencil Portraits</option>
+                            <option value="Caricature">Caricature</option>
+                            <option value="Live Wedding Painting">Live Wedding Painting</option>
+                          </>
+                        )
+                      }
                     </select>
                   </div>
                   <div>

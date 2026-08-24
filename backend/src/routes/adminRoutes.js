@@ -35,6 +35,12 @@ router.post('/gallery', protectAdmin, galleryController.createGalleryItem);
 router.put('/gallery/:id', protectAdmin, galleryController.updateGalleryItem);
 router.delete('/gallery/:id', protectAdmin, galleryController.deleteGalleryItem);
 
+// Gallery categories
+const galleryCategoryController = require('../controllers/galleryCategoryController');
+router.get('/gallery-categories', protectAdmin, galleryCategoryController.getCategories);
+router.post('/gallery-categories', protectAdmin, galleryCategoryController.createCategory);
+router.delete('/gallery-categories/:id', protectAdmin, galleryCategoryController.deleteCategory);
+
 router.get('/orders', protectAdmin, orderController.getAllOrders);
 router.put('/orders/:id/status', protectAdmin, orderController.updateOrderStatus);
 router.delete('/orders/clear-all', protectAdmin, orderController.clearAllOrders);
