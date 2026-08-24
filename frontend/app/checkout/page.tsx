@@ -85,7 +85,7 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  // OTP state
+  // OTP state — pre-verified for signed-in users (email verified at registration)
   const [otpStep, setOtpStep] = useState<'idle' | 'sending' | 'sent' | 'verifying' | 'verified'>('idle');
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
@@ -231,12 +231,19 @@ export default function CheckoutPage() {
     ...extra,
   });
 
+  // ── Auth headers helper ────────────────────────────────────────────────
+  const authHeaders = () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('nha_user_token') : null;
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  };
+
   // ── Submit COD ─────────────────────────────────────────────────────────
   const submitCOD = async () => {
     setSubmitting(true);
     try {
       const res = await fetch(`${API}/api/orders`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(buildPayload()),
       });
       const data = await res.json();
@@ -260,9 +267,14 @@ export default function CheckoutPage() {
   const initiateRazorpay = async () => {
     setSubmitting(true);
     try {
-      // Create Razorpay order on backend
+      // Create Razorpay order on backend — send JWT so signed-in users skip OTP check
+      const token = typeof window !== 'undefined' ? localStorage.getItem('nha_user_token') : null;
       const orderRes = await fetch(`${API}/api/payment/create-razorpay-order`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders(),
+        },
         body: JSON.stringify({
           amount: total, currency: 'INR',
           email: form.email.trim(),
@@ -296,7 +308,8 @@ export default function CheckoutPage() {
 
           // Create order with payment info
           const placeRes = await fetch(`${API}/api/orders`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(buildPayload({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
@@ -363,8 +376,9 @@ export default function CheckoutPage() {
 
   const inputCls = 'w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-[#d4af37] transition-colors placeholder-zinc-600';
   const labelCls = 'text-[11px] uppercase tracking-wider text-zinc-400 block mb-1.5';
-  const needsOtp = paymentMethod === 'razorpay';
-  const canPayOnline = otpStep === 'verified';
+  // Signed-in users skip OTP — email verified at registration
+  const needsOtp = paymentMethod === 'razorpay' && !user;
+  const canPayOnline = user ? true : otpStep === 'verified';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#070709]">
@@ -598,7 +612,11 @@ export default function CheckoutPage() {
                 {paymentMethod === 'razorpay' && (
                   <div className="bg-[#0a2319]/40 border border-emerald-900/50 rounded-xl p-3 text-[11px] text-[#a3b8af] flex items-start gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                    <span>Your email will be verified with a one-time code before payment. This ensures order confirmations reach you securely.</span>
+                    <span>
+                      {user
+                        ? 'Your email is verified. You can proceed to pay securely.'
+                        : 'Your email will be verified with a one-time code before payment. This ensures order confirmations reach you securely.'}
+                    </span>
                   </div>
                 )}
               </div>

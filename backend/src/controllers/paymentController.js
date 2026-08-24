@@ -152,10 +152,23 @@ exports.createRazorpayOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid amount.' });
     }
 
-    // Verify OTP was completed for this email
-    const stored = otpStore.get(email);
-    if (!stored?.verified) {
-      return res.status(403).json({ success: false, message: 'Email not verified. Please complete OTP verification.' });
+    // Check OTP verification — skip if request comes from a signed-in user (JWT present)
+    const authHeader = req.headers.authorization;
+    let isAuthenticatedUser = false;
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const JWT_SECRET = process.env.JWT_SECRET || 'niharikartist_fine_art_jwt_secret_key_2026';
+        const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+        if (decoded.type === 'user') isAuthenticatedUser = true;
+      } catch { /* invalid token — fall through to OTP check */ }
+    }
+
+    if (!isAuthenticatedUser) {
+      const stored = otpStore.get(email);
+      if (!stored?.verified) {
+        return res.status(403).json({ success: false, message: 'Email not verified. Please complete OTP verification.' });
+      }
     }
 
     const order = await getRazorpay().orders.create({

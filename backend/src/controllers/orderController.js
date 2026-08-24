@@ -159,8 +159,19 @@ exports.createOrder = async (req, res) => {
     const razorpayPaymentId = req.body.razorpay_payment_id || null;
     const razorpayOrderId   = req.body.razorpay_order_id   || null;
 
-    // For online payments, verify OTP was completed
-    if (isOnlinePayment && !isEmailVerified(customer.email.toLowerCase().trim())) {
+    // For online payments, verify OTP was completed OR user is authenticated via JWT
+    const authHeader = req.headers?.authorization;
+    let isAuthenticatedUser = false;
+    if (authHeader?.startsWith('Bearer ')) {
+      try {
+        const jwt = require('jsonwebtoken');
+        const JWT_SECRET = process.env.JWT_SECRET || 'niharikartist_fine_art_jwt_secret_key_2026';
+        const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET);
+        if (decoded.type === 'user') isAuthenticatedUser = true;
+      } catch { /* invalid token */ }
+    }
+
+    if (isOnlinePayment && !isAuthenticatedUser && !isEmailVerified(customer.email.toLowerCase().trim())) {
       return res.status(403).json({
         success: false,
         message: 'Email verification required for online payment. Please complete OTP verification.'
