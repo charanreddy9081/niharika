@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '../../components/Header';
@@ -10,7 +9,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   Package, Palette, Truck, CheckCircle2, MapPin, Copy,
   ChevronDown, ChevronUp, XCircle, AlertTriangle, RefreshCw,
-  Clock, ShoppingBag, Search, ArrowRight, Loader2
+  Clock, ShoppingBag, ArrowRight, Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -345,66 +344,6 @@ function OrderCard({ order, email, onCancelled }: { order: any; email: string; o
 }
 
 // ── Guest: single order search ────────────────────────────────────────────
-function GuestSearch() {
-  const searchParams = useSearchParams();
-  const qOrderId = searchParams?.get('orderId') || '';
-  const [searchId, setSearchId] = useState(qOrderId);
-  const [order, setOrder] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-
-  const handleTrack = useCallback(async (id?: string) => {
-    const oid = (id ?? searchId).trim();
-    if (!oid) return;
-    setLoading(true); setSearched(true);
-    try {
-      const res = await fetch(`${API}/api/orders/track?orderId=${encodeURIComponent(oid)}`);
-      const data = await res.json();
-      if (data.success && data.data) setOrder(data.data);
-      else { setOrder(null); toast.error(data.message || 'No order found.'); }
-    } catch { toast.error('Could not reach server.'); }
-    finally { setLoading(false); }
-  }, [searchId]);
-
-  useEffect(() => { if (qOrderId) handleTrack(qOrderId); }, [qOrderId]);
-
-  return (
-    <div className="space-y-8">
-      <form onSubmit={e => { e.preventDefault(); handleTrack(); }} className="flex max-w-md mx-auto gap-2">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-          <input
-            type="text"
-            placeholder="Order ID (e.g. NA-84920)"
-            value={searchId}
-            onChange={e => setSearchId(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-4 py-3 text-xs text-zinc-100 uppercase placeholder-zinc-500 focus:outline-none focus:border-[#d4af37]"
-          />
-        </div>
-        <button type="submit" disabled={loading}
-          className="bg-[#d4af37] hover:bg-[#c49f2e] text-black font-semibold px-5 py-3 rounded-lg text-xs uppercase tracking-wider transition-colors disabled:opacity-60">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Track'}
-        </button>
-      </form>
-
-      {order && (
-        <OrderCard order={order} email={order.customer?.email || ''} onCancelled={() => setOrder(null)} />
-      )}
-      {searched && !loading && !order && (
-        <div className="text-center py-10 bg-zinc-950/40 rounded-xl border border-zinc-800 text-xs text-zinc-500">
-          No order found for "{searchId}". Please check the ID in your confirmation email.
-        </div>
-      )}
-
-      <div className="text-center">
-        <p className="text-xs text-zinc-600">
-          <Link href="/admin" className="text-[#d4af37] hover:underline">Sign in</Link> to see all your orders in one place.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 // ── Authenticated: full My Orders dashboard ───────────────────────────────
 function MyOrders({ user }: { user: any }) {
   const [orders, setOrders] = useState<any[]>([]);
@@ -512,22 +451,25 @@ function MyOrders({ user }: { user: any }) {
 // ── Page shell ────────────────────────────────────────────────────────────
 function TrackOrderContent() {
   const { user, isGuest, isLoading: authLoading } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Dynamically import AuthModal to avoid SSR issues
+  const [AuthModal, setAuthModal] = useState<any>(null);
+  useEffect(() => {
+    import('../../components/AuthModal').then(m => setAuthModal(() => m.default));
+  }, []);
 
   return (
     <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-      <div className="text-center mb-10">
-        <span className="text-xs uppercase tracking-widest text-[#d4af37] font-semibold block mb-1">
-          {isGuest ? 'Live Status' : 'Order History'}
-        </span>
-        <h1 className="font-editorial text-4xl text-zinc-100 font-light">
-          {isGuest ? 'Track Your Order' : 'Manage Your Orders'}
-        </h1>
-        {isGuest && (
-          <p className="text-xs text-zinc-400 max-w-md mx-auto mt-2">
-            Enter your Order ID to view live crafting and shipment progress.
-          </p>
-        )}
-      </div>
+
+      {/* Auth modal */}
+      {showAuthModal && AuthModal && (
+        <AuthModal
+          reason="Sign in to view and manage your orders"
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={() => setShowAuthModal(false)}
+        />
+      )}
 
       {authLoading ? (
         <div className="flex items-center justify-center py-20 gap-3 text-zinc-500">
@@ -535,9 +477,38 @@ function TrackOrderContent() {
           <span className="text-sm">Loading…</span>
         </div>
       ) : isGuest ? (
-        <GuestSearch />
+        /* ── Guest gate ─────────────────────────────────────────── */
+        <div className="max-w-md mx-auto text-center py-16 space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#0a2319] border border-[#d4af37]/30 flex items-center justify-center mx-auto">
+            <Package className="w-7 h-7 text-[#d4af37]" />
+          </div>
+          <div>
+            <h1 className="font-editorial text-3xl text-zinc-100 font-light mb-3">Track Your Orders</h1>
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              Sign in to view your order history, track delivery status, and manage cancellations.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="inline-flex items-center gap-2 bg-[#d4af37] hover:bg-[#c49f2e] text-black font-semibold px-8 py-3.5 rounded-full text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+            Sign In to View Orders
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <p className="text-xs text-zinc-600">
+            Don&apos;t have an account?{' '}
+            <button onClick={() => setShowAuthModal(true)} className="text-[#d4af37] hover:underline">
+              Register here
+            </button>
+          </p>
+        </div>
       ) : (
-        <MyOrders user={user!} />
+        <>
+          <div className="text-center mb-10">
+            <span className="text-xs uppercase tracking-widest text-[#d4af37] font-semibold block mb-1">Order History</span>
+            <h1 className="font-editorial text-4xl text-zinc-100 font-light">Manage Your Orders</h1>
+          </div>
+          <MyOrders user={user!} />
+        </>
       )}
     </main>
   );
