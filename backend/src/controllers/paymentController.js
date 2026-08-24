@@ -30,9 +30,9 @@ exports.sendOTP = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Valid email address is required.' });
     }
 
-    // Rate limiting: max 3 OTPs per email per 10 minutes
+    // Rate limiting: max 5 OTPs per email per 10 minutes
     const existing = otpStore.get(email);
-    if (existing && existing.sentCount >= 3 && Date.now() < existing.blockUntil) {
+    if (existing && existing.sentCount >= 5 && Date.now() < existing.blockUntil) {
       const waitMins = Math.ceil((existing.blockUntil - Date.now()) / 60000);
       return res.status(429).json({ success: false, message: `Too many OTP requests. Try again in ${waitMins} minute(s).` });
     }
@@ -45,7 +45,7 @@ exports.sendOTP = async (req, res) => {
       expiresAt,
       attempts: 0,
       sentCount: (existing?.sentCount || 0) + 1,
-      blockUntil: existing?.sentCount >= 2 ? Date.now() + 10 * 60 * 1000 : 0,
+      blockUntil: existing?.sentCount >= 4 ? Date.now() + 10 * 60 * 1000 : 0,
     });
 
     // Send OTP via SendGrid or log it

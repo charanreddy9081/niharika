@@ -74,7 +74,10 @@ exports.register = async (req, res) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase insert error:', JSON.stringify(error));
+      throw error;
+    }
 
     const token = makeToken(user);
     return res.status(201).json({
