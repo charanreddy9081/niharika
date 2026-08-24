@@ -49,7 +49,8 @@ app.use('/api/journal', require('./routes/journalRoutes'));
 app.use('/api/home-transition', require('./routes/homeTransitionRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
 app.use('/api/shipping', require('./routes/shippingRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/users',   require('./routes/userAuthRoutes'));
+app.use('/api/admin',   require('./routes/adminRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

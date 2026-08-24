@@ -44,5 +44,24 @@ const protectAdmin = async (req, res, next) => {
 
 module.exports = {
   protectAdmin,
+  protectUser: async (req, res, next) => {
+    let token;
+    if (req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    if (!token) {
+      return res.status(401).json({ success: false, message: 'Please sign in to continue.' });
+    }
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      if (decoded.type !== 'user') {
+        return res.status(401).json({ success: false, message: 'Invalid token type.' });
+      }
+      req.user = decoded;
+      return next();
+    } catch {
+      return res.status(401).json({ success: false, message: 'Session expired. Please sign in again.' });
+    }
+  },
   JWT_SECRET
 };

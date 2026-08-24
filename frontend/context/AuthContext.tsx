@@ -2,13 +2,17 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
+const API = process.env.NEXT_PUBLIC_API_URL;
+const TOKEN_KEY = 'nha_user_token';
+
 export interface AuthUser {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone?: string;
-  createdAt: string;
+  emailVerified?: boolean;
+  createdAt?: string;
 }
 
 interface AuthContextType {
@@ -31,92 +35,92 @@ interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'nha_auth_user';
-const ACCOUNTS_KEY = 'nha_accounts'; // local account store (no backend yet)
-
-// Simple hash for demo — NOT cryptographically secure; replace with backend auth
-function simpleHash(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return String(Math.abs(hash));
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Rehydrate from localStorage on mount
+  // On mount: verify stored token with backend
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setUser(JSON.parse(saved));
-    } catch {
-      // ignore corrupt storage
-    } finally {
-      setIsLoading(false);
-    }
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) { setIsLoading(false); return; }
+
+    fetch(`${API}/api/users/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.user) {
+          setUser(data.user);
+        } else {
+          // Token invalid/expired — clear it
+          localStorage.removeItem(TOKEN_KEY);
+        }
+      })
+      .catch(() => {
+        // Network error — keep token, try again next load
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const accounts: Record<string, { user: AuthUser; passwordHash: string }> =
-        JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '{}');
-      const key = email.toLowerCase().trim();
-      const account = accounts[key];
-
-      if (!account) return { success: false, message: 'No account found with this email. Please register first.' };
-      if (account.passwordHash !== simpleHash(password)) return { success: false, message: 'Incorrect password.' };
-
-      setUser(account.user);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(account.user));
-      return { success: true, message: 'Welcome back!' };
+      const res = await fetch(`${API}/api/users/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        localStorage.setItem(TOKEN_KEY, data.token);
+        setUser(data.user);
+        return { success: true, message: data.message || 'Welcome back!' };
+      }
+      return { success: false, message: data.message || 'Sign in failed.' };
     } catch {
-      return { success: false, message: 'Sign in failed. Please try again.' };
+      return { success: false, message: 'Could not reach server. Please try again.' };
     }
   }, []);
 
   const register = useCallback(async (data: RegisterData) => {
     try {
-      const accounts: Record<string, { user: AuthUser; passwordHash: string }> =
-        JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '{}');
-      const key = data.email.toLowerCase().trim();
-
-      if (accounts[key]) return { success: false, message: 'An account with this email already exists. Please sign in.' };
-
-      const newUser: AuthUser = {
-        id: `usr_${Date.now()}`,
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        email: key,
-        phone: data.phone?.trim(),
-        createdAt: new Date().toISOString(),
-      };
-
-      accounts[key] = { user: newUser, passwordHash: simpleHash(data.password) };
-      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-      setUser(newUser);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
-      return { success: true, message: 'Account created successfully!' };
+      const res = await fetch(`${API}/api/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email.trim(),
+          phone: data.phone || '',
+          password: data.password,
+        }),
+      });
+      const result = await res.json();
+      if (result.success && result.token) {
+        localStorage.setItem(TOKEN_KEY, result.token);
+        setUser(result.user);
+        return { success: true, message: result.message || 'Account created!' };
+      }
+      return { success: false, message: result.message || 'Registration failed.' };
     } catch {
-      return { success: false, message: 'Registration failed. Please try again.' };
+      return { success: false, message: 'Could not reach server. Please try again.' };
     }
   }, []);
 
   const signOut = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
     setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+    // Fire-and-forget backend logout
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      fetch(`${API}/api/users/logout`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      }).catch(() => {});
+    }
   }, []);
 
   const updateUser = useCallback((data: Partial<AuthUser>) => {
-    setUser(prev => {
-      if (!prev) return prev;
-      const updated = { ...prev, ...data };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    setUser(prev => prev ? { ...prev, ...data } : prev);
   }, []);
 
   return (
