@@ -144,7 +144,12 @@ exports.createOrder = async (req, res) => {
     }
 
     const FREE_SHIPPING_THRESHOLD = 999;
-    const serverShippingFee = serverSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 99;
+    // Use the client-submitted shipping fee (validated via pincode zone on frontend)
+    // Fall back to 99 only if not provided
+    const clientDeliveryCharge = Number(deliveryCharge);
+    const serverShippingFee = !isNaN(clientDeliveryCharge) && clientDeliveryCharge >= 0
+      ? clientDeliveryCharge
+      : (serverSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 99);
     const clientSubtotal = Number(subtotal) || 0;
     const discountAmount = Math.max(0, Math.round(clientSubtotal - serverSubtotal));
     const safeDiscount = discountAmount <= serverSubtotal * 0.2 ? discountAmount : 0;
