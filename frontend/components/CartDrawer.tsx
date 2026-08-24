@@ -34,7 +34,7 @@ export const CartDrawer: React.FC = () => {
       toast.success('Coupon "' + inputCoupon.toUpperCase() + '" applied!');
       setInputCoupon('');
     } else {
-      toast.error('Invalid code. Try LOVEART10 for 10% off!');
+      toast.error('Invalid or expired coupon code.');
     }
   };
 
@@ -133,7 +133,7 @@ export const CartDrawer: React.FC = () => {
                   <Tag className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600" />
                   <input
                     type="text"
-                    placeholder="Coupon (e.g. LOVEART10)"
+                    placeholder="Enter coupon code"
                     value={inputCoupon}
                     onChange={e => setInputCoupon(e.target.value)}
                     className="w-full bg-[#06120d] border border-emerald-900/60 rounded-lg px-3 pl-8 py-2 text-xs text-zinc-100 placeholder-emerald-700 uppercase focus:outline-none focus:border-[#e8c872]"

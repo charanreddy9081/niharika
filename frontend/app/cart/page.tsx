@@ -32,7 +32,7 @@ export default function CartPage() {
       toast.success('Coupon code applied successfully!');
       setCouponInput('');
     } else {
-      toast.error('Invalid coupon code. Try LOVEART10 for 10% off!');
+      toast.error('Invalid or expired coupon code.');
     }
   };
 
@@ -115,7 +115,7 @@ export default function CartPage() {
                   <Tag className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
                   <input
                     type="text"
-                    placeholder="Coupon code (e.g. LOVEART10)"
+                    placeholder="Enter coupon code"
                     value={couponInput}
                     onChange={e => setCouponInput(e.target.value)}
                     className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 pl-8 py-2 text-xs text-zinc-100 placeholder-zinc-500 uppercase focus:outline-none focus:border-[#d4af37]"
