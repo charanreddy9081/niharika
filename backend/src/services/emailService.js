@@ -1,41 +1,32 @@
 /**
- * Email Service — SendGrid HTTPS API (port 443, works on Render free tier).
- * Domain authentication set up for niharikartist.shop via SendGrid.
- * DKIM signs with niharikartist.shop → DMARC PASS.
+ * Email Service — Resend API (HTTPS port 443, works on Render free tier).
+ * Domain: niharikartist.shop verified on Resend → DKIM signs with niharikartist.shop → DMARC PASS.
+ * 3,000 free emails/month.
  */
 
-const sgMail = require('@sendgrid/mail');
+const { Resend } = require('resend');
 
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-} else {
-  console.error('❌ SENDGRID_API_KEY not set — emails will not send');
-}
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
+const FROM_EMAIL  = process.env.RESEND_FROM_EMAIL || 'niharikaananthoja@niharikartist.shop';
 const FROM_NAME   = 'niharikartist Studio';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
-
-// Use domain-authenticated sender if available, fall back to gmail
-// When FROM_EMAIL ends in @niharikartist.shop, SendGrid signs with niharikartist.shop DKIM → DMARC PASS
-const SENDER_EMAIL = process.env.SENDGRID_SENDER_EMAIL || FROM_EMAIL;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'niharikaananthoja@gmail.com';
+const SENDER      = `${FROM_NAME} <${FROM_EMAIL}>`;
 
 async function sendMail(to, subject, html, replyTo) {
-  if (!process.env.SENDGRID_API_KEY) {
-    console.warn('⚠️ SENDGRID_API_KEY missing — email not sent');
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('⚠️ RESEND_API_KEY missing — email not sent');
     return;
   }
-  await sgMail.send({
+  const { data, error } = await resend.emails.send({
+    from: SENDER,
     to,
-    from: { email: SENDER_EMAIL, name: FROM_NAME },
     replyTo: replyTo || ADMIN_EMAIL,
     subject,
     html,
-    trackingSettings: {
-      clickTracking: { enable: false, enableText: false },
-      openTracking: { enable: false },
-    },
   });
+  if (error) throw new Error(error.message);
+  return data;
 }
 
 const brandStyles = `
@@ -130,6 +121,9 @@ async function sendAdminOrderEmail(order) {
   try {
     await sendMail(ADMIN_EMAIL, `New Order — ${order_id} | ${isOnline ? '✅ Paid Online' : '🚚 COD'}`, html);
     console.log(`✅ Admin email sent for ${order_id}`);
+  } catch (err) {
+    console.error(`❌ Admin email failed for ${order_id}:`, err.message);
+  }
   } catch (err) {
     console.error(`❌ Admin email failed for ${order_id}:`, err?.response?.body?.errors || err.message);
   }
