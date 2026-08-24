@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans, Cormorant_Garamond, Cinzel, Great_Vibes } from 'next/font/google';
 import './globals.css';
 import { CartProvider } from '../context/CartContext';
@@ -37,6 +37,14 @@ export const metadata: Metadata = {
   title: 'niharikartist | Haute Fine Art Atelier & Handcrafted Keepsakes',
   description: 'Original acrylic & oil paintings, sentimental sibling keepsakes, everlasting botanicals, and wax-sealed calligraphy letters by artist Niharika.',
   icons: { icon: 'https://cuddlingupmybrush.com/favicon.ico' },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
