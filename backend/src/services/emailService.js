@@ -124,9 +124,6 @@ async function sendAdminOrderEmail(order) {
   } catch (err) {
     console.error(`❌ Admin email failed for ${order_id}:`, err.message);
   }
-  } catch (err) {
-    console.error(`❌ Admin email failed for ${order_id}:`, err?.response?.body?.errors || err.message);
-  }
 }
 
 // ─── Customer order confirmation ──────────────────────────────────────────
