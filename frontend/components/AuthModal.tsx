@@ -196,11 +196,14 @@ export default function AuthModal({ onClose, onSuccess, reason }: AuthModalProps
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 pt-6 sm:pt-4 bg-black/70 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
-      <div
-        className="relative w-full max-w-md bg-[#0a0f0c] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden my-auto"
-        onClick={e => e.stopPropagation()}
-      >
+    /* Backdrop — fixed, no scroll */
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      {/* Scroll container — full height, scrollable, centers on desktop */}
+      <div className="min-h-full flex items-start sm:items-center justify-center p-4 sm:p-6">
+        <div
+          className="relative w-full max-w-md bg-[#0a0f0c] border border-zinc-800 rounded-2xl shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        >
         {/* Top gold accent */}
         <div className="h-1 w-full bg-gradient-to-r from-[#d4af37] via-[#f3e5ab] to-[#d4af37]" />
 
@@ -429,6 +432,7 @@ export default function AuthModal({ onClose, onSuccess, reason }: AuthModalProps
               </button>
             </p>
           )}
+        </div>
         </div>
       </div>
     </div>
