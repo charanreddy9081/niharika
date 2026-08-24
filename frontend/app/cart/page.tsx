@@ -20,8 +20,6 @@ export default function CartPage() {
     discountCode,
     applyCoupon,
     total,
-    freeShippingThreshold,
-    freeShippingProgress
   } = useCart();
 
   const [couponInput, setCouponInput] = useState('');
@@ -64,22 +62,10 @@ export default function CartPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2 space-y-4">
-              <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 space-y-2">
-                <div className="flex justify-between text-xs">
-                  {subtotal >= freeShippingThreshold ? (
-                    <span className="text-emerald-400 font-medium flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4" />
-                      <span>Congratulations! You qualify for FREE Studio Shipping!</span>
-                    </span>
-                  ) : (
-                    <span className="text-zinc-400">
-                      Add <strong className="text-[#f3e5ab]">₹{freeShippingThreshold - subtotal}</strong> more for FREE Pan-India delivery
-                    </span>
-                  )}
-                  <span className="text-zinc-400 font-mono">{freeShippingProgress}%</span>
-                </div>
-                <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
-                  <div className="bg-gradient-to-r from-[#d4af37] to-[#f3e5ab] h-full transition-all duration-500" style={{ width: freeShippingProgress + '%' }} />
+              <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800">
+                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                  <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
+                  <span>Shipping is calculated at checkout based on your pincode (Speed Post or Registered Parcel)</span>
                 </div>
               </div>
 
@@ -148,7 +134,10 @@ export default function CartPage() {
                     <span>-₹{discount.toLocaleString('en-IN')}</span>
                   </div>
                 )}
-                <div className="flex justify-between"><span>Shipping</span><span className="text-zinc-200">{shippingFee === 0 ? 'FREE' : '₹' + shippingFee}</span></div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span className="text-zinc-500 text-[10px] italic">Calculated at checkout</span>
+                </div>
                 <div className="flex justify-between text-base font-semibold text-zinc-100 pt-3 border-t border-zinc-800">
                   <span>Total</span>
                   <span className="text-[#f3e5ab]">₹{total.toLocaleString('en-IN')}</span>
