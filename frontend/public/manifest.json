@@ -1,0 +1,24 @@
+{
+  "name": "niharikartist — Fine Art Atelier",
+  "short_name": "niharikartist",
+  "description": "Original handpainted masterworks, bespoke keepsakes and fine art by Niharika.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050f0b",
+  "theme_color": "#050f0b",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

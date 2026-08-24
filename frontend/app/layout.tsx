@@ -36,7 +36,18 @@ const greatVibes = Great_Vibes({
 export const metadata: Metadata = {
   title: 'niharikartist | Haute Fine Art Atelier & Handcrafted Keepsakes',
   description: 'Original acrylic & oil paintings, sentimental sibling keepsakes, everlasting botanicals, and wax-sealed calligraphy letters by artist Niharika.',
-  icons: { icon: '/logo.png' },
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+    shortcut: '/logo.png',
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'niharikartist',
+    statusBarStyle: 'black-translucent',
+  },
+  applicationName: 'niharikartist',
 };
 
 export const viewport: Viewport = {
@@ -45,6 +56,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
+  themeColor: '#050f0b',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
