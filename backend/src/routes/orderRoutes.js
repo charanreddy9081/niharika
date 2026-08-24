@@ -6,6 +6,8 @@ const { protectAdmin } = require('../middleware/authMiddleware');
 // Public customer routes
 router.post('/', orderController.createOrder);
 router.get('/track', orderController.trackOrder);
+router.get('/my-orders', orderController.getMyOrders);
+router.post('/:orderId/cancel', orderController.cancelOrder);
 
 // Protected Admin-only routes
 router.get('/', protectAdmin, orderController.getAllOrders);

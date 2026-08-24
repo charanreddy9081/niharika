@@ -5,19 +5,24 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { CheckCircle2, Package, Mail, Phone, Banknote, ArrowRight, Sparkles } from 'lucide-react';
+import { CheckCircle2, Package, Mail, Phone, Banknote, ArrowRight, Sparkles, CreditCard } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 // ─── Inner component uses useSearchParams (needs Suspense boundary) ────────
 function OrderSuccessContent() {
   const params = useSearchParams();
+  const { user, isGuest } = useAuth();
 
-  const orderId = params?.get('orderId') || '';
-  const email = params?.get('email') || '';
-  const phone = params?.get('phone') || '';
-  const name = params?.get('name') || '';
-  const total = params?.get('total') || '';
+  const orderId      = params?.get('orderId')      || '';
+  const email        = params?.get('email')        || '';
+  const phone        = params?.get('phone')        || '';
+  const name         = params?.get('name')         || '';
+  const total        = params?.get('total')        || '';
+  const paymentMethod = params?.get('paymentMethod') || 'COD';
+  const paymentId    = params?.get('paymentId')    || '';
 
   const formattedTotal = total ? Number(total).toLocaleString('en-IN') : null;
+  const isOnline = paymentMethod === 'Razorpay';
 
   return (
     <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 py-16 w-full">
@@ -77,10 +82,20 @@ function OrderSuccessContent() {
 
           <div className="flex items-center justify-between text-sm border-t border-zinc-800 pt-4">
             <span className="text-zinc-500 flex items-center gap-2">
-              <Banknote className="w-4 h-4 text-[#d4af37]" />
+              {isOnline ? <CreditCard className="w-4 h-4 text-[#d4af37]" /> : <Banknote className="w-4 h-4 text-[#d4af37]" />}
               Payment
             </span>
-            <span className="text-zinc-200">Cash on Delivery — pay when order arrives</span>
+            <div className="text-right">
+              <span className="text-zinc-200 block">
+                {isOnline ? 'Paid via Razorpay' : 'Cash on Delivery'}
+              </span>
+              {isOnline && paymentId && (
+                <span className="text-[10px] text-zinc-500 font-mono">{paymentId}</span>
+              )}
+              {!isOnline && (
+                <span className="text-[10px] text-zinc-500">Pay when your order arrives</span>
+              )}
+            </div>
           </div>
 
           {formattedTotal && (
@@ -100,14 +115,14 @@ function OrderSuccessContent() {
         </div>
 
         {/* CTAs */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4 w-full pt-2">
+        <div className="flex flex-col sm:flex-row justify-center gap-3 w-full pt-2">
           {orderId && (
             <Link
-              href={`/track-order?orderId=${encodeURIComponent(orderId)}`}
+              href={`/track-order${!isGuest ? '' : `?orderId=${encodeURIComponent(orderId)}`}`}
               className="flex-1 sm:flex-none bg-[#d4af37] hover:bg-[#c49f2e] text-black font-semibold px-6 py-3.5 rounded-full text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.25)] text-center flex items-center justify-center gap-2 btn-magnetic"
             >
               <Package className="w-4 h-4" />
-              Track Order Live
+              {isGuest ? 'Track This Order' : 'View All My Orders'}
             </Link>
           )}
           <Link
@@ -118,6 +133,18 @@ function OrderSuccessContent() {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
+
+        {/* 24hr cancellation reminder */}
+        {!isGuest && (
+          <div className="w-full bg-amber-950/20 border border-amber-800/30 rounded-xl px-4 py-3 text-center">
+            <p className="text-xs text-amber-300/80">
+              Need to cancel? You have <strong>24 hours</strong> from now to cancel this order for a full refund.{' '}
+              <Link href="/track-order" className="underline hover:text-amber-200">
+                Manage in My Orders →
+              </Link>
+            </p>
+          </div>
+        )}
 
         {/* Fine print */}
         <p className="text-[11px] text-zinc-600 text-center">

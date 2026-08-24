@@ -306,6 +306,110 @@ exports.createOrder = async (req, res) => {
   }
 };
 
+// ─── GET /api/orders/my-orders?email=x ───────────────────────────────────
+exports.getMyOrders = async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ success: false, message: 'Valid email is required.' });
+    }
+
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('customer_email', email.toLowerCase().trim())
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return res.json({ success: true, data: mapIds(orders || []) });
+  } catch (error) {
+    console.error('Error fetching user orders:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// ─── POST /api/orders/:orderId/cancel ────────────────────────────────────
+exports.cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { email } = req.body;
+
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ success: false, message: 'Valid email is required.' });
+    }
+
+    // Find the order by order_id AND customer_email (ownership check)
+    const { data: orders, error: fetchError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('order_id', orderId)
+      .eq('customer_email', email.toLowerCase().trim());
+
+    if (fetchError) throw fetchError;
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ success: false, message: 'Order not found or does not belong to this account.' });
+    }
+
+    const order = orders[0];
+
+    // Check already cancelled/delivered
+    if (['Cancelled', 'Cancelled by niharikartist', 'Delivered'].includes(order.status)) {
+      return res.status(400).json({ success: false, message: `This order cannot be cancelled — current status: ${order.status}.` });
+    }
+
+    // 24-hour window check
+    const placedAt = new Date(order.created_at).getTime();
+    const hoursElapsed = (Date.now() - placedAt) / (1000 * 60 * 60);
+    if (hoursElapsed > 24) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cancellation window has expired. Orders can only be cancelled within 24 hours of placement.'
+      });
+    }
+
+    // Update status to Cancelled
+    const newTimeline = [
+      ...(order.timeline || []),
+      {
+        status: 'Cancelled by Customer',
+        timestamp: new Date().toISOString(),
+        note: 'Order cancelled by customer within 24-hour cancellation window.'
+      }
+    ];
+
+    const { data: updated, error: updateError } = await supabase
+      .from('orders')
+      .update({ status: 'Cancelled by Customer', timeline: newTimeline })
+      .eq('id', order.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    // Send cancellation email (fire-and-forget)
+    const emailData = {
+      order_id: order.order_id,
+      status: 'Cancelled by Customer',
+      note: 'Cancelled within 24-hour window. Full refund will be processed within 5–7 business days.',
+      customer: mapId(order).customer,
+      total: order.total_amount,
+      items: order.items || []
+    };
+    sendOrderStatusUpdate(emailData).catch(err =>
+      console.error('Cancellation email failed:', err.message)
+    );
+
+    return res.json({
+      success: true,
+      message: 'Order cancelled successfully. Full refund will be processed within 5–7 business days.',
+      data: mapId(updated)
+    });
+  } catch (error) {
+    console.error('Error cancelling order:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // ─── GET /api/orders/track ────────────────────────────────────────────────
 exports.trackOrder = async (req, res) => {
   try {
