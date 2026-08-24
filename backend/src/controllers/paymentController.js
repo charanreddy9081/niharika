@@ -78,7 +78,7 @@ exports.sendOTP = async (req, res) => {
         await sgMail.send({
           to: email,
           from: { email: process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com', name: 'niharikartist Studio' },
-          subject: `${otp} — Your niharikartist Order Verification Code`,
+          subject: `${otp} — Your niharikartist Verification Code`,
           html,
         });
       } catch (emailErr) {
