@@ -36,7 +36,7 @@ const greatVibes = Great_Vibes({
 export const metadata: Metadata = {
   title: 'niharikartist | Haute Fine Art Atelier & Handcrafted Keepsakes',
   description: 'Original acrylic & oil paintings, sentimental sibling keepsakes, everlasting botanicals, and wax-sealed calligraphy letters by artist Niharika.',
-  icons: { icon: 'https://cuddlingupmybrush.com/favicon.ico' },
+  icons: { icon: '/logo.png' },
 };
 
 export const viewport: Viewport = {

@@ -76,12 +76,11 @@ export const Header: React.FC = () => {
           {/* Brand Wordmark */}
           <div className="flex flex-col items-center justify-center text-center py-1">
             <Link href="/" className="group flex flex-col items-center">
-              <span className="font-signature text-3xl sm:text-4xl font-normal text-[#fbf5e6] group-hover:text-[#e8c872] transition-colors tracking-wide drop-shadow-[0_0_25px_rgba(232,200,114,0.45)]">
-                niharikartist
-              </span>
-              <span className="text-[9px] tracking-[0.48em] uppercase text-[#a3b8af] font-sans font-medium mt-[-4px]">
-                fine art atelier
-              </span>
+              <img
+                src="/logo.png"
+                alt="niharikartist"
+                className="h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(232,200,114,0.35)] group-hover:drop-shadow-[0_0_20px_rgba(232,200,114,0.55)] transition-all duration-300"
+              />
             </Link>
           </div>
 

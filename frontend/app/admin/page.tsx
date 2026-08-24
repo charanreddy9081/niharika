@@ -548,10 +548,14 @@ export default function AdminPortalPage() {
         </div>
 
         <header className="relative z-10 text-center">
-          <span className="font-signature text-4xl sm:text-5xl text-[#fbf5e6] drop-shadow-[0_0_25px_rgba(232,200,114,0.45)]">
-            niharikartist
-          </span>
-          <span className="block text-[10px] tracking-[0.45em] uppercase text-[#a3b8af] mt-1">
+          <Link href="/" className="inline-block">
+            <img
+              src="/logo.png"
+              alt="niharikartist"
+              className="h-16 w-auto object-contain mx-auto drop-shadow-[0_0_20px_rgba(232,200,114,0.4)]"
+            />
+          </Link>
+          <span className="block text-[10px] tracking-[0.45em] uppercase text-[#a3b8af] mt-2">
             haute art atelier • private portal
           </span>
         </header>
@@ -733,11 +737,13 @@ export default function AdminPortalPage() {
       <header className="sticky top-0 z-40 bg-[#071710]/95 backdrop-blur-2xl border-b border-[#e8c872]/20 px-4 sm:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/admin" className="flex flex-col">
-              <span className="font-signature text-2xl text-[#fbf5e6] tracking-wide">
-                niharikartist
-              </span>
-              <span className="text-[9px] tracking-[0.35em] uppercase text-[#e8c872] font-semibold mt-[-3px]">
+            <Link href="/admin" className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt="niharikartist"
+                className="h-9 w-auto object-contain"
+              />
+              <span className="text-[9px] tracking-[0.35em] uppercase text-[#e8c872] font-semibold hidden sm:block">
                 admin studio console
               </span>
             </Link>
