@@ -71,24 +71,20 @@ export function invalidateContentCache() {
  * 3. Falls back to hardcoded strings if the backend is unreachable.
  */
 export function useSiteContent(section: string) {
-  const [sectionData, setSectionData] = useState<Record<string, string>>(() => {
-    // Synchronously read localStorage on first render to avoid flash
-    if (typeof window === 'undefined') return {};
-    const cached = readLocalCache();
-    return cached?.[section] || {};
-  });
-  const [loading, setLoading] = useState(Object.keys(sectionData).length === 0);
+  const [sectionData, setSectionData] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
-    // If we already have stale cache, show it immediately and revalidate in background
+    // Read localStorage cache first — instant display
     const staleCache = readLocalCache();
     if (staleCache?.[section]) {
       setSectionData(staleCache[section]);
       setLoading(false);
     }
 
+    // Then fetch fresh data in background
     fetchContent().then(all => {
       if (!cancelled) {
         setSectionData(all[section] || {});
