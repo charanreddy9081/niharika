@@ -158,8 +158,33 @@ exports.getMe = async (req, res) => {
   }
 };
 
+-- Add a debug endpoint to test registration directly
 // ─── POST /api/users/logout ───────────────────────────────────────────────
 exports.logout = (req, res) => {
-  // JWT is stateless — client deletes the token
   return res.json({ success: true, message: 'Logged out successfully.' });
+};
+  try {
+    const { supabase: sb } = require('../config/db');
+    // Test basic table access
+    const { data, error } = await sb.from('users').select('count').limit(1);
+    if (error) {
+      return res.json({ success: false, stage: 'select', error: error.message, code: error.code });
+    }
+    // Test insert with minimal data
+    const testEmail = `test_${Date.now()}@debug.com`;
+    const bcrypt = require('bcryptjs');
+    const hash = await bcrypt.hash('test123', 1);
+    const { data: ins, error: insErr } = await sb.from('users').insert([{
+      first_name: 'Test', last_name: 'User',
+      email: testEmail, password_hash: hash, email_verified: false
+    }]).select().single();
+    if (insErr) {
+      return res.json({ success: false, stage: 'insert', error: insErr.message, code: insErr.code, details: insErr.details });
+    }
+    // Clean up
+    await sb.from('users').delete().eq('email', testEmail);
+    return res.json({ success: true, message: 'users table working correctly' });
+  } catch (e) {
+    return res.json({ success: false, stage: 'exception', error: e.message });
+  }
 };
