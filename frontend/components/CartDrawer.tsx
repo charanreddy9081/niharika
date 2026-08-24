@@ -20,8 +20,8 @@ export const CartDrawer: React.FC = () => {
     discountCode,
     applyCoupon,
     total,
-    freeShippingThreshold,
-    freeShippingProgress
+    shippingMethod,
+    shippingZoneLabel,
   } = useCart();
 
   const [inputCoupon, setInputCoupon] = useState('');
@@ -58,23 +58,20 @@ export const CartDrawer: React.FC = () => {
             </button>
           </div>
 
-          {/* Shipping Progress */}
+          {/* Shipping info */}
           <div className="bg-[#0d241c] px-6 py-3 border-b border-emerald-900/40">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              {subtotal >= freeShippingThreshold ? (
-                <span className="text-emerald-400 font-medium flex items-center gap-1">
+            <div className="flex items-center justify-between text-xs">
+              {shippingMethod ? (
+                <span className="text-emerald-400 flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>You unlocked FREE Studio Delivery!</span>
+                  <span>{shippingMethod === 'speedPost' ? 'Speed Post' : 'Registered Parcel'} · {shippingZoneLabel}</span>
                 </span>
               ) : (
-                <span className="text-[#a3b8af]">
-                  Add <strong className="text-[#fbf5e6]">₹{freeShippingThreshold - subtotal}</strong> more for FREE delivery
-                </span>
+                <span className="text-[#a3b8af]">Shipping calculated at checkout based on pincode</span>
               )}
-              <span className="text-emerald-400 font-mono text-[11px]">{freeShippingProgress}%</span>
-            </div>
-            <div className="w-full bg-emerald-950/80 h-1.5 rounded-full overflow-hidden">
-              <div className="bg-gradient-to-r from-[#e8c872] to-[#fbf5e6] h-full transition-all duration-500" style={{ width: freeShippingProgress + '%' }} />
+              {shippingFee > 0 && (
+                <span className="text-[#e8c872] font-semibold">₹{shippingFee}</span>
+              )}
             </div>
           </div>
 
@@ -155,7 +152,12 @@ export const CartDrawer: React.FC = () => {
               )}
               <div className="space-y-1.5 text-xs text-[#a3b8af]">
                 <div className="flex justify-between"><span>Subtotal</span><span className="text-zinc-200">₹{subtotal.toLocaleString('en-IN')}</span></div>
-                <div className="flex justify-between"><span>Estimated Delivery</span><span className="text-zinc-200">{shippingFee === 0 ? 'FREE' : '₹' + shippingFee}</span></div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span className="text-zinc-200">
+                    {shippingFee > 0 ? `₹${shippingFee}` : 'Enter pincode at checkout'}
+                  </span>
+                </div>
                 <div className="flex justify-between text-base font-semibold text-zinc-100 pt-2 border-t border-emerald-900/50">
                   <span>Total</span>
                   <span className="text-[#fbf5e6]">₹{total.toLocaleString('en-IN')}</span>

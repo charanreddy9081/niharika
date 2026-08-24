@@ -48,7 +48,7 @@ function validateForm(form: FormState, hasItems: boolean): string | null {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, shippingFee, discount, total, clearCart } = useCart();
+  const { items, subtotal, shippingFee, discount, total, clearCart, setShipping, clearShipping, shippingMethod, shippingZone, shippingZoneLabel } = useCart();
   const { user, isGuest, isLoading: authLoading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -59,6 +59,11 @@ export default function CheckoutPage() {
 
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'razorpay'>('razorpay');
   const [submitting, setSubmitting] = useState(false);
+
+  // Shipping rate state
+  const [shippingRates, setShippingRates] = useState<any>(null);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState('');
 
   // Proactively wake the Render backend as soon as checkout loads
   useEffect(() => {
@@ -104,6 +109,35 @@ export default function CheckoutPage() {
       setOtpStep('idle');
       setOtp('');
       setOtpError('');
+    }
+    // Lookup shipping rates when pincode is complete
+    if (field === 'pincode' && value.length === 6) {
+      lookupShipping(value);
+    }
+    if (field === 'pincode' && value.length < 6) {
+      setShippingRates(null);
+      setShippingError('');
+      clearShipping();
+    }
+  };
+
+  // ── Shipping rate lookup ───────────────────────────────────────────────
+  const lookupShipping = async (pincode: string) => {
+    setShippingLoading(true);
+    setShippingError('');
+    clearShipping();
+    try {
+      const res = await fetch(`${API}/api/shipping/rate?pincode=${pincode}`);
+      const data = await res.json();
+      if (data.success) {
+        setShippingRates(data.data);
+      } else {
+        setShippingError(data.message || 'Could not calculate shipping.');
+      }
+    } catch {
+      setShippingError('Could not reach server for shipping rates.');
+    } finally {
+      setShippingLoading(false);
     }
   };
 
@@ -192,6 +226,8 @@ export default function CheckoutPage() {
     })),
     subtotal, deliveryCharge: shippingFee, total,
     paymentMethod: paymentMethod === 'razorpay' ? 'Razorpay' : 'Cash on Delivery',
+    shippingMethod: shippingMethod === 'speedPost' ? 'Speed Post' : 'Registered Parcel',
+    shippingZone,
     ...extra,
   });
 
@@ -305,6 +341,8 @@ export default function CheckoutPage() {
     e.preventDefault();
     const validErr = validateForm(form, items.length > 0);
     if (validErr) { toast.error(validErr); return; }
+
+    if (!shippingMethod) { toast.error('Please select a shipping method.'); return; }
 
     if (paymentMethod === 'razorpay') {
       if (otpStep !== 'verified') { toast.error('Please verify your email first.'); return; }
@@ -456,8 +494,79 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div><label className={labelCls}>City *</label><input type="text" value={form.city} onChange={e => updateField('city', e.target.value)} placeholder="Hyderabad" className={inputCls} /></div>
                   <div><label className={labelCls}>State *</label><input type="text" value={form.state} onChange={e => updateField('state', e.target.value)} placeholder="Telangana" className={inputCls} /></div>
-                  <div><label className={labelCls}>Pincode *</label><input type="text" value={form.pincode} onChange={e => updateField('pincode', e.target.value.replace(/\D/g,'').slice(0,6))} placeholder="500001" maxLength={6} className={inputCls} /></div>
+                  <div>
+                    <label className={labelCls}>Pincode *</label>
+                    <input
+                      type="text"
+                      value={form.pincode}
+                      onChange={e => updateField('pincode', e.target.value.replace(/\D/g,'').slice(0,6))}
+                      placeholder="500001"
+                      maxLength={6}
+                      className={inputCls}
+                    />
+                  </div>
                 </div>
+
+                {/* Shipping method selector — appears when pincode is entered */}
+                {shippingLoading && (
+                  <div className="flex items-center gap-2 text-xs text-zinc-400">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Calculating shipping rates…
+                  </div>
+                )}
+                {shippingError && (
+                  <p className="text-xs text-red-400">{shippingError}</p>
+                )}
+                {shippingRates && !shippingLoading && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Delivery Zone:</span>
+                      <span className="text-[11px] text-[#d4af37] font-medium">{shippingRates.label}</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Select Shipping Method *</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Speed Post */}
+                      <button
+                        type="button"
+                        onClick={() => setShipping('speedPost', shippingRates.speedPost.price, shippingRates.zone, shippingRates.label)}
+                        className={`p-4 rounded-xl border text-left transition-all ${
+                          shippingMethod === 'speedPost'
+                            ? 'bg-[#d4af37]/15 border-[#d4af37]'
+                            : 'bg-zinc-950 border-zinc-800 hover:border-zinc-600'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-semibold text-zinc-100">Speed Post</span>
+                          <span className="text-[#d4af37] font-bold text-sm">₹{shippingRates.speedPost.price}</span>
+                        </div>
+                        <span className="text-[10px] text-zinc-400">India Post · {shippingRates.speedPost.deliveryDays} business days</span>
+                        {shippingMethod === 'speedPost' && (
+                          <span className="block text-[10px] text-emerald-400 mt-1">✓ Selected</span>
+                        )}
+                      </button>
+                      {/* Registered Parcel */}
+                      <button
+                        type="button"
+                        onClick={() => setShipping('registeredParcel', shippingRates.registeredParcel.price, shippingRates.zone, shippingRates.label)}
+                        className={`p-4 rounded-xl border text-left transition-all ${
+                          shippingMethod === 'registeredParcel'
+                            ? 'bg-[#d4af37]/15 border-[#d4af37]'
+                            : 'bg-zinc-950 border-zinc-800 hover:border-zinc-600'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-semibold text-zinc-100">Registered Parcel</span>
+                          <span className="text-[#d4af37] font-bold text-sm">₹{shippingRates.registeredParcel.price}</span>
+                        </div>
+                        <span className="text-[10px] text-zinc-400">India Post · {shippingRates.registeredParcel.deliveryDays} business days</span>
+                        {shippingMethod === 'registeredParcel' && (
+                          <span className="block text-[10px] text-emerald-400 mt-1">✓ Selected</span>
+                        )}
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-zinc-600">Rates for ~3kg parcel incl. 18% GST, dispatched from Alwal, Hyderabad.</p>
+                  </div>
+                )}
               </div>
 
               {/* 3. Payment */}
@@ -517,17 +626,27 @@ export default function CheckoutPage() {
               <div className="space-y-2 text-xs text-zinc-400 border-t border-zinc-800 pt-4">
                 <div className="flex justify-between"><span>Subtotal</span><span className="text-zinc-200">₹{subtotal.toLocaleString('en-IN')}</span></div>
                 {discount > 0 && <div className="flex justify-between text-emerald-400"><span>Discount</span><span>−₹{discount.toLocaleString('en-IN')}</span></div>}
-                <div className="flex justify-between"><span>Delivery</span><span className="text-zinc-200">{shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}</span></div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span className="text-zinc-200">
+                    {shippingFee > 0
+                      ? `₹${shippingFee} (${shippingMethod === 'speedPost' ? 'Speed Post' : 'Reg. Parcel'})`
+                      : <span className="text-zinc-500 text-[10px]">Enter pincode above</span>
+                    }
+                  </span>
+                </div>
                 <div className="flex justify-between text-base font-semibold text-zinc-100 pt-3 border-t border-zinc-800">
                   <span>Total</span><span className="text-[#f3e5ab]">₹{total.toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
               {/* Main CTA */}
-              <button type="submit" disabled={submitting || (needsOtp && !canPayOnline && paymentMethod === 'razorpay')}
+              <button type="submit" disabled={submitting || (needsOtp && !canPayOnline && paymentMethod === 'razorpay') || !shippingMethod}
                 className="w-full bg-[#d4af37] hover:bg-[#c49f2e] disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold py-4 rounded-xl text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center justify-center gap-2 btn-magnetic">
                 {submitting ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /><span>Processing...</span></>
+                ) : !shippingMethod ? (
+                  <span>Select Shipping Method</span>
                 ) : paymentMethod === 'razorpay' ? (
                   <><CreditCard className="w-4 h-4" /><span>{needsOtp && !canPayOnline ? 'Verify Email to Pay' : `Pay ₹${total.toLocaleString('en-IN')}`}</span></>
                 ) : (
