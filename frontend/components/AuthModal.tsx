@@ -196,10 +196,10 @@ export default function AuthModal({ onClose, onSuccess, reason }: AuthModalProps
   };
 
   return (
-    /* Backdrop — fixed, no scroll */
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose}>
-      {/* Scroll container — full height, scrollable, centers on desktop */}
-      <div className="min-h-full flex items-start sm:items-center justify-center p-4 sm:p-6">
+    /* Backdrop — fixed, scrollable */
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm" onClick={onClose}>
+      {/* Centering wrapper */}
+      <div className="flex min-h-full items-start sm:items-center justify-center p-4 py-8">
         <div
           className="relative w-full max-w-md bg-[#0a0f0c] border border-zinc-800 rounded-2xl shadow-2xl"
           onClick={e => e.stopPropagation()}
