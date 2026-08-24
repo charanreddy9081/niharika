@@ -446,6 +446,8 @@ export default function AuthModal({ onClose, onSuccess, reason }: AuthModalProps
             <p className="text-center text-xs text-zinc-600 mt-5">
               {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
               <button type="button" onClick={() => switchMode(mode === 'signin' ? 'register' : 'signin')}
+                className="text-[#d4af37] hover:underline font-medium">
+                {mode === 'signin' ? 'Register here' : 'Sign in'}
               </button>
             </p>
           )}
