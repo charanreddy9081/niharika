@@ -75,6 +75,8 @@ export default function CheckoutPage() {
         email: user.email || prev.email,
         phone: user.phone || prev.phone,
       }));
+      // Signed-in users verified email at registration — skip OTP at checkout
+      setOtpStep('verified');
     }
   }, [user]);
 
