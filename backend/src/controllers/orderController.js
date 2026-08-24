@@ -1,6 +1,6 @@
 const { supabase } = require('../config/db');
 const { sendAdminOrderEmail, sendCustomerOrderConfirmation, sendOrderStatusUpdate } = require('../services/emailService');
-const { sendOrderAlert } = require('../services/telegramService');
+const { sendOrderAlert, sendCancellationAlert } = require('../services/telegramService');
 const { isEmailVerified, clearOTP } = require('./paymentController');
 
 /**
@@ -405,17 +405,22 @@ exports.cancelOrder = async (req, res) => {
 
     if (updateError) throw updateError;
 
-    // Send cancellation email (fire-and-forget)
-    const emailData = {
+    // Send cancellation email + Telegram alert (fire-and-forget)
+    const cancelData = {
       order_id: order.order_id,
       status: 'Cancelled by Customer',
       note: 'Cancelled within 24-hour window. Full refund will be processed within 5–7 business days.',
       customer: mapId(order).customer,
       total: order.total_amount,
-      items: order.items || []
+      items: order.items || [],
+      payment_method: order.payment_method,
+      razorpay_payment_id: order.razorpay_payment_id || null,
     };
-    sendOrderStatusUpdate(emailData).catch(err =>
+    sendOrderStatusUpdate(cancelData).catch(err =>
       console.error('Cancellation email failed:', err.message)
+    );
+    sendCancellationAlert(cancelData).catch(err =>
+      console.error('Cancellation Telegram failed:', err.message)
     );
 
     return res.json({

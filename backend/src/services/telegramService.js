@@ -114,4 +114,42 @@ async function sendOrderAlert(order) {
   await sendTelegramMessage(message);
 }
 
-module.exports = { sendTelegramMessage, sendOrderAlert };
+/**
+ * Send cancellation alert to admin Telegram chats.
+ */
+async function sendCancellationAlert(order) {
+  const { order_id, customer, items, total, payment_method, razorpay_payment_id } = order;
+
+  const isOnline = payment_method && payment_method.toLowerCase().includes('razorpay');
+  const paymentLine = isOnline
+    ? `✅ Paid Online (Razorpay)${razorpay_payment_id ? `\n<b>Payment ID:</b> <code>${razorpay_payment_id}</code>` : ''}\n⚠️ <b>Refund required within 5–7 business days</b>`
+    : `🚚 Cash on Delivery`;
+
+  const itemLines = (items || []).map(item =>
+    `  • ${item.name} × ${item.quantity} — ₹${Number(item.price * item.quantity).toLocaleString('en-IN')}`
+  ).join('\n');
+
+  const message = [
+    `❌ <b>Order Cancelled by Customer</b>`,
+    ``,
+    `<b>Order ID:</b> <code>${order_id}</code>`,
+    `<b>Payment:</b> ${paymentLine}`,
+    ``,
+    `<b>Customer:</b>`,
+    `  👤 ${customer.first_name || customer.firstName} ${customer.last_name || customer.lastName}`,
+    `  📧 ${customer.email}`,
+    `  📞 ${customer.phone}`,
+    ``,
+    `<b>Cancelled Items:</b>`,
+    itemLines,
+    ``,
+    `<b>💰 Order Total: ₹${Number(total).toLocaleString('en-IN')}</b>`,
+    ``,
+    isOnline ? `<b>⚠️ Action Required: Process refund to customer</b>\n` : '',
+    `<a href="https://niharikartist.shop/admin">→ Open Admin Panel</a>`,
+  ].filter(Boolean).join('\n');
+
+  await sendTelegramMessage(message);
+}
+
+module.exports = { sendTelegramMessage, sendOrderAlert, sendCancellationAlert };

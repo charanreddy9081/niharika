@@ -16,6 +16,24 @@ const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.
 const FROM_NAME   = 'niharikartist Studio';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
 
+// SendGrid mail options helper — adds headers that reduce spam score
+function mailOptions(to, subject, html, replyToEmail) {
+  return {
+    to,
+    from: { email: FROM_EMAIL, name: FROM_NAME },
+    replyTo: replyToEmail || FROM_EMAIL,
+    subject,
+    html,
+    headers: {
+      'X-Entity-Ref-ID': `niharikartist-${Date.now()}`,
+    },
+    trackingSettings: {
+      clickTracking: { enable: false, enableText: false },
+      openTracking: { enable: false },
+    },
+  };
+}
+
 const brandStyles = `
   body { margin:0; padding:0; background:#050f0b; font-family:'Segoe UI',Arial,sans-serif; color:#fbf8f1; }
   .wrapper { max-width:620px; margin:0 auto; background:#071610; border:1px solid rgba(232,200,114,0.25); border-radius:16px; overflow:hidden; }
@@ -67,18 +85,26 @@ function buildItemsTable(items) {
 // ─── Admin order notification ─────────────────────────────────────────────
 async function sendAdminOrderEmail(order) {
   if (!process.env.SENDGRID_API_KEY) { console.warn('⚠️ SENDGRID_API_KEY missing'); return; }
-  const { order_id, customer, shipping_address, items, subtotal, shipping_fee, discount, total, order_status, created_at } = order;
+  const { order_id, customer, shipping_address, items, subtotal, shipping_fee, discount, total, order_status, created_at, payment_method, razorpay_payment_id } = order;
   const placedAt = created_at ? new Date(created_at).toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' }) : new Date().toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' });
+  const isOnline = payment_method && payment_method.toLowerCase().includes('razorpay');
+  const paymentDisplay = isOnline
+    ? `Paid Online (Razorpay)${razorpay_payment_id ? ` — <span style="font-family:monospace;font-size:11px;color:#a3b8af;">${escapeHtml(razorpay_payment_id)}</span>` : ''}`
+    : 'Cash on Delivery';
+  const orderSubtitle = isOnline
+    ? 'A new <strong style="color:#6ee7b7;">Paid Online (Razorpay)</strong> order has been placed.'
+    : 'A new <strong style="color:#e8c872;">Cash on Delivery</strong> order has been placed.';
+
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><style>${brandStyles}</style></head>
   <body><div class="wrapper">
     <div class="header"><div class="brand">niharikartist</div><div class="tagline">fine art atelier • admin notification</div></div>
     <div class="body">
       <h2 style="font-size:22px;font-weight:400;color:#fbf5e6;margin:0 0 6px;font-family:Georgia,serif;">New Order Received</h2>
-      <p style="color:#a3b8af;font-size:13px;margin:0 0 28px;">A new Cash on Delivery order has been placed.</p>
+      <p style="color:#a3b8af;font-size:13px;margin:0 0 28px;">${orderSubtitle}</p>
       <div class="section-title">Order Details</div>
       <div class="info-row"><span class="info-label">Order ID</span><span class="info-value gold">${escapeHtml(order_id)}</span></div>
       <div class="info-row"><span class="info-label">Placed At</span><span class="info-value">${placedAt}</span></div>
-      <div class="info-row"><span class="info-label">Payment</span><span class="info-value">Cash on Delivery</span></div>
+      <div class="info-row"><span class="info-label">Payment</span><span class="info-value">${paymentDisplay}</span></div>
       <div class="info-row"><span class="info-label">Status</span><span class="info-value"><span class="status-pill">${escapeHtml(order_status||'Ordered')}</span></span></div>
       <div class="section-title" style="margin-top:28px;">Customer</div>
       <div class="info-row"><span class="info-label">Name</span><span class="info-value">${escapeHtml(customer.first_name)} ${escapeHtml(customer.last_name)}</span></div>
@@ -98,7 +124,7 @@ async function sendAdminOrderEmail(order) {
     <div class="footer">&copy; 2026 niharikartist fine art atelier</div>
   </div></body></html>`;
   try {
-    await sgMail.send({ to: ADMIN_EMAIL, from: { email: FROM_EMAIL, name: FROM_NAME }, replyTo: FROM_EMAIL, subject: `New Order Received — ${order_id}`, html });
+    await sgMail.send(mailOptions(ADMIN_EMAIL, `New Order — ${order_id} | ${isOnline ? '✅ Paid Online' : '🚚 COD'}`, html));
     console.log(`✅ Admin email sent for ${order_id}`);
   } catch (err) {
     console.error(`❌ Admin email failed for ${order_id}:`, err?.response?.body?.errors || err.message);
@@ -108,8 +134,20 @@ async function sendAdminOrderEmail(order) {
 // ─── Customer order confirmation ──────────────────────────────────────────
 async function sendCustomerOrderConfirmation(order) {
   if (!process.env.SENDGRID_API_KEY) { console.warn('⚠️ SENDGRID_API_KEY missing'); return; }
-  const { order_id, customer, shipping_address, items, subtotal, shipping_fee, discount, total, created_at } = order;
+  const { order_id, customer, shipping_address, items, subtotal, shipping_fee, discount, total, created_at, payment_method, razorpay_payment_id } = order;
   const placedAt = created_at ? new Date(created_at).toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' }) : new Date().toLocaleString('en-IN', { dateStyle:'long', timeStyle:'short' });
+  const isOnline = payment_method && payment_method.toLowerCase().includes('razorpay');
+  const paymentBox = isOnline
+    ? `<div style="background:#0a2319;border-radius:10px;padding:16px 20px;font-size:13px;margin-top:20px;">
+        <strong style="color:#6ee7b7;">✅ Paid Online via Razorpay</strong>
+        ${razorpay_payment_id ? `<p style="margin:6px 0 0;color:#a3b8af;font-size:11px;font-family:monospace;">Payment ID: ${escapeHtml(razorpay_payment_id)}</p>` : ''}
+        <p style="margin:8px 0 0;color:#a3b8af;font-size:12px;">Your payment has been received. Thank you!</p>
+      </div>`
+    : `<div style="background:#0a2319;border-radius:10px;padding:16px 20px;font-size:13px;margin-top:20px;">
+        <strong style="color:#fbf8f1;">🚚 Cash on Delivery</strong>
+        <p style="margin:8px 0 0;color:#a3b8af;font-size:12px;">Pay when your order arrives. No payment needed right now.</p>
+      </div>`;
+
   const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><style>${brandStyles}</style></head>
   <body><div class="wrapper">
     <div class="header"><div class="brand">niharikartist</div><div class="tagline">fine art atelier • order confirmation</div></div>
@@ -131,19 +169,16 @@ async function sendCustomerOrderConfirmation(order) {
       </div>
       <div class="section-title" style="margin-top:28px;">Delivering To</div>
       <div class="address-box">${escapeHtml(customer.first_name)} ${escapeHtml(customer.last_name)}<br>${escapeHtml(shipping_address.street)}<br>${escapeHtml(shipping_address.city)}, ${escapeHtml(shipping_address.state)} — ${escapeHtml(shipping_address.pincode)}<br><span style="color:#a3b8af;">Phone: ${escapeHtml(customer.phone)}</span></div>
-      <div style="background:#0a2319;border-radius:10px;padding:16px 20px;font-size:13px;margin-top:20px;">
-        <strong style="color:#fbf8f1;">Cash on Delivery</strong>
-        <p style="margin:8px 0 0;color:#a3b8af;font-size:12px;">Pay when your order arrives. No payment needed right now.</p>
-      </div>
+      ${paymentBox}
       <div style="text-align:center;margin-top:28px;">
-        <a href="https://niharikartist.netlify.app/track-order?orderId=${encodeURIComponent(order_id)}" class="cta-btn">Track Your Order</a>
+        <a href="https://niharikartist.shop/track-order" class="cta-btn">Track Your Order</a>
       </div>
       <p style="margin-top:28px;font-size:12px;color:#627a70;text-align:center;">Questions? Contact us at <a href="mailto:${FROM_EMAIL}" style="color:#e8c872;">${FROM_EMAIL}</a></p>
     </div>
     <div class="footer">&copy; 2026 niharikartist fine art atelier • Handmade in India</div>
   </div></body></html>`;
   try {
-    await sgMail.send({ to: customer.email, from: { email: FROM_EMAIL, name: FROM_NAME }, replyTo: FROM_EMAIL, subject: `Order Confirmation — ${order_id}`, html });
+    await sgMail.send(mailOptions(customer.email, `Order Confirmed — ${order_id} | niharikartist`, html, FROM_EMAIL));
     console.log(`✅ Customer email sent to ${customer.email} for ${order_id}`);
   } catch (err) {
     console.error(`❌ Customer email failed for ${order_id} (to: ${customer.email}):`, err?.response?.body?.errors || err.message);
@@ -198,7 +233,7 @@ async function sendOrderStatusUpdate({ order_id, status, note, customer, total, 
   </div></body></html>`;
 
   try {
-    await sgMail.send({ to: customer.email, from: { email: FROM_EMAIL, name: FROM_NAME }, replyTo: FROM_EMAIL, subject: `Order Update — ${cfg.title} — ${order_id}`, html });
+    await sgMail.send(mailOptions(customer.email, `Order Update — ${cfg.title} — ${order_id}`, html, FROM_EMAIL));
     console.log(`✅ Status update email sent to ${customer.email} for ${order_id} [${status}]`);
   } catch (err) {
     console.error(`❌ Status update email failed for ${order_id}:`, err?.response?.body?.errors || err.message);
