@@ -405,3 +405,21 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 };
+
+// ─── DELETE /api/admin/orders/clear-all (admin) ───────────────────────────
+exports.clearAllOrders = async (req, res) => {
+  try {
+    // Delete all rows — Supabase requires a filter; use neq on a non-null col
+    const { error } = await supabase
+      .from('orders')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000'); // matches all real rows
+
+    if (error) throw error;
+
+    return res.json({ success: true, message: 'All orders deleted successfully.' });
+  } catch (error) {
+    console.error('Error clearing all orders:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

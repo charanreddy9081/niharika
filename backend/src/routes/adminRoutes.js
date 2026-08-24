@@ -37,6 +37,7 @@ router.delete('/gallery/:id', protectAdmin, galleryController.deleteGalleryItem)
 
 router.get('/orders', protectAdmin, orderController.getAllOrders);
 router.put('/orders/:id/status', protectAdmin, orderController.updateOrderStatus);
+router.delete('/orders/clear-all', protectAdmin, orderController.clearAllOrders);
 
 router.get('/inquiries', protectAdmin, contactController.getInquiries);
 router.get('/subscribers', protectAdmin, contactController.getSubscribers);

@@ -463,6 +463,48 @@ export default function AdminPortalPage() {
     }
   };
 
+  const handleClearAllOrders = async () => {
+    if (!confirm('⚠️ This will permanently delete ALL orders from the database. This cannot be undone.\n\nAre you absolutely sure?')) return;
+    const token = localStorage.getItem('niharikartist_admin_token');
+    if (!token) return;
+    try {
+      const res = await fetch(API + '/api/admin/orders/clear-all', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('All orders cleared successfully.');
+        setOrders([]);
+      } else {
+        toast.error(data.message || 'Failed to clear orders.');
+      }
+    } catch {
+      toast.error('Network error while clearing orders.');
+    }
+  };
+
+  const handleClearRevenue = async () => {
+    if (!confirm('⚠️ This will delete ALL orders and reset revenue to ₹0.\n\nThis cannot be undone. Continue?')) return;
+    const token = localStorage.getItem('niharikartist_admin_token');
+    if (!token) return;
+    try {
+      const res = await fetch(API + '/api/admin/orders/clear-all', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Revenue data cleared. All orders deleted.');
+        setOrders([]);
+      } else {
+        toast.error(data.message || 'Failed to reset revenue.');
+      }
+    } catch {
+      toast.error('Network error while resetting revenue.');
+    }
+  };
+
   const handleUpdateOrderStatus = async (id: string, status: string) => {
     const token = localStorage.getItem('niharikartist_admin_token');
     if (!token) return;
@@ -793,7 +835,16 @@ export default function AdminPortalPage() {
               <div className="bg-[#0a2319]/80 border border-[#e8c872]/25 p-6 rounded-3xl space-y-2 shadow-xl">
                 <div className="flex items-center justify-between text-[#e8c872]">
                   <span className="text-[11px] uppercase tracking-wider text-[#a3b8af] font-medium">Total Studio Revenue</span>
-                  <TrendingUp className="w-4 h-4" />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleClearRevenue}
+                      title="Reset revenue (clears all orders)"
+                      className="p-1 rounded text-red-400/60 hover:text-red-300 hover:bg-red-950/40 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
                 </div>
                 <h3 className="font-display text-3xl text-[#fbf5e6]">₹{totalRevenue.toLocaleString('en-IN')}</h3>
                 <span className="text-[10px] text-emerald-400 block font-sans">Across {orders.length} custom heirlooms</span>
@@ -1053,12 +1104,23 @@ export default function AdminPortalPage() {
           </div>
         )}
 
-        {/* TAB 4: ORDERS */}
         {activeTab === 'orders' && (
           <div className="space-y-6">
-            <div>
-              <h3 className="font-display text-2xl text-zinc-100">Collector Orders ({orders.length})</h3>
-              <p className="text-xs text-[#a3b8af]">Track orders, custom calligraphy notes, and update shipping progress.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-display text-2xl text-zinc-100">Collector Orders ({orders.length})</h3>
+                <p className="text-xs text-[#a3b8af]">Track orders, custom calligraphy notes, and update shipping progress.</p>
+              </div>
+              {orders.length > 0 && (
+                <button
+                  onClick={handleClearAllOrders}
+                  className="flex items-center gap-2 bg-red-950/70 hover:bg-red-900/90 border border-red-800/60 text-red-200 hover:text-red-100 px-4 py-2 rounded-xl text-xs uppercase tracking-wider font-medium transition-colors whitespace-nowrap"
+                  title="Permanently delete all orders"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Clear All Orders
+                </button>
+              )}
             </div>
 
             <div className="space-y-4">
