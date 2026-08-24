@@ -272,6 +272,9 @@ exports.createOrder = async (req, res) => {
       order_id,
       tracking_number,
       order_status: 'Ordered',
+      payment_method: finalPaymentMethod,
+      payment_status: paymentStatus,
+      razorpay_payment_id: razorpayPaymentId,
       created_at: savedOrder.created_at,
       customer: {
         first_name: customer.firstName.trim(),

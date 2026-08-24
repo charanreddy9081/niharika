@@ -77,7 +77,12 @@ async function sendTelegramMessage(text) {
  * Send new order alert to all admin Telegram chats.
  */
 async function sendOrderAlert(order) {
-  const { order_id, customer, shipping_address, items, total, payment_method } = order;
+  const { order_id, customer, shipping_address, items, total, payment_method, payment_status, razorpay_payment_id } = order;
+
+  const isOnline = payment_method && payment_method.toLowerCase().includes('razorpay');
+  const paymentLine = isOnline
+    ? `✅ <b>Paid Online</b> (Razorpay)${razorpay_payment_id ? `\n<b>Payment ID:</b> <code>${razorpay_payment_id}</code>` : ''}`
+    : `🚚 <b>Cash on Delivery</b>`;
 
   const itemLines = (items || []).map(item =>
     `  • ${item.name} × ${item.quantity} — ₹${Number(item.price * item.quantity).toLocaleString('en-IN')}`
@@ -87,7 +92,7 @@ async function sendOrderAlert(order) {
     `🛍️ <b>New Order Received</b>`,
     ``,
     `<b>Order ID:</b> <code>${order_id}</code>`,
-    `<b>Payment:</b> ${payment_method || 'Cash on Delivery'}`,
+    `<b>Payment:</b> ${paymentLine}`,
     ``,
     `<b>Customer:</b>`,
     `  👤 ${customer.first_name} ${customer.last_name}`,
@@ -103,7 +108,7 @@ async function sendOrderAlert(order) {
     ``,
     `<b>💰 Total: ₹${Number(total).toLocaleString('en-IN')}</b>`,
     ``,
-    `<a href="https://niharikartist.netlify.app/admin">→ Open Admin Panel</a>`,
+    `<a href="https://niharikartist.shop/admin">→ Open Admin Panel</a>`,
   ].join('\n');
 
   await sendTelegramMessage(message);
