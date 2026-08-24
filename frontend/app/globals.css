@@ -244,12 +244,13 @@ body {
 
 /* ─── PINK THEME — Complete CSS overrides ──────────────────────────────── */
 /*
- * Pink is a standalone theme (no filter). All overrides use [data-theme="pink"]
- * which is set on <html> by ThemeContext.
+ * Pink is a standalone theme (no filter). All overrides use [data-theme="pink"].
+ * Rules are surgical — avoid over-broad selectors that break button text etc.
  */
 
-/* ── Body & page ─────────────────────────────────────────────────────────── */
-[data-theme="pink"] body {
+/* ── Body & root backgrounds ─────────────────────────────────────────────── */
+[data-theme="pink"] body,
+[data-theme="pink"] #theme-root {
   background-color: #FFF7FA !important;
   color: #2B2024 !important;
 }
@@ -257,119 +258,190 @@ body {
   background-color: #FFF7FA !important;
 }
 
-/* ── All text ────────────────────────────────────────────────────────────── */
-[data-theme="pink"] h1, [data-theme="pink"] h2,
-[data-theme="pink"] h3, [data-theme="pink"] h4,
-[data-theme="pink"] h5, [data-theme="pink"] h6 {
+/* ── Headings ────────────────────────────────────────────────────────────── */
+[data-theme="pink"] h1,
+[data-theme="pink"] h2,
+[data-theme="pink"] h3,
+[data-theme="pink"] h4,
+[data-theme="pink"] h5,
+[data-theme="pink"] h6 {
   color: #2B2024 !important;
 }
-[data-theme="pink"] p, [data-theme="pink"] span,
-[data-theme="pink"] label, [data-theme="pink"] li {
+
+/* ── Body text: only target zinc/emerald text utilities, not all spans ───── */
+/* Dark text classes → deep espresso */
+[data-theme="pink"] .text-zinc-100,
+[data-theme="pink"] .text-zinc-200,
+[data-theme="pink"] .text-zinc-300,
+[data-theme="pink"] [class*="text-\[#fbf"],
+[data-theme="pink"] [class*="text-\[#f3e"] { color: #2B2024 !important; }
+
+/* Mid-grey text → muted rose */
+[data-theme="pink"] .text-zinc-400,
+[data-theme="pink"] .text-zinc-500,
+[data-theme="pink"] .text-zinc-600,
+[data-theme="pink"] [class*="text-\[#a3b"],
+[data-theme="pink"] [class*="text-\[#627"] { color: #806B72 !important; }
+
+/* Gold accent text → deep rose */
+[data-theme="pink"] .text-zinc-700,
+[data-theme="pink"] [class*="text-\[#e8c"],
+[data-theme="pink"] [class*="text-\[#d4a"],
+[data-theme="pink"] [class*="text-\[#d4b"],
+[data-theme="pink"] .text-\[\#e8c872\],
+[data-theme="pink"] .text-\[\#d4af37\],
+[data-theme="pink"] .text-\[\#f3e5ab\] { color: #A94F6B !important; }
+
+/* Emerald text → rose */
+[data-theme="pink"] .text-emerald-400,
+[data-theme="pink"] .text-emerald-300 { color: #A94F6B !important; }
+
+/* White text — only override in non-button/badge contexts */
+[data-theme="pink"] .text-white:not(button):not([role="button"]):not(.badge) {
   color: #2B2024 !important;
 }
-[data-theme="pink"] a { color: #A94F6B !important; }
-[data-theme="pink"] a:hover { color: #7B2D45 !important; }
+
+/* Explicit link colour */
+[data-theme="pink"] a:not([class*="bg-"]):not([class*="text-white"]):not([class*="text-black"]) {
+  color: #A94F6B !important;
+}
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 [data-theme="pink"] header {
   background-color: rgba(255,247,250,0.97) !important;
   border-bottom-color: #E9CCD5 !important;
 }
-[data-theme="pink"] nav a,
-[data-theme="pink"] nav button span { color: #2B2024 !important; }
-[data-theme="pink"] nav a:hover { color: #A94F6B !important; }
+/* Nav links */
+[data-theme="pink"] header nav a { color: #2B2024 !important; }
+[data-theme="pink"] header nav a:hover { color: #A94F6B !important; }
+/* Active nav */
+[data-theme="pink"] header nav a.text-\[\#e8c872\] { color: #A94F6B !important; }
 
-/* ── Dark backgrounds → blush ────────────────────────────────────────────── */
-[data-theme="pink"] [class*="bg-[#0"],
-[data-theme="pink"] [class*="bg-[#04"],
-[data-theme="pink"] [class*="bg-[#05"],
-[data-theme="pink"] [class*="bg-zinc-9"],
-[data-theme="pink"] [class*="bg-zinc-95"] {
-  background-color: #FCEEF3 !important;
-  color: #2B2024 !important;
+/* ── Announcement ribbon ─────────────────────────────────────────────────── */
+[data-theme="pink"] .bg-gradient-to-r.from-\[\#081b13\],
+[data-theme="pink"] [class*="from-[#081b13]"] {
+  background: #A94F6B !important;
+  background-image: none !important;
 }
+[data-theme="pink"] [class*="from-[#081b13]"] span,
+[data-theme="pink"] [class*="from-[#081b13]"] p { color: #fff !important; }
+
+/* ── Dark section backgrounds → blush ───────────────────────────────────── */
+/* bg-[#070709], bg-[#050f0b], bg-[#081a13], bg-[#0a0f0c] etc */
+[data-theme="pink"] [class*="bg-\[#07"],
+[data-theme="pink"] [class*="bg-\[#05"],
+[data-theme="pink"] [class*="bg-\[#08"],
+[data-theme="pink"] [class*="bg-\[#0a"],
+[data-theme="pink"] [class*="bg-\[#0c"],
+[data-theme="pink"] [class*="bg-\[#0d"],
+[data-theme="pink"] [class*="bg-\[#06"] {
+  background-color: #FCEEF3 !important;
+}
+/* zinc-900, zinc-950 */
+[data-theme="pink"] .bg-zinc-900,
+[data-theme="pink"] .bg-zinc-950 {
+  background-color: #FFF0F4 !important;
+}
+[data-theme="pink"] [class*="bg-zinc-9"] {
+  background-color: #FFF0F4 !important;
+}
+/* Transparency variants like bg-zinc-900/40 */
+[data-theme="pink"] [class*="bg-zinc-9"][class*="/"] {
+  background-color: rgba(255,240,244,0.6) !important;
+}
+/* emerald-950 surfaces → blush */
 [data-theme="pink"] [class*="bg-emerald-9"],
 [data-theme="pink"] [class*="bg-emerald-95"] {
   background-color: #F6DDE5 !important;
 }
-[data-theme="pink"] [class*="bg-black"] {
-  background-color: rgba(43,32,36,0.9) !important;
+
+/* ── Text must remain readable on blush surfaces ────────────────────────── */
+[data-theme="pink"] [class*="bg-\[#07"] *,
+[data-theme="pink"] [class*="bg-\[#05"] *,
+[data-theme="pink"] [class*="bg-\[#08"] *,
+[data-theme="pink"] [class*="bg-\[#0a"] *,
+[data-theme="pink"] .bg-zinc-900 *,
+[data-theme="pink"] .bg-zinc-950 * {
+  --text-fallback: #2B2024;
 }
 
 /* ── Borders ─────────────────────────────────────────────────────────────── */
-[data-theme="pink"] [class*="border-emerald"],
-[data-theme="pink"] [class*="border-zinc"],
-[data-theme="pink"] [class*="border-white"] {
-  border-color: #E9CCD5 !important;
-}
-[data-theme="pink"] [class*="border-[#e8c"] {
-  border-color: #D98FA6 !important;
-}
+[data-theme="pink"] .border-zinc-800,
+[data-theme="pink"] .border-zinc-700,
+[data-theme="pink"] [class*="border-zinc-8"],
+[data-theme="pink"] [class*="border-zinc-9"],
+[data-theme="pink"] [class*="border-emerald-9"] { border-color: #E9CCD5 !important; }
 
-/* ── Cards & surfaces ────────────────────────────────────────────────────── */
-[data-theme="pink"] .rounded-3xl,
-[data-theme="pink"] .rounded-2xl {
+[data-theme="pink"] [class*="border-\[#e8c"],
+[data-theme="pink"] [class*="border-\[#d4"] { border-color: #D98FA6 !important; }
+
+/* ── Cards & panels ──────────────────────────────────────────────────────── */
+[data-theme="pink"] .rounded-2xl,
+[data-theme="pink"] .rounded-3xl {
   background-color: #FFFFFF !important;
   border-color: #E9CCD5 !important;
-  box-shadow: 0 2px 20px rgba(169,79,107,0.08) !important;
+  box-shadow: 0 2px 20px rgba(169,79,107,0.07) !important;
 }
-[data-theme="pink"] .rounded-3xl:hover,
-[data-theme="pink"] .rounded-2xl:hover {
-  box-shadow: 0 8px 30px rgba(169,79,107,0.14) !important;
+[data-theme="pink"] .rounded-2xl:hover,
+[data-theme="pink"] .rounded-3xl:hover {
+  box-shadow: 0 6px 28px rgba(169,79,107,0.13) !important;
   border-color: #D98FA6 !important;
 }
 
-/* ── Gold accent text → deep rose ───────────────────────────────────────── */
-[data-theme="pink"] [class*="text-[#e8c"],
-[data-theme="pink"] [class*="text-[#d4"] {
-  color: #A94F6B !important;
+/* ── Primary CTA buttons — gold → rose, keep text BLACK ─────────────────── */
+[data-theme="pink"] .bg-\[\#d4af37\],
+[data-theme="pink"] .bg-\[\#e8c872\],
+[data-theme="pink"] .bg-\[\#d4b055\],
+[data-theme="pink"] [class*="bg-\[#d4af"],
+[data-theme="pink"] [class*="bg-\[#e8c8"],
+[data-theme="pink"] [class*="bg-\[#d4b0"] {
+  background-color: #A94F6B !important;
+  /* text stays black (Tailwind sets text-black on these buttons) */
 }
-[data-theme="pink"] [class*="text-emerald"] {
-  color: #A94F6B !important;
-}
-[data-theme="pink"] [class*="text-[#a3b"] {
-  color: #806B72 !important;
-}
-[data-theme="pink"] [class*="text-zinc-1"],
-[data-theme="pink"] [class*="text-zinc-2"],
-[data-theme="pink"] [class*="text-zinc-3"] {
-  color: #2B2024 !important;
-}
-[data-theme="pink"] [class*="text-zinc-4"],
-[data-theme="pink"] [class*="text-zinc-5"],
-[data-theme="pink"] [class*="text-zinc-6"] {
-  color: #806B72 !important;
-}
+[data-theme="pink"] .bg-\[\#d4af37\]:hover,
+[data-theme="pink"] .bg-\[\#e8c872\]:hover,
+[data-theme="pink"] [class*="bg-\[#d4af"]:hover { background-color: #7B2D45 !important; }
 
-/* ── Primary gold buttons → deep rose ───────────────────────────────────── */
-[data-theme="pink"] [class*="bg-gradient-to-r"][class*="fbf5e6"],
-[data-theme="pink"] [class*="bg-gradient-to-r"][class*="e8c872"],
-[data-theme="pink"] [class*="bg-gradient-to-r"][class*="d4b055"] {
+/* text-black on rose buttons stays black — good contrast */
+[data-theme="pink"] [class*="text-black"] { color: #000 !important; }
+
+/* Gold gradient buttons */
+[data-theme="pink"] [class*="from-\[#fbf5e6\]"],
+[data-theme="pink"] [class*="from-\[#e8c872\]"],
+[data-theme="pink"] [class*="from-\[#d4b055\]"] {
   background: linear-gradient(135deg, #E8A9BA, #A94F6B) !important;
   background-image: linear-gradient(135deg, #E8A9BA, #A94F6B) !important;
 }
-[data-theme="pink"] [class*="bg-[#e8c872]"],
-[data-theme="pink"] [class*="bg-[#d4b055]"],
-[data-theme="pink"] [class*="bg-[#d4af37]"] {
-  background-color: #A94F6B !important;
-  color: #fff !important;
-}
-[data-theme="pink"] [class*="bg-[#e8c872]"]:hover,
-[data-theme="pink"] [class*="bg-[#d4b055]"]:hover {
-  background-color: #7B2D45 !important;
-}
 
-/* ── Dark outline/ghost buttons → rose ──────────────────────────────────── */
-[data-theme="pink"] [class*="bg-[#0a2319]"]:not([class*="text-black"]),
-[data-theme="pink"] [class*="bg-[#071710]"]:not([class*="text-black"]) {
+/* ── Ghost / dark-bg buttons → light rose ────────────────────────────────── */
+[data-theme="pink"] .bg-\[\#0a2319\],
+[data-theme="pink"] .bg-\[\#081a13\],
+[data-theme="pink"] .bg-\[\#071710\] {
   background-color: #FFF0F4 !important;
   border-color: #D98FA6 !important;
   color: #A94F6B !important;
 }
-[data-theme="pink"] [class*="bg-[#0a2319]"]:not([class*="text-black"]):hover {
-  background-color: #FCEEF3 !important;
-  border-color: #A94F6B !important;
+/* Keep their child text rose too */
+[data-theme="pink"] .bg-\[\#0a2319\] span,
+[data-theme="pink"] .bg-\[\#081a13\] span,
+[data-theme="pink"] .bg-\[\#071710\] span { color: #A94F6B !important; }
+
+/* ── Status / info badges ────────────────────────────────────────────────── */
+/* emerald badges → rose */
+[data-theme="pink"] .bg-emerald-950,
+[data-theme="pink"] [class*="bg-emerald-95"] {
+  background-color: #F6DDE5 !important;
 }
+[data-theme="pink"] .text-emerald-400 { color: #A94F6B !important; }
+/* red badges — keep them red */
+[data-theme="pink"] [class*="bg-red-9"] { background-color: #fee2e2 !important; }
+[data-theme="pink"] [class*="text-red-"]  { color: #b91c1c !important; }
+/* amber badges */
+[data-theme="pink"] [class*="bg-amber-9"] { background-color: #fef3c7 !important; }
+[data-theme="pink"] [class*="text-amber-"] { color: #92400e !important; }
+/* blue badges */
+[data-theme="pink"] [class*="bg-blue-9"]  { background-color: #dbeafe !important; }
+[data-theme="pink"] [class*="text-blue-"] { color: #1d4ed8 !important; }
 
 /* ── Inputs & forms ──────────────────────────────────────────────────────── */
 [data-theme="pink"] input,
@@ -386,57 +458,54 @@ body {
   outline-color: rgba(169,79,107,0.25) !important;
 }
 [data-theme="pink"] input::placeholder,
-[data-theme="pink"] textarea::placeholder {
-  color: #B89AA3 !important;
-}
+[data-theme="pink"] textarea::placeholder { color: #B89AA3 !important; }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 [data-theme="pink"] footer {
   background-color: #FCEEF3 !important;
   border-top-color: #E9CCD5 !important;
 }
-[data-theme="pink"] footer * { color: #2B2024 !important; }
-[data-theme="pink"] footer a:hover { color: #A94F6B !important; }
-
-/* ── Announcement bar ────────────────────────────────────────────────────── */
-[data-theme="pink"] [class*="from-[#081b13]"],
-[data-theme="pink"] [class*="via-[#102d21]"],
-[data-theme="pink"] [class*="to-[#081b13]"] {
-  --tw-gradient-from: #A94F6B !important;
-  --tw-gradient-via: #C27089 !important;
-  --tw-gradient-to: #A94F6B !important;
-  background-color: #A94F6B !important;
-}
-[data-theme="pink"] [class*="from-[#081b13]"] * ,
-[data-theme="pink"] [class*="via-[#102d21]"] * { color: #fff !important; }
+[data-theme="pink"] footer p,
+[data-theme="pink"] footer span,
+[data-theme="pink"] footer h1,
+[data-theme="pink"] footer h2,
+[data-theme="pink"] footer h3,
+[data-theme="pink"] footer li { color: #2B2024 !important; }
+[data-theme="pink"] footer a { color: #A94F6B !important; }
 
 /* ── Glass card ──────────────────────────────────────────────────────────── */
 [data-theme="pink"] .glass-atelier {
-  background: rgba(255,255,255,0.9) !important;
+  background: rgba(255,255,255,0.92) !important;
   border-color: #E9CCD5 !important;
 }
-[data-theme="pink"] .glass-atelier:hover {
-  border-color: #D98FA6 !important;
-}
+[data-theme="pink"] .glass-atelier:hover { border-color: #D98FA6 !important; }
 
-/* ── Image overlays on hero — keep dark so images pop ────────────────────── */
-[data-theme="pink"] [class*="from-[#050f0b]"],
-[data-theme="pink"] [class*="to-[#050f0b]"],
-[data-theme="pink"] [class*="from-[#06120d]"],
-[data-theme="pink"] [class*="to-[#06120d]"] {
-  --tw-gradient-from: rgba(43,32,36,0.6) !important;
+/* ── Hero image overlays — keep dark so artwork pops ────────────────────── */
+[data-theme="pink"] [class*="from-\[#050f0b\]"],
+[data-theme="pink"] [class*="to-\[#050f0b\]"],
+[data-theme="pink"] [class*="from-\[#06120d\]"],
+[data-theme="pink"] [class*="to-\[#06120d\]"] {
+  --tw-gradient-from: rgba(43,32,36,0.55) !important;
   --tw-gradient-to: transparent !important;
 }
-
-/* ── Backdrop blur elements (hero quotes, lightbox) — keep dark ─────────── */
-[data-theme="pink"] [class*="bg-[#050f0b]/8"],
-[data-theme="pink"] [class*="bg-black/9"],
-[data-theme="pink"] [class*="bg-black/95"],
-[data-theme="pink"] [class*="bg-black/96"] {
-  background-color: rgba(43,32,36,0.92) !important;
+/* Lightbox / modal backdrops stay dark */
+[data-theme="pink"] [class*="bg-black\/9"],
+[data-theme="pink"] [class*="bg-black\/95"],
+[data-theme="pink"] [class*="bg-black\/96"] {
+  background-color: rgba(43,32,36,0.93) !important;
 }
-[data-theme="pink"] [class*="bg-black/9"] *,
-[data-theme="pink"] [class*="bg-black/95"] * { color: #fbf5e6 !important; }
+[data-theme="pink"] [class*="bg-black\/9"] *,
+[data-theme="pink"] [class*="bg-black\/95"] * { color: #fbf5e6 !important; }
+
+/* ── Admin page — keep dark so dashboard stays readable ──────────────────── */
+[data-theme="pink"] body[data-page="admin"] {
+  background-color: #050f0b !important;
+  color: #fbf8f1 !important;
+}
+[data-theme="pink"] body[data-page="admin"] * {
+  /* Reset pink overrides inside admin */
+  --pink-override: none;
+}
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
 [data-theme="pink"] ::-webkit-scrollbar { background: #FCEEF3; }
@@ -445,23 +514,50 @@ body {
   border-radius: 4px;
 }
 
-/* ── Selection ───────────────────────────────────────────────────────────── */
+/* ── Text selection ──────────────────────────────────────────────────────── */
 [data-theme="pink"] ::selection {
   background-color: #D98FA6;
   color: #fff;
 }
 
-/* ── Champagne gradient text → rose gradient ─────────────────────────────── */
+/* ── Gradient text → rose version ───────────────────────────────────────── */
 [data-theme="pink"] .champagne-gradient-text {
   background: linear-gradient(135deg, #D98FA6 0%, #A94F6B 50%, #7B2D45 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
 }
 
-/* ── Smooth transitions ──────────────────────────────────────────────────── */
-[data-theme="pink"] * {
-  transition-property: background-color, border-color, color;
-  transition-duration: 300ms;
+/* ── Dividers & hr ───────────────────────────────────────────────────────── */
+[data-theme="pink"] hr,
+[data-theme="pink"] .divide-y > * { border-color: #E9CCD5 !important; }
+
+/* ── Specific "dark" utility overrides ───────────────────────────────────── */
+/* bg-[#070709] page background */
+[data-theme="pink"] .bg-\[\#070709\] { background-color: #FFF7FA !important; }
+/* bg-[#050f0b] nav/card */
+[data-theme="pink"] .bg-\[\#050f0b\] { background-color: #FCEEF3 !important; }
+/* bg-[#0a2319] studio surface */
+[data-theme="pink"] .bg-\[\#0a2319\]  { background-color: #FFF0F4 !important; }
+[data-theme="pink"] .bg-\[\#081a13\]  { background-color: #FFF0F4 !important; }
+[data-theme="pink"] .bg-\[\#081b13\]  { background-color: #A94F6B !important; }
+[data-theme="pink"] .bg-\[\#0a0f0c\]  { background-color: #FCEEF3 !important; }
+[data-theme="pink"] .bg-\[\#071610\]  { background-color: #FCEEF3 !important; }
+[data-theme="pink"] .bg-\[\#0d241a\]  { background-color: #FFF0F4 !important; }
+
+/* Fix text on those surfaces */
+[data-theme="pink"] .bg-\[\#070709\] h1,
+[data-theme="pink"] .bg-\[\#070709\] h2,
+[data-theme="pink"] .bg-\[\#070709\] h3,
+[data-theme="pink"] .bg-\[\#070709\] p { color: #2B2024 !important; }
+
+/* ── Mono / tracking font (order IDs etc.) ───────────────────────────────── */
+[data-theme="pink"] .font-mono { color: #A94F6B !important; }
+
+/* ── Smooth theme transitions ────────────────────────────────────────────── */
+[data-theme="pink"] *:not(img):not(video):not(canvas):not(svg) {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 250ms;
   transition-timing-function: ease;
 }
 
