@@ -10,13 +10,15 @@ const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.
 const FROM_NAME   = 'niharikartist Studio';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
 
-// Create Gmail SMTP transporter
+// Create Gmail SMTP transporter using port 465 (SSL) — works on Render free tier
 function getTransporter() {
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // SSL
     auth: {
       user: process.env.GMAIL_USER || FROM_EMAIL,
-      pass: process.env.GMAIL_APP_PASSWORD, // Gmail App Password (not regular password)
+      pass: process.env.GMAIL_APP_PASSWORD,
     },
   });
 }
