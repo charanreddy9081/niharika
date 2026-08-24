@@ -232,7 +232,7 @@ export default function CheckoutPage() {
   });
 
   // ── Auth headers helper ────────────────────────────────────────────────
-  const authHeaders = () => {
+  const authHeaders = (): Record<string, string> => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('nha_user_token') : null;
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   };
