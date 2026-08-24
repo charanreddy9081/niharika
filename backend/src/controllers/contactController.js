@@ -1,4 +1,10 @@
 const { supabase } = require('../config/db');
+const sgMail = require('@sendgrid/mail');
+
+if (process.env.SENDGRID_API_KEY) sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+const FROM_EMAIL  = process.env.SENDGRID_FROM_EMAIL || 'niharikaananthoja@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || FROM_EMAIL;
 
 exports.submitInquiry = async (req, res) => {
   try {
@@ -10,6 +16,36 @@ exports.submitInquiry = async (req, res) => {
 
     if (error) throw error;
     const mapped = { ...inquiry, _id: inquiry.id };
+
+    // Send email notification to admin — fire-and-forget
+    if (process.env.SENDGRID_API_KEY) {
+      const { name, email, phone, message, commission_subject, inquiry_type, artistic_vision } = req.body;
+      const body = message || artistic_vision || '';
+      const subject = commission_subject || inquiry_type || 'Studio Inquiry';
+
+      sgMail.send({
+        to: ADMIN_EMAIL,
+        from: { email: FROM_EMAIL, name: 'niharikartist Studio' },
+        replyTo: email || FROM_EMAIL,
+        subject: `📩 New Commission: ${subject} — ${name}`,
+        html: `
+          <div style="font-family:'Segoe UI',Arial,sans-serif;background:#050f0b;color:#fbf8f1;padding:32px;border-radius:12px;max-width:600px;margin:0 auto;border:1px solid rgba(232,200,114,0.25)">
+            <h2 style="color:#e8c872;font-weight:300;margin:0 0 20px">New Studio Commission Inquiry</h2>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+              <tr><td style="color:#a3b8af;padding:6px 0;width:140px">Name</td><td style="color:#fbf5e6">${name || '—'}</td></tr>
+              <tr><td style="color:#a3b8af;padding:6px 0">Email</td><td style="color:#fbf5e6"><a href="mailto:${email}" style="color:#e8c872">${email || '—'}</a></td></tr>
+              <tr><td style="color:#a3b8af;padding:6px 0">Phone</td><td style="color:#fbf5e6">${phone || '—'}</td></tr>
+              <tr><td style="color:#a3b8af;padding:6px 0">Category</td><td style="color:#fbf5e6">${inquiry_type || '—'}</td></tr>
+              <tr><td style="color:#a3b8af;padding:6px 0">Subject</td><td style="color:#fbf5e6">${subject}</td></tr>
+              <tr><td style="color:#a3b8af;padding:6px 0;vertical-align:top">Message</td><td style="color:#fbf5e6;white-space:pre-wrap">${body || '—'}</td></tr>
+            </table>
+            <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(232,200,114,0.2);font-size:11px;color:#627a70">
+              Submitted via niharikartist.shop/contact
+            </div>
+          </div>`,
+      }).catch(err => console.error('Commission email failed:', err?.response?.body || err.message));
+    }
+
     return res.status(201).json({ success: true, message: 'Your message has been received! Our studio will be in touch shortly.', data: mapped });
   } catch (error) {
     console.error('Error submitting inquiry:', error);
