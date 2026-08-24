@@ -13,6 +13,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../context/AuthContext';
+import AuthModal from '../../components/AuthModal';
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 if (!API) console.error('❌ NEXT_PUBLIC_API_URL is not set — API calls will fail in production');
@@ -47,6 +49,8 @@ function validateForm(form: FormState, hasItems: boolean): string | null {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, subtotal, shippingFee, discount, total, clearCart } = useCart();
+  const { user, isGuest, isLoading: authLoading } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const [form, setForm] = useState<FormState>({
     firstName: '', lastName: '', email: '', phone: '',
@@ -60,6 +64,19 @@ export default function CheckoutPage() {
   useEffect(() => {
     fetch(`${API}/api/health`, { cache: 'no-store' }).catch(() => {});
   }, []);
+
+  // Pre-fill form with logged-in user details
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        firstName: user.firstName || prev.firstName,
+        lastName: user.lastName || prev.lastName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone,
+      }));
+    }
+  }, [user]);
 
   // OTP state
   const [otpStep, setOtpStep] = useState<'idle' | 'sending' | 'sent' | 'verifying' | 'verified'>('idle');
@@ -312,11 +329,52 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#070709]">
       <Header />
+
+      {/* Auth modal */}
+      {showAuthModal && (
+        <AuthModal
+          reason="Sign in to complete your order"
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={() => setShowAuthModal(false)}
+        />
+      )}
+
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         <div className="text-center mb-10">
           <span className="text-xs uppercase tracking-widest text-[#d4af37] font-semibold block mb-1">Secure Studio Checkout</span>
           <h1 className="font-editorial text-4xl text-zinc-100 font-light">Delivery &amp; Payment</h1>
         </div>
+
+        {/* ── Guest gate ───────────────────────────────────────────── */}
+        {!authLoading && isGuest && (
+          <div className="max-w-md mx-auto text-center py-16 space-y-6">
+            <div className="w-16 h-16 rounded-full bg-[#0a2319] border border-[#d4af37]/30 flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-7 h-7 text-[#d4af37]" />
+            </div>
+            <div>
+              <h2 className="font-editorial text-2xl text-zinc-100 mb-2">Sign in to Checkout</h2>
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                You are browsing as a guest. To place an order, please sign in or create a free account.
+                This ensures your order confirmations and updates reach you reliably.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="inline-flex items-center gap-2 bg-[#d4af37] hover:bg-[#c49f2e] text-black font-semibold px-8 py-3.5 rounded-full text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+              Sign In / Register
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <p className="text-xs text-zinc-600">
+              You can continue browsing the{' '}
+              <a href="/shop" className="text-[#d4af37] hover:underline">store</a> or{' '}
+              <a href="/gallery" className="text-[#d4af37] hover:underline">gallery</a> as a guest.
+            </p>
+          </div>
+        )}
+
+        {/* Only show the checkout form to signed-in users */}
+        {!authLoading && !isGuest && (
+        <>
 
         {items.length === 0 && (
           <div className="text-center py-16 bg-zinc-950/40 rounded-2xl border border-zinc-800 p-8 space-y-4 max-w-md mx-auto">
@@ -489,6 +547,9 @@ export default function CheckoutPage() {
             </div>
           </form>
         )}
+        </> /* end signed-in wrapper */
+        )}
+
       </main>
       <Footer />
     </div>

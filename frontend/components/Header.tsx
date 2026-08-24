@@ -3,17 +3,22 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, Heart, Menu, X, Sparkles } from 'lucide-react';
+import { ShoppingBag, Heart, Menu, X, Sparkles, User, LogOut, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useSiteContent } from '../hooks/useSiteContent';
 import ThemeToggle from './ThemeToggle';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from './AuthModal';
 
 export const Header: React.FC = () => {
   const pathname = usePathname();
   const { toggleCart, totalItemsCount } = useCart();
   const { wishlistCount } = useWishlist();
+  const { user, isGuest, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { c } = useSiteContent('nav');
 
   const leftNavLinks = [
@@ -32,6 +37,14 @@ export const Header: React.FC = () => {
 
   return (
     <>
+      {/* Auth modal */}
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={() => setShowAuthModal(false)}
+        />
+      )}
+
       {/* Announcement Ribbon */}
       <div className="bg-gradient-to-r from-[#081b13] via-[#102d21] to-[#081b13] border-b border-[#e8c872]/25 py-2 px-4 text-center text-[11px] sm:text-xs tracking-widest text-[#fbf5e6] flex items-center justify-center gap-3 font-sans">
         <Sparkles className="w-3.5 h-3.5 text-[#e8c872] animate-pulse" />
@@ -97,6 +110,48 @@ export const Header: React.FC = () => {
               )}
             </button>
 
+            {/* Account */}
+            {isGuest ? (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="p-2 text-zinc-300 hover:text-[#e8c872] transition-colors btn-magnetic"
+                aria-label="Sign in"
+                title="Sign in"
+              >
+                <User className="w-5 h-5" />
+              </button>
+            ) : (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(v => !v)}
+                  className="flex items-center gap-1.5 p-1.5 rounded-lg bg-[#0a2319] border border-emerald-900/60 hover:border-[#e8c872]/50 text-[#a3b8af] hover:text-[#e8c872] transition-all"
+                  aria-label="Account menu"
+                >
+                  <div className="w-5 h-5 rounded-full bg-[#d4af37]/20 border border-[#d4af37]/50 flex items-center justify-center">
+                    <span className="text-[#d4af37] text-[10px] font-bold leading-none">
+                      {user!.firstName.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-44 bg-[#081a13] border border-[#e8c872]/30 rounded-xl shadow-2xl overflow-hidden z-50">
+                    <div className="px-4 py-3 border-b border-zinc-800">
+                      <p className="text-zinc-100 text-xs font-semibold truncate">{user!.firstName} {user!.lastName}</p>
+                      <p className="text-zinc-500 text-[10px] truncate">{user!.email}</p>
+                    </div>
+                    <button
+                      onClick={() => { signOut(); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-zinc-400 hover:bg-white/5 hover:text-red-400 transition-colors"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Theme Toggle */}
             <ThemeToggle />
           </div>
@@ -112,6 +167,22 @@ export const Header: React.FC = () => {
                   {link.label}
                 </Link>
               ))}
+            </div>
+            <div className="pt-2 border-t border-emerald-950">
+              {isGuest ? (
+                <button onClick={() => { setShowAuthModal(true); setMobileMenuOpen(false); }}
+                  className="flex items-center gap-2 text-sm text-[#d4af37] hover:text-[#f3e5ab] py-2">
+                  <User className="w-4 h-4" /> Sign In / Register
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-zinc-400">Signed in as <span className="text-zinc-200">{user!.firstName}</span></p>
+                  <button onClick={() => { signOut(); setMobileMenuOpen(false); }}
+                    className="flex items-center gap-2 text-xs text-red-400 hover:text-red-300 py-1">
+                    <LogOut className="w-3.5 h-3.5" /> Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -4,6 +4,7 @@ import './globals.css';
 import { CartProvider } from '../context/CartContext';
 import { WishlistProvider } from '../context/WishlistContext';
 import { ThemeProvider } from '../context/ThemeContext';
+import { AuthProvider } from '../context/AuthContext';
 import { CartDrawer } from '../components/CartDrawer';
 import { Toaster } from 'react-hot-toast';
 import KeepAlive from '../components/KeepAlive';
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text-primary)] antialiased selection:bg-[#e8c872] selection:text-black">
         <ThemeProvider>
+          <AuthProvider>
           <CartProvider>
             <WishlistProvider>
               <Toaster
@@ -71,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </WishlistProvider>
           </CartProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
