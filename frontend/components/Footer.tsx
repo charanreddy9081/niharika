@@ -2,11 +2,22 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Heart, Truck, Palette, Award, ShieldCheck } from 'lucide-react';
+import { Heart, Truck, Palette, Award, ShieldCheck, ExternalLink } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
+import { useSocialLinks, useWebsiteSettings } from '../hooks/useCMSData';
+
+const SOCIAL_ICONS: Record<string, React.ReactNode> = {
+  instagram: <span className="text-xs font-bold">IG</span>,
+  facebook:  <span className="text-xs font-bold">FB</span>,
+  youtube:   <span className="text-xs font-bold">YT</span>,
+  whatsapp:  <span className="text-xs font-bold">WA</span>,
+  pinterest: <span className="text-xs font-bold">PT</span>,
+};
 
 export const Footer: React.FC = () => {
   const { c } = useSiteContent('footer');
+  const socialLinks = useSocialLinks();
+  const settings = useWebsiteSettings();
 
   return (
     <footer className="bg-[#040e0a] border-t border-[#e8c872]/20 text-[#a3b8af] text-sm font-sans">
@@ -44,6 +55,27 @@ export const Footer: React.FC = () => {
             <ShieldCheck className="w-4 h-4" />
             <span>{c('quality_badge', 'Handmade in India • Archival Quality Guarantee')}</span>
           </div>
+
+          {/* Social Links — from CMS */}
+          {socialLinks.length > 0 && (
+            <div className="flex flex-wrap gap-3 pt-2">
+              {socialLinks.map(s => (
+                <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-[#a3b8af] hover:text-[#e8c872] transition-colors text-xs"
+                  title={s.label}>
+                  {SOCIAL_ICONS[s.platform] || <ExternalLink className="w-4 h-4" />}
+                  <span className="sr-only">{s.label}</span>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Contact info from settings */}
+          {settings?.contact_email && (
+            <a href={`mailto:${settings.contact_email}`} className="text-xs text-[#a3b8af] hover:text-[#e8c872] transition-colors block">
+              {settings.contact_email}
+            </a>
+          )}
         </div>
 
         <div className="space-y-3">

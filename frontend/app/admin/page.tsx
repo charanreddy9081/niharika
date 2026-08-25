@@ -14,6 +14,7 @@ import AdminArtistImages from '../../components/admin/AdminArtistImages';
 import AdminSiteContent from '../../components/admin/AdminSiteContent';
 import AdminJournal from '../../components/admin/AdminJournal';
 import AdminHomeTransition from '../../components/admin/AdminHomeTransition';
+import AdminCMS from '../../components/admin/AdminCMS';
 import ImageInput, { FileData } from '../../components/admin/ImageInput';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -43,7 +44,7 @@ export default function AdminPortalPage() {
   const [cpShowNew, setCpShowNew] = useState(false);
   const [cpShowConfirm, setCpShowConfirm] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'journal' | 'home_transition' | 'content'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'journal' | 'home_transition' | 'content' | 'cms'>('overview');
   const [products, setProducts] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -871,6 +872,7 @@ export default function AdminPortalPage() {
             { id: 'journal', label: 'Journal Stories (' + journalStories.length + ')', icon: FileText },
             { id: 'home_transition', label: 'Home Slideshow (' + homeTransitionImages.length + ')', icon: Home },
             { id: 'content', label: 'Website Content', icon: FileText },
+            { id: 'cms',     label: 'CMS Manager',     icon: LayoutDashboard },
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1343,6 +1345,11 @@ export default function AdminPortalPage() {
         {/* TAB 9: WEBSITE CONTENT */}
         {activeTab === 'content' && (
           <AdminSiteContent />
+        )}
+
+        {/* TAB 10: CMS MANAGER */}
+        {activeTab === 'cms' && (
+          <AdminCMS />
         )}
 
         {/* Add Gallery Artwork Modal */}

@@ -77,4 +77,34 @@ router.put('/home-transition/:id', protectAdmin, homeTransitionController.update
 router.put('/home-transition/:id/replace', protectAdmin, homeTransitionController.replaceImage);
 router.delete('/home-transition/:id', protectAdmin, homeTransitionController.deleteImage);
 
+// ── CMS Phase 1 (admin) ───────────────────────────────────────────────────
+const cms = require('../controllers/cmsController');
+
+// FAQs
+router.get('/cms/faqs',              protectAdmin, (req, res) => { req.query.admin = 'true'; cms.getFaqs(req, res); });
+router.post('/cms/faqs',             protectAdmin, cms.createFaq);
+router.put('/cms/faqs/reorder',      protectAdmin, cms.reorderFaqs);
+router.put('/cms/faqs/:id',          protectAdmin, cms.updateFaq);
+router.delete('/cms/faqs/:id',       protectAdmin, cms.deleteFaq);
+
+// Testimonials
+router.get('/cms/testimonials',         protectAdmin, (req, res) => { req.query.admin = 'true'; cms.getTestimonials(req, res); });
+router.post('/cms/testimonials',        protectAdmin, cms.createTestimonial);
+router.put('/cms/testimonials/:id',     protectAdmin, cms.updateTestimonial);
+router.delete('/cms/testimonials/:id',  protectAdmin, cms.deleteTestimonial);
+
+// Website Settings
+router.get('/cms/settings',  protectAdmin, cms.getSettings);
+router.put('/cms/settings',  protectAdmin, cms.updateSettings);
+
+// Social Links
+router.get('/cms/social-links',      protectAdmin, (req, res) => { req.query.admin = 'true'; cms.getSocialLinks(req, res); });
+router.post('/cms/social-links',     protectAdmin, cms.createSocialLink);
+router.put('/cms/social-links/:id',  protectAdmin, cms.updateSocialLink);
+
+// SEO Settings
+router.get('/cms/seo',        protectAdmin, cms.getSeoSettings);
+router.get('/cms/seo/:slug',  protectAdmin, cms.getSeoSettings);
+router.put('/cms/seo/:slug',  protectAdmin, cms.updateSeoSettings);
+
 module.exports = router;

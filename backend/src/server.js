@@ -50,6 +50,7 @@ app.use('/api/home-transition', require('./routes/homeTransitionRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
 app.use('/api/shipping', require('./routes/shippingRoutes'));
 app.use('/api/users',   require('./routes/userAuthRoutes'));
+app.use('/api/cms',     require('./routes/cmsRoutes'));
 app.use('/api/admin',   require('./routes/adminRoutes'));
 
 // Error handling middleware
