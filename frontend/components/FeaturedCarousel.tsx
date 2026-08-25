@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useSiteContent } from '../hooks/useSiteContent';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const AUTO_INTERVAL = 4000;
@@ -15,6 +16,7 @@ interface Artwork {
 }
 
 export default function FeaturedCarousel() {
+  const { c } = useSiteContent('gallery');
   const [artworks, setArtworks] = useState<Artwork[]>([]);
   const [current, setCurrent] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -74,9 +76,15 @@ export default function FeaturedCarousel() {
 
         {/* Header */}
         <div className="text-center mb-12 space-y-2">
-          <span className="text-[10px] uppercase tracking-[0.35em] text-[#e8c872] font-semibold block">Selected Work</span>
-          <h2 className="font-display text-3xl sm:text-4xl text-zinc-100 font-light">Featured Artwork</h2>
-          <p className="text-xs text-[#a3b8af]">A glimpse into recent paintings, portraits and commissions.</p>
+          <span className="text-[10px] uppercase tracking-[0.35em] text-[#e8c872] font-semibold block">
+            {c('carousel_label', 'Selected Work')}
+          </span>
+          <h2 className="font-display text-3xl sm:text-4xl text-zinc-100 font-light">
+            {c('carousel_title', 'Featured Artwork')}
+          </h2>
+          <p className="text-xs text-[#a3b8af]">
+            {c('carousel_subtitle', 'A glimpse into recent paintings, portraits and commissions.')}
+          </p>
         </div>
 
         {/* Carousel wrapper */}
