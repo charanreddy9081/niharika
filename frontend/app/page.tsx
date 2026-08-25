@@ -6,9 +6,10 @@ import Image from 'next/image';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { ProductCard } from '../components/ProductCard';
-import { Sparkles, ArrowRight, Star, Palette, Feather, Shield } from 'lucide-react';
+import { Sparkles, ArrowRight, Star, Palette, Feather, Shield, Quote } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
 import { useHomeTransition } from '../hooks/useHomeTransition';
+import { useTestimonials } from '../hooks/useCMSData';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import FeaturedCarousel from '../components/FeaturedCarousel';
@@ -20,6 +21,7 @@ export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { c } = useSiteContent('home');
+  const { testimonials } = useTestimonials();
   const {
     current, next, direction, animating, loading: imgLoading,
     currentSrc, currentAlt, hasFallback,
@@ -238,6 +240,48 @@ export default function HomePage() {
             </div>
           )}
         </section>
+
+        {/* Testimonials */}
+        {testimonials.length > 0 && (
+          <section className="py-20 border-t border-white/[0.06]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center max-w-xl mx-auto mb-14 space-y-3 reveal">
+                <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
+                  {c('testimonials_label', 'Patron Stories')}
+                </span>
+                <h2 className="font-display text-3xl sm:text-4xl text-zinc-100 font-light">
+                  {c('testimonials_title', 'Words from Collectors')}
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {testimonials.slice(0, 6).map((t, i) => (
+                  <div key={t.id} className={`bg-[#0a2319]/70 border border-emerald-900/40 p-6 rounded-3xl space-y-4 shadow-xl reveal reveal-delay-${Math.min(i + 1, 5)}`}>
+                    <Quote className="w-6 h-6 text-[#e8c872]/40" />
+                    <p className="text-xs text-zinc-300 leading-relaxed font-sans italic">"{t.review}"</p>
+                    <div className="flex items-center gap-1">
+                      {[1,2,3,4,5].map(s => (
+                        <Star key={s} className={`w-3.5 h-3.5 ${t.rating >= s ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'}`} />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-3 pt-1 border-t border-emerald-950">
+                      {t.photo_url ? (
+                        <img src={t.photo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover border border-[#e8c872]/30" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-[#e8c872]/20 border border-[#e8c872]/30 flex items-center justify-center text-[#e8c872] font-bold text-xs">
+                          {t.name.charAt(0)}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs font-semibold text-zinc-200">{t.name}</p>
+                        <p className="text-[10px] text-zinc-500">{t.designation}{t.location ? ` · ${t.location}` : ''}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* 4 Pillars */}
         <section ref={pillarsRef as any} className="py-20 bg-gradient-to-b from-[#050f0b] via-[#081b13] to-[#050f0b] border-t border-white/[0.06]">

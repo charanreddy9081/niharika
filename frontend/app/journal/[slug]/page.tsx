@@ -175,24 +175,36 @@ export default function JournalArticlePage() {
             </blockquote>
           )}
 
-          {/* Content */}
-          <div className="prose prose-invert prose-sm sm:prose-base max-w-none
-            prose-headings:font-display prose-headings:font-light prose-headings:text-zinc-100
-            prose-p:text-[#c4bfb0] prose-p:leading-[1.9] prose-p:text-base
-            prose-strong:text-zinc-200 prose-em:text-[#a3b8af]
-            prose-hr:border-white/[0.08]
-            space-y-5">
-            {content.split('\n').map((para, i) => {
-              if (!para.trim()) return null;
-              const cleaned = para.replace(/\*/g, '').trim();
-              if (!cleaned) return null;
-              return (
-                <p key={i} className="text-[#c4bfb0] leading-[1.9] text-base sm:text-[17px]">
-                  {cleaned}
-                </p>
-              );
-            })}
-          </div>
+          {/* Content — supports rich HTML from TipTap editor */}
+          {content.startsWith('<') ? (
+            <div
+              className="prose prose-invert prose-sm sm:prose-base max-w-none
+                prose-headings:font-display prose-headings:font-light prose-headings:text-zinc-100
+                prose-p:text-[#c4bfb0] prose-p:leading-[1.9] prose-p:text-base
+                prose-strong:text-zinc-200 prose-em:text-[#a3b8af]
+                prose-a:text-[#e8c872] prose-a:underline hover:prose-a:text-[#d4b055]
+                prose-blockquote:border-[#e8c872]/50 prose-blockquote:text-[#a3b8af]
+                prose-code:text-[#e8c872] prose-code:bg-[#0a2319] prose-code:rounded prose-code:px-1
+                prose-img:rounded-xl prose-img:shadow-xl
+                prose-hr:border-white/[0.08]
+                prose-ul:text-[#c4bfb0] prose-ol:text-[#c4bfb0]
+                space-y-5"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          ) : (
+            <div className="space-y-5">
+              {content.split('\n').map((para, i) => {
+                if (!para.trim()) return null;
+                const cleaned = para.replace(/\*/g, '').trim();
+                if (!cleaned) return null;
+                return (
+                  <p key={i} className="text-[#c4bfb0] leading-[1.9] text-base sm:text-[17px]">
+                    {cleaned}
+                  </p>
+                );
+              })}
+            </div>
+          )}
 
           {/* Author signature */}
           <div className="mt-12 pt-8 border-t border-white/[0.06] flex items-center gap-3">

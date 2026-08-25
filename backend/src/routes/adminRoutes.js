@@ -80,6 +80,11 @@ router.delete('/home-transition/:id', protectAdmin, homeTransitionController.del
 // ── CMS Phase 1 (admin) ───────────────────────────────────────────────────
 const cms = require('../controllers/cmsController');
 
+// Media Library
+router.get('/media',                protectAdmin, require('../controllers/mediaController').listMedia);
+router.post('/media/upload',        protectAdmin, require('../controllers/mediaController').uploadMedia);
+router.delete('/media/:fileName',   protectAdmin, require('../controllers/mediaController').deleteMedia);
+
 // FAQs
 router.get('/cms/faqs',              protectAdmin, (req, res) => { req.query.admin = 'true'; cms.getFaqs(req, res); });
 router.post('/cms/faqs',             protectAdmin, cms.createFaq);

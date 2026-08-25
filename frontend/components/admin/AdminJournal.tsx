@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { Plus, Trash2, Pencil, Eye, EyeOff, X, CheckCircle2, Star, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ImageInput, { FileData } from './ImageInput';
+import RichTextEditor from './RichTextEditor';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -113,12 +114,11 @@ function ArticleFields({ val, onChange }: FieldProps) {
 
       <div>
         <label className="block text-[#a3b8af] mb-1">Full Article Content</label>
-        <textarea
-          rows={8}
+        <RichTextEditor
           value={val.content || ''}
-          onChange={e => onChange('content', e.target.value)}
+          onChange={v => onChange('content', v)}
           placeholder="Full article text (shown on article detail page)..."
-          className={inputCls + ' resize-y'}
+          minHeight={250}
         />
       </div>
 

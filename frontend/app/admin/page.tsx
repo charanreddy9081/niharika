@@ -15,6 +15,7 @@ import AdminSiteContent from '../../components/admin/AdminSiteContent';
 import AdminJournal from '../../components/admin/AdminJournal';
 import AdminHomeTransition from '../../components/admin/AdminHomeTransition';
 import AdminCMS from '../../components/admin/AdminCMS';
+import MediaLibrary from '../../components/admin/MediaLibrary';
 import ImageInput, { FileData } from '../../components/admin/ImageInput';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -44,7 +45,7 @@ export default function AdminPortalPage() {
   const [cpShowNew, setCpShowNew] = useState(false);
   const [cpShowConfirm, setCpShowConfirm] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'journal' | 'home_transition' | 'content' | 'cms'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'gallery' | 'products' | 'orders' | 'inquiries' | 'artist_images' | 'journal' | 'home_transition' | 'content' | 'cms' | 'media'>('overview');
   const [products, setProducts] = useState<any[]>([]);
   const [gallery, setGallery] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
@@ -873,6 +874,7 @@ export default function AdminPortalPage() {
             { id: 'home_transition', label: 'Home Slideshow (' + homeTransitionImages.length + ')', icon: Home },
             { id: 'content', label: 'Website Content', icon: FileText },
             { id: 'cms',     label: 'CMS Manager',     icon: LayoutDashboard },
+            { id: 'media',   label: 'Media Library',   icon: Images },
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1350,6 +1352,11 @@ export default function AdminPortalPage() {
         {/* TAB 10: CMS MANAGER */}
         {activeTab === 'cms' && (
           <AdminCMS />
+        )}
+
+        {/* TAB 11: MEDIA LIBRARY */}
+        {activeTab === 'media' && (
+          <MediaLibrary />
         )}
 
         {/* Add Gallery Artwork Modal */}

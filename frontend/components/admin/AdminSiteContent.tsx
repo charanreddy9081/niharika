@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Save, RefreshCw, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Save, RefreshCw, ChevronDown, ChevronUp, CheckCircle2, Search, X, ChevronsUpDown } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { invalidateContentCache } from '../../hooks/useSiteContent';
 
@@ -15,9 +15,7 @@ interface ContentRow {
   content_type: string;
 }
 
-// Human-readable labels for each content key
 const LABELS: Record<string, string> = {
-  // nav
   announcement_ribbon: 'Announcement Ribbon',
   link_artist: 'Nav: The Artist',
   link_gallery: 'Nav: Gallery',
@@ -25,7 +23,6 @@ const LABELS: Record<string, string> = {
   link_journal: 'Nav: Journal',
   link_commissions: 'Nav: Commissions',
   link_order_status: 'Nav: Order Status',
-  // footer
   brand_tagline: 'Brand Tagline',
   brand_description: 'Brand Description',
   quality_badge: 'Quality Badge',
@@ -38,7 +35,6 @@ const LABELS: Record<string, string> = {
   guarantee_3_desc: 'Guarantee 3 Description',
   guarantee_4_title: 'Guarantee 4 Title',
   guarantee_4_desc: 'Guarantee 4 Description',
-  // home
   hero_label: 'Hero Badge Label',
   hero_title_line1: 'Hero Title Line 1',
   hero_title_line2: 'Hero Title Line 2 (Script)',
@@ -56,17 +52,18 @@ const LABELS: Record<string, string> = {
   featured_title: 'Featured Section Title',
   pillars_label: 'Pillars Section Label',
   pillars_title: 'Pillars Section Title',
-  pillars_step1_title: 'Step 1 Title (e.g. Charcoal Draft)',
-  pillars_step1_desc:  'Step 1 Description',
-  pillars_step2_title: 'Step 2 Title (e.g. Archival Glazes)',
-  pillars_step2_desc:  'Step 2 Description',
-  pillars_step3_title: 'Step 3 Title (e.g. Teakwood Framing)',
-  pillars_step3_desc:  'Step 3 Description',
-  pillars_step4_title: 'Step 4 Title (e.g. Gold Wax Seal)',
-  pillars_step4_desc:  'Step 4 Description',
-  // artist (shares some keys with home — labels apply by key name)
+  pillars_step1_title: 'Step 1 Title',
+  pillars_step1_desc: 'Step 1 Description',
+  pillars_step2_title: 'Step 2 Title',
+  pillars_step2_desc: 'Step 2 Description',
+  pillars_step3_title: 'Step 3 Title',
+  pillars_step3_desc: 'Step 3 Description',
+  pillars_step4_title: 'Step 4 Title',
+  pillars_step4_desc: 'Step 4 Description',
+  testimonials_label: 'Testimonials Section Label',
+  testimonials_title: 'Testimonials Section Title',
   origin_label: 'Origin Section Label',
-  origin_title: 'Origin Title (Every Brushstroke...)',
+  origin_title: 'Origin Title',
   origin_body1: 'Origin Body Paragraph 1',
   origin_body2: 'Origin Body Paragraph 2',
   origin_stat: 'Stats / Rating Text',
@@ -84,7 +81,6 @@ const LABELS: Record<string, string> = {
   cta_description: 'CTA Description',
   cta_btn_primary: 'CTA Primary Button',
   cta_btn_secondary: 'CTA Secondary Button',
-  // gallery / shop / community / contact
   page_label: 'Page Label / Badge',
   page_title: 'Page Title',
   page_subtitle: 'Page Subtitle',
@@ -111,6 +107,11 @@ const LABELS: Record<string, string> = {
   success_title: 'Success Title',
   success_desc: 'Success Description',
   submit_btn: 'Submit Button',
+  // shipping / privacy
+  para_1: 'Paragraph 1',
+  para_2: 'Paragraph 2',
+  para_3: 'Paragraph 3',
+  para_4: 'Paragraph 4',
 };
 
 const SECTION_LABELS: Record<string, string> = {
@@ -122,19 +123,26 @@ const SECTION_LABELS: Record<string, string> = {
   shop: '🛍️ Store / Shop Page',
   community: '💬 Journal / Community Page',
   contact: '📩 Commissions / Contact Page',
+  shipping: '🚚 Shipping Policy',
+  privacy: '🔒 Privacy Policy',
 };
 
 const isLongText = (key: string, value: string) =>
-  value.length > 80 || key.includes('body') || key.includes('desc') || key.includes('excerpt') || key.includes('description');
+  value.length > 80 ||
+  key.includes('body') || key.includes('desc') ||
+  key.includes('excerpt') || key.includes('description') ||
+  key.includes('para');
 
 export default function AdminSiteContent() {
   const [rows, setRows] = useState<ContentRow[]>([]);
-  const [edited, setEdited] = useState<Record<string, string>>({}); // id -> new value
+  const [edited, setEdited] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    artist: true, nav: true, footer: false, home: false,
+    nav: true, home: true, artist: false, footer: false,
     gallery: false, shop: false, community: false, contact: false,
+    shipping: false, privacy: false,
   });
 
   const token = () => localStorage.getItem('niharikartist_admin_token') || '';
@@ -142,27 +150,17 @@ export default function AdminSiteContent() {
   const loadContent = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/api/admin/content`, {
-        headers: { 'Authorization': 'Bearer ' + token() }
-      });
+      const res = await fetch(`${API}/api/admin/content`, { headers: { Authorization: 'Bearer ' + token() } });
       const data = await res.json();
       if (data.success) setRows(data.rows || []);
-    } catch {
-      toast.error('Failed to load content');
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error('Failed to load content'); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { loadContent(); }, []);
 
-  const getValue = (row: ContentRow) =>
-    edited[row.id] !== undefined ? edited[row.id] : row.content_value;
-
-  const handleChange = (row: ContentRow, value: string) => {
-    setEdited(prev => ({ ...prev, [row.id]: value }));
-  };
-
+  const getValue = (row: ContentRow) => edited[row.id] !== undefined ? edited[row.id] : row.content_value;
+  const handleChange = (row: ContentRow, value: string) => setEdited(prev => ({ ...prev, [row.id]: value }));
   const hasChanges = Object.keys(edited).length > 0;
 
   const handleSaveAll = async () => {
@@ -170,39 +168,46 @@ export default function AdminSiteContent() {
     setSaving(true);
     try {
       const updates = Object.entries(edited).map(([id, value]) => {
-        const row = rows.find(r => r.id === id);
-        return { section: row!.section, content_key: row!.content_key, content_value: value, content_type: row!.content_type };
+        const row = rows.find(r => r.id === id)!;
+        return { section: row.section, content_key: row.content_key, content_value: value, content_type: row.content_type };
       });
-
       const res = await fetch(`${API}/api/admin/content/bulk`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
-        body: JSON.stringify({ updates })
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token() },
+        body: JSON.stringify({ updates }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
-
-      // Invalidate frontend cache so pages pick up new content
       invalidateContentCache();
-
-      toast.success(`${Object.keys(edited).length} content items saved!`);
+      toast.success(`${Object.keys(edited).length} items saved!`);
       setEdited({});
       loadContent();
-    } catch (err: any) {
-      toast.error(err.message || 'Save failed.');
-    } finally {
-      setSaving(false);
-    }
+    } catch (err: any) { toast.error(err.message || 'Save failed.'); }
+    finally { setSaving(false); }
   };
 
-  // Group rows by section
-  const grouped = rows.reduce<Record<string, ContentRow[]>>((acc, row) => {
+  // Filter rows by search query
+  const filteredRows = useMemo(() => {
+    if (!search.trim()) return rows;
+    const q = search.toLowerCase();
+    return rows.filter(r =>
+      r.content_key.toLowerCase().includes(q) ||
+      r.content_value.toLowerCase().includes(q) ||
+      (LABELS[r.content_key] || '').toLowerCase().includes(q) ||
+      r.section.toLowerCase().includes(q)
+    );
+  }, [rows, search]);
+
+  const grouped = useMemo(() => filteredRows.reduce<Record<string, ContentRow[]>>((acc, row) => {
     if (!acc[row.section]) acc[row.section] = [];
     acc[row.section].push(row);
     return acc;
-  }, {});
+  }, {}), [filteredRows]);
 
-  const sectionOrder = ['nav', 'footer', 'home', 'artist', 'gallery', 'shop', 'community', 'contact'];
+  const sectionOrder = ['nav', 'footer', 'home', 'artist', 'gallery', 'shop', 'community', 'contact', 'shipping', 'privacy'];
+
+  const expandAll = () => setOpenSections(Object.fromEntries(sectionOrder.map(s => [s, true])));
+  const collapseAll = () => setOpenSections(Object.fromEntries(sectionOrder.map(s => [s, false])));
 
   if (loading) {
     return (
@@ -219,9 +224,11 @@ export default function AdminSiteContent() {
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h3 className="font-display text-2xl text-zinc-100">Website Content Manager</h3>
-          <p className="text-xs text-[#a3b8af] mt-0.5">Edit any text across the website without touching source code. Changes take effect on next page load.</p>
+          <p className="text-xs text-[#a3b8af] mt-0.5">{rows.length} editable fields across {Object.keys(grouped).length} sections</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={expandAll} className="text-[11px] text-zinc-500 hover:text-zinc-300 px-2 py-1 transition-colors">Expand All</button>
+          <button onClick={collapseAll} className="text-[11px] text-zinc-500 hover:text-zinc-300 px-2 py-1 transition-colors">Collapse All</button>
           <button onClick={loadContent} className="p-2 bg-[#0a2319] border border-emerald-900 hover:border-[#e8c872]/50 rounded-lg text-[#a3b8af] hover:text-white transition-colors" title="Reload">
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -232,6 +239,26 @@ export default function AdminSiteContent() {
           </button>
         </div>
       </div>
+
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-700" />
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by field name, section, or content value…"
+          className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl pl-9 pr-9 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872] transition-colors placeholder-emerald-900"
+        />
+        {search && (
+          <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-300">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+      {search && (
+        <p className="text-xs text-zinc-500">{filteredRows.length} field{filteredRows.length !== 1 ? 's' : ''} matching "{search}"</p>
+      )}
 
       {/* Unsaved changes notice */}
       {hasChanges && (
@@ -245,13 +272,12 @@ export default function AdminSiteContent() {
       {sectionOrder.map(section => {
         const sectionRows = grouped[section];
         if (!sectionRows || sectionRows.length === 0) return null;
-        const isOpen = openSections[section] !== false;
+        const isOpen = search ? true : (openSections[section] !== false);
 
         return (
           <div key={section} className="bg-[#0a2319]/80 border border-emerald-900/60 rounded-3xl overflow-hidden shadow-xl">
-            {/* Section Header */}
             <button
-              onClick={() => setOpenSections(prev => ({ ...prev, [section]: !isOpen }))}
+              onClick={() => !search && setOpenSections(prev => ({ ...prev, [section]: !isOpen }))}
               className="w-full flex items-center justify-between px-6 py-4 hover:bg-[#0d2a1f]/50 transition-colors text-left">
               <div className="flex items-center gap-3">
                 <span className="font-display text-lg text-zinc-100">{SECTION_LABELS[section] || section}</span>
@@ -259,15 +285,12 @@ export default function AdminSiteContent() {
                   {sectionRows.length} fields
                 </span>
                 {sectionRows.some(r => edited[r.id] !== undefined) && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-700/50 uppercase tracking-wider">
-                    unsaved
-                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-700/50 uppercase tracking-wider">unsaved</span>
                 )}
               </div>
-              {isOpen ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
+              {!search && (isOpen ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />)}
             </button>
 
-            {/* Fields */}
             {isOpen && (
               <div className="border-t border-emerald-950 divide-y divide-emerald-950/60">
                 {sectionRows.map(row => {
@@ -285,7 +308,7 @@ export default function AdminSiteContent() {
                       </div>
                       {longText ? (
                         <textarea
-                          rows={Math.min(6, Math.ceil(currentValue.length / 80))}
+                          rows={Math.min(6, Math.max(2, Math.ceil(currentValue.length / 80)))}
                           value={currentValue}
                           onChange={e => handleChange(row, e.target.value)}
                           className="w-full bg-[#050f0b] border border-emerald-900/80 rounded-xl px-3 py-2.5 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872] transition-colors resize-y font-sans leading-relaxed"
@@ -306,6 +329,12 @@ export default function AdminSiteContent() {
           </div>
         );
       })}
+
+      {search && filteredRows.length === 0 && (
+        <div className="text-center py-12 text-zinc-500 text-sm">
+          No content fields found for "{search}"
+        </div>
+      )}
     </div>
   );
 }
