@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Save, RefreshCw, ChevronDown, ChevronUp, CheckCircle2, Search, X, ChevronsUpDown } from 'lucide-react';
+import { Save, RefreshCw, ChevronDown, ChevronUp, CheckCircle2, Search, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { invalidateContentCache } from '../../hooks/useSiteContent';
 

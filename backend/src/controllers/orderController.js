@@ -249,8 +249,8 @@ exports.createOrder = async (req, res) => {
           items: verifiedItems,
           total_amount: serverTotal,
           status: 'Ordered',
-          payment_method: 'Cash on Delivery',
-          payment_status: 'pending'
+          payment_method: finalPaymentMethod,
+          payment_status: paymentStatus
         };
 
         const { data: coreInsert, error: coreError } = await supabase
@@ -372,7 +372,7 @@ exports.cancelOrder = async (req, res) => {
     const order = orders[0];
 
     // Check already cancelled/delivered
-    if (['Cancelled', 'Cancelled by niharikartist', 'Delivered'].includes(order.status)) {
+    if (['Cancelled', 'Cancelled by Customer', 'Cancelled by niharikartist', 'Delivered'].includes(order.status)) {
       return res.status(400).json({ success: false, message: `This order cannot be cancelled — current status: ${order.status}.` });
     }
 
@@ -414,7 +414,7 @@ exports.cancelOrder = async (req, res) => {
       total: order.total_amount,
       items: order.items || [],
       payment_method: order.payment_method,
-      razorpay_payment_id: order.razorpay_payment_id || null,
+      razorpay_payment_id: order.razorpay_payment_id || order.razorpay_order_id || null,
     };
     sendOrderStatusUpdate(cancelData).catch(err =>
       console.error('Cancellation email failed:', err.message)

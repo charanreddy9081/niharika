@@ -268,7 +268,6 @@ export default function CheckoutPage() {
     setSubmitting(true);
     try {
       // Create Razorpay order on backend — send JWT so signed-in users skip OTP check
-      const token = typeof window !== 'undefined' ? localStorage.getItem('nha_user_token') : null;
       const orderRes = await fetch(`${API}/api/payment/create-razorpay-order`, {
         method: 'POST',
         headers: {

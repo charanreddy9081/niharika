@@ -91,7 +91,6 @@ function Stepper({ status }: { status: string }) {
         const Icon = step.icon;
         const done    = idx < currentStep;
         const current = idx === currentStep;
-        const future  = idx > currentStep;
         return (
           <React.Fragment key={idx}>
             <div className="flex flex-col items-center flex-shrink-0 min-w-[60px]">
