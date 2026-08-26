@@ -565,3 +565,9 @@ body {
 
 
 
+
+/* ─── Testimonials infinite scroll ─────────────────────────────────────── */
+@keyframes testimonialScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}

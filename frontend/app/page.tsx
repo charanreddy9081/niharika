@@ -243,33 +243,49 @@ export default function HomePage() {
         </section>
         )}
 
-        {/* Testimonials */}
+        {/* Testimonials — auto-scrolling marquee */}
         {testimonials.length > 0 && (
-          <section className="py-20 border-t border-white/[0.06]">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center max-w-xl mx-auto mb-14 space-y-3">
-                <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
-                  {c('testimonials_label', 'Patron Stories')}
-                </span>
-                <h2 className="font-display text-3xl sm:text-4xl text-zinc-100 font-light">
-                  {c('testimonials_title', 'Words from Collectors')}
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {testimonials.slice(0, 6).map((t, i) => (
-                  <div key={t.id} className="bg-[#0a2319]/70 border border-emerald-900/40 p-6 rounded-3xl space-y-4 shadow-xl">
-                    <Quote className="w-6 h-6 text-[#e8c872]/40" />
+          <section className="py-20 border-t border-white/[0.06] overflow-hidden">
+            <div className="text-center max-w-xl mx-auto mb-14 space-y-3 px-4">
+              <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
+                {c('testimonials_label', 'Patron Stories')}
+              </span>
+              <h2 className="font-display text-3xl sm:text-4xl text-zinc-100 font-light">
+                {c('testimonials_title', 'Words from Collectors')}
+              </h2>
+            </div>
+            {/* Marquee track — duplicated for seamless loop */}
+            <div className="relative">
+              {/* Fade edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none bg-gradient-to-r from-[#050f0b] to-transparent" />
+              <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none bg-gradient-to-l from-[#050f0b] to-transparent" />
+              <div
+                className="flex gap-6"
+                style={{
+                  animation: 'testimonialScroll 30s linear infinite',
+                  width: 'max-content',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.animationPlayState = 'paused')}
+                onMouseLeave={e => (e.currentTarget.style.animationPlayState = 'running')}
+              >
+                {/* Render twice for seamless infinite loop */}
+                {[...testimonials, ...testimonials].map((t, i) => (
+                  <div
+                    key={`${t.id}-${i}`}
+                    className="flex-shrink-0 w-80 bg-[#0a2319]/70 border border-emerald-900/40 p-6 rounded-3xl space-y-4 shadow-xl"
+                  >
+                    <Quote className="w-5 h-5 text-[#e8c872]/40" />
                     <p className="text-xs text-zinc-300 leading-relaxed font-sans italic">"{t.review}"</p>
                     <div className="flex items-center gap-1">
                       {[1,2,3,4,5].map(s => (
-                        <Star key={s} className={`w-3.5 h-3.5 ${t.rating >= s ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'}`} />
+                        <Star key={s} className={`w-3 h-3 ${t.rating >= s ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'}`} />
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 pt-1 border-t border-emerald-950">
+                    <div className="flex items-center gap-3 pt-2 border-t border-emerald-950">
                       {(t.photo_url && t.photo_url.length > 0) ? (
                         <img src={t.photo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover border border-[#e8c872]/30" />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-[#e8c872]/20 border border-[#e8c872]/30 flex items-center justify-center text-[#e8c872] font-bold text-xs">
+                        <div className="w-8 h-8 rounded-full bg-[#e8c872]/20 border border-[#e8c872]/30 flex items-center justify-center text-[#e8c872] font-bold text-xs flex-shrink-0">
                           {t.name.charAt(0)}
                         </div>
                       )}
