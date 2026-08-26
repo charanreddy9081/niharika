@@ -247,7 +247,7 @@ export default function HomePage() {
         {testimonials.length > 0 && (
           <section className="py-20 border-t border-white/[0.06]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center max-w-xl mx-auto mb-14 space-y-3 reveal">
+              <div className="text-center max-w-xl mx-auto mb-14 space-y-3">
                 <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
                   {c('testimonials_label', 'Patron Stories')}
                 </span>
@@ -257,7 +257,7 @@ export default function HomePage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {testimonials.slice(0, 6).map((t, i) => (
-                  <div key={t.id} className={`bg-[#0a2319]/70 border border-emerald-900/40 p-6 rounded-3xl space-y-4 shadow-xl reveal reveal-delay-${Math.min(i + 1, 5)}`}>
+                  <div key={t.id} className="bg-[#0a2319]/70 border border-emerald-900/40 p-6 rounded-3xl space-y-4 shadow-xl">
                     <Quote className="w-6 h-6 text-[#e8c872]/40" />
                     <p className="text-xs text-zinc-300 leading-relaxed font-sans italic">"{t.review}"</p>
                     <div className="flex items-center gap-1">
@@ -266,7 +266,7 @@ export default function HomePage() {
                       ))}
                     </div>
                     <div className="flex items-center gap-3 pt-1 border-t border-emerald-950">
-                      {t.photo_url ? (
+                      {(t.photo_url && t.photo_url.length > 0) ? (
                         <img src={t.photo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover border border-[#e8c872]/30" />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-[#e8c872]/20 border border-[#e8c872]/30 flex items-center justify-center text-[#e8c872] font-bold text-xs">
