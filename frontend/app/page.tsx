@@ -211,7 +211,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Artworks */}
+        {/* Featured Artworks — only show when products are available */}
+        {(loading || products.length > 0) && (
         <section ref={featuredRef as any} className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-white/[0.06]">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4 reveal">
             <div>
@@ -240,6 +241,7 @@ export default function HomePage() {
             </div>
           )}
         </section>
+        )}
 
         {/* Testimonials */}
         {testimonials.length > 0 && (
