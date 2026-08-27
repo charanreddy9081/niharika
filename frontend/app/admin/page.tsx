@@ -869,6 +869,7 @@ export default function AdminPortalPage() {
             { id: 'products', label: 'Shop Inventory (' + products.length + ')', icon: Package },
             { id: 'gallery', label: 'Gallery Artworks (' + gallery.length + ')', icon: Images },
             { id: 'orders', label: 'Orders & Heirlooms (' + orders.length + ')', icon: ShoppingCart },
+            { id: 'reviews', label: 'Patron Reviews', icon: Star },
             { id: 'inquiries', label: 'Commissions (' + inquiries.length + ')', icon: MessageSquare },
             { id: 'artist_images', label: 'Artist Images (' + artistImages.length + ')', icon: ImageIcon },
             { id: 'journal', label: 'Journal Stories (' + journalStories.length + ')', icon: FileText },
@@ -876,7 +877,6 @@ export default function AdminPortalPage() {
             { id: 'content', label: 'Website Content', icon: FileText },
             { id: 'cms',     label: 'CMS Manager',     icon: LayoutDashboard },
             { id: 'media',   label: 'Media Library',   icon: Images },
-            { id: 'reviews', label: 'Patron Reviews',  icon: Star },
           ].map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
