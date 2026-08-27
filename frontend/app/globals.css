@@ -62,26 +62,17 @@
   }
 
   /* ─── Global text justification ─────────────────────────────────────── */
-  /* All paragraph text is justified. Headings, buttons, labels stay left/center. */
+  /* Paragraphs justified with inter-word spacing — no aggressive hyphenation */
   p, li, blockquote, td, .prose p, .prose li {
     text-align: justify;
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    word-break: break-word;
+    text-justify: inter-word;
+    hyphens: none;
+    -webkit-hyphens: none;
     overflow-wrap: break-word;
   }
 
-  /* Headings — never justify, always natural alignment */
-  h1, h2, h3, h4, h5, h6,
-  .font-display, .font-editorial, .font-signature {
-    text-align: inherit;
-    hyphens: none;
-    -webkit-hyphens: none;
-  }
-
-  /* Short inline elements — no justify */
-  label, button, span, a, input, textarea, select,
-  .text-xs, .text-\[10px\], .text-\[11px\] {
+  /* Headings — never justify */
+  h1, h2, h3, h4, h5, h6 {
     text-align: inherit;
   }
 
