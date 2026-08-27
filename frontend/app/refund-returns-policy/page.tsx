@@ -19,7 +19,7 @@ const Section = ({ number, icon: Icon, title, children }: {
         <h2 className="font-editorial text-xl text-zinc-100 mt-0.5">{title}</h2>
       </div>
     </div>
-    <div className="text-sm text-zinc-300 leading-relaxed space-y-3 pl-14">
+    <div className="text-sm text-zinc-300 leading-relaxed space-y-3 pl-14 justified">
       {children}
     </div>
   </div>

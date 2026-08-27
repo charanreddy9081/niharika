@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
             {c('page_title', 'Privacy Policy')}
           </h1>
         </div>
-        <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 sm:p-10 space-y-6 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
+        <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 sm:p-10 space-y-6 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans justified">
           <p>{c('para_1', 'We respect your privacy and are committed to safeguarding the personal information you share with us.')}</p>
           <p>{c('para_2', 'When you place an order or contact our studio, we collect your name, shipping address, email address, and phone number solely to process your order, deliver your package, and communicate tracking updates.')}</p>
           <p>{c('para_3', 'We never sell, rent, or trade your personal data to third parties. All online payments are handled securely through encrypted payment gateways.')}</p>

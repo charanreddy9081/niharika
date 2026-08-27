@@ -320,7 +320,7 @@ export default function ProductDetailPage() {
             ))}
           </div>
 
-          <div className="max-w-3xl mx-auto py-4 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans space-y-4">
+          <div className="max-w-3xl mx-auto py-4 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans space-y-4 justified">
             {activeTab === 'story' && (
               <div className="space-y-4 whitespace-pre-line bg-[#0a2319]/50 border border-emerald-900/60 p-8 rounded-3xl shadow-xl">
                 <h3 className="font-display text-2xl text-zinc-100">{c('story_heading', 'The Story Behind the Masterwork')}</h3>

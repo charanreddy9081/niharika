@@ -178,7 +178,7 @@ export default function JournalArticlePage() {
           {/* Content — supports rich HTML from TipTap editor */}
           {content.startsWith('<') ? (
             <div
-              className="prose prose-invert prose-sm sm:prose-base max-w-none
+              className="justified prose prose-invert prose-sm sm:prose-base max-w-none
                 prose-headings:font-display prose-headings:font-light prose-headings:text-zinc-100
                 prose-p:text-[#c4bfb0] prose-p:leading-[1.9] prose-p:text-base
                 prose-strong:text-zinc-200 prose-em:text-[#a3b8af]

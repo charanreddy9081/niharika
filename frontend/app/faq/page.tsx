@@ -59,7 +59,7 @@ export default function FAQPage() {
                     : <ChevronDown className="w-4 h-4 text-[#a3b8af] flex-shrink-0" />}
                 </button>
                 {openIdx === faq.id && (
-                  <div className="px-6 pb-6 text-xs text-[#a3b8af] leading-relaxed border-t border-emerald-900/60 pt-4 font-sans">
+                  <div className="px-6 pb-6 text-xs text-[#a3b8af] leading-relaxed border-t border-emerald-900/60 pt-4 font-sans justified">
                     {faq.answer}
                   </div>
                 )}

@@ -190,7 +190,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="space-y-6 text-left reveal reveal-right">
+            <div className="space-y-6 text-left reveal reveal-right justified">
               <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
                 {c('manifesto_label', 'The Studio Philosophy')}
               </span>

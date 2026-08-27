@@ -20,7 +20,7 @@ export default function ShippingPage() {
             {c('page_title', 'Shipping & Delivery Policy')}
           </h1>
         </div>
-        <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 sm:p-10 space-y-6 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
+        <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl p-6 sm:p-10 space-y-6 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans justified">
           <p>{c('para_1', 'At niharikartist, each artwork is handpainted and customized to order. Please allow 2 to 3 business days for our studio artists to complete your piece, apply the protective varnish, and frame it securely.')}</p>
           <p>{c('para_2', 'Shipping charges are calculated at checkout based on your pincode. We dispatch via India Post Speed Post and Registered Parcel from Alwal, Hyderabad.')}</p>
           <p>{c('para_3', 'Once dispatched, packages are routed via India Post. Delivery timelines range between 1–4 business days for metropolitan cities and 4–7 business days for other regional areas.')}</p>

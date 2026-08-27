@@ -61,19 +61,17 @@
     scroll-behavior: smooth;
   }
 
-  /* ─── Global text justification ─────────────────────────────────────── */
-  /* Paragraphs justified with inter-word spacing — no aggressive hyphenation */
-  p, li, blockquote, td, .prose p, .prose li {
+  /* ─── Text justification utility — apply only where needed ─────────── */
+  /* Usage: add class "justified" to any container whose paragraphs need justification */
+  .justified p,
+  .justified li,
+  .prose-justified p,
+  .prose-justified li {
     text-align: justify;
     text-justify: inter-word;
     hyphens: none;
     -webkit-hyphens: none;
     overflow-wrap: break-word;
-  }
-
-  /* Headings — never justify */
-  h1, h2, h3, h4, h5, h6 {
-    text-align: inherit;
   }
 
   /* Smooth scroll for all anchor links */

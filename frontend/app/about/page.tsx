@@ -64,7 +64,7 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-6 space-y-6 text-left">
+          <div className="lg:col-span-6 space-y-6 text-left justified">
             <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
               {c('origin_label', 'Our Beginning')}
             </span>
@@ -109,7 +109,7 @@ export default function AboutPage() {
 
         {/* Second Visual Story: The Atelier Craft */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-28">
-          <div className="lg:col-span-6 space-y-6 text-left order-2 lg:order-1">
+          <div className="lg:col-span-6 space-y-6 text-left order-2 lg:order-1 justified">
             <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
               {c('craft_label', 'Archival Permanence')}
             </span>
