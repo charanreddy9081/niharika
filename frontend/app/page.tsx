@@ -9,10 +9,10 @@ import { ProductCard } from '../components/ProductCard';
 import { Sparkles, ArrowRight, Star, Palette, Feather, Shield, Quote } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
 import { useHomeTransition } from '../hooks/useHomeTransition';
-import { useTestimonials } from '../hooks/useCMSData';
 import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import FeaturedCarousel from '../components/FeaturedCarousel';
+import ReviewSection from '../components/ReviewSection';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const SLIDE_DURATION = 900;
@@ -21,7 +21,6 @@ export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { c } = useSiteContent('home');
-  const { testimonials } = useTestimonials();
   const {
     current, next, direction, animating, loading: imgLoading,
     currentSrc, currentAlt, hasFallback,
@@ -243,63 +242,8 @@ export default function HomePage() {
         </section>
         )}
 
-        {/* Testimonials — auto-scrolling marquee */}
-        {testimonials.length > 0 && (
-          <section className="py-20 border-t border-white/[0.06] overflow-hidden">
-            <div className="text-center max-w-xl mx-auto mb-14 space-y-3 px-4">
-              <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block">
-                {c('testimonials_label', 'Patron Stories')}
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl text-zinc-100 font-light">
-                {c('testimonials_title', 'Words from Collectors')}
-              </h2>
-            </div>
-            {/* Marquee track — duplicated for seamless loop */}
-            <div className="relative">
-              {/* Fade edges */}
-              <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none bg-gradient-to-r from-[#050f0b] to-transparent" />
-              <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none bg-gradient-to-l from-[#050f0b] to-transparent" />
-              <div
-                className="flex gap-6"
-                style={{
-                  animation: 'testimonialScroll 30s linear infinite',
-                  width: 'max-content',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.animationPlayState = 'paused')}
-                onMouseLeave={e => (e.currentTarget.style.animationPlayState = 'running')}
-              >
-                {/* Render twice for seamless infinite loop */}
-                {[...testimonials, ...testimonials].map((t, i) => (
-                  <div
-                    key={`${t.id}-${i}`}
-                    className="flex-shrink-0 w-80 bg-[#0a2319]/70 border border-emerald-900/40 p-6 rounded-3xl space-y-4 shadow-xl"
-                  >
-                    <Quote className="w-5 h-5 text-[#e8c872]/40" />
-                    <p className="text-xs text-zinc-300 leading-relaxed font-sans italic">"{t.review}"</p>
-                    <div className="flex items-center gap-1">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} className={`w-3 h-3 ${t.rating >= s ? 'text-amber-400 fill-amber-400' : 'text-zinc-700'}`} />
-                      ))}
-                    </div>
-                    <div className="flex items-center gap-3 pt-2 border-t border-emerald-950">
-                      {(t.photo_url && t.photo_url.length > 0) ? (
-                        <img src={t.photo_url} alt={t.name} className="w-8 h-8 rounded-full object-cover border border-[#e8c872]/30" />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-[#e8c872]/20 border border-[#e8c872]/30 flex items-center justify-center text-[#e8c872] font-bold text-xs flex-shrink-0">
-                          {t.name.charAt(0)}
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-xs font-semibold text-zinc-200">{t.name}</p>
-                        <p className="text-[10px] text-zinc-500">{t.designation}{t.location ? ` · ${t.location}` : ''}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* Reviews — user submitted, admin approved */}
+        <ReviewSection />
 
         {/* 4 Pillars */}
         <section ref={pillarsRef as any} className="py-20 bg-gradient-to-b from-[#050f0b] via-[#081b13] to-[#050f0b] border-t border-white/[0.06]">

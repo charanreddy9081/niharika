@@ -51,6 +51,7 @@ app.use('/api/payment', require('./routes/paymentRoutes'));
 app.use('/api/shipping', require('./routes/shippingRoutes'));
 app.use('/api/users',   require('./routes/userAuthRoutes'));
 app.use('/api/cms',     require('./routes/cmsRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/admin',   require('./routes/adminRoutes'));
 
 // Error handling middleware

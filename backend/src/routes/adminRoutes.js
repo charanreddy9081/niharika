@@ -112,4 +112,10 @@ router.get('/cms/seo',        protectAdmin, cms.getSeoSettings);
 router.get('/cms/seo/:slug',  protectAdmin, cms.getSeoSettings);
 router.put('/cms/seo/:slug',  protectAdmin, cms.updateSeoSettings);
 
+// Reviews (admin)
+const reviewController = require('../controllers/reviewController');
+router.get('/reviews',              protectAdmin, reviewController.getAllReviews);
+router.put('/reviews/:id/status',   protectAdmin, reviewController.updateReviewStatus);
+router.delete('/reviews/:id',       protectAdmin, reviewController.deleteReview);
+
 module.exports = router;
