@@ -58,8 +58,31 @@
     font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
     letter-spacing: -0.01em;
-    /* Smooth page scrolling */
     scroll-behavior: smooth;
+  }
+
+  /* ─── Global text justification ─────────────────────────────────────── */
+  /* All paragraph text is justified. Headings, buttons, labels stay left/center. */
+  p, li, blockquote, td, .prose p, .prose li {
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Headings — never justify, always natural alignment */
+  h1, h2, h3, h4, h5, h6,
+  .font-display, .font-editorial, .font-signature {
+    text-align: inherit;
+    hyphens: none;
+    -webkit-hyphens: none;
+  }
+
+  /* Short inline elements — no justify */
+  label, button, span, a, input, textarea, select,
+  .text-xs, .text-\[10px\], .text-\[11px\] {
+    text-align: inherit;
   }
 
   /* Smooth scroll for all anchor links */
