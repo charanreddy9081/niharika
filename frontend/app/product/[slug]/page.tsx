@@ -11,6 +11,7 @@ import { useCart } from '../../../context/CartContext';
 import { useWishlist } from '../../../context/WishlistContext';
 import { Star, Heart, ShoppingBag, Truck, ShieldCheck, Sparkles, ChevronRight, Palette, Layers, Maximize } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useSiteContent } from '../../../hooks/useSiteContent';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -21,6 +22,7 @@ export default function ProductDetailPage() {
 
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { c } = useSiteContent('product');
 
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
@@ -197,7 +199,7 @@ export default function ProductDetailPage() {
                   )}
                 </div>
                 <span className="text-[10px] text-emerald-400 block mt-1 font-sans">
-                  • Complimentary Pan-India Insured Dispatch Included
+                  {c('dispatch_badge', '• Complimentary Pan-India Insured Dispatch Included')}
                 </span>
                 {product.short_description && (
                   <span className="text-[11px] text-[#e8c872] block mt-1 font-sans italic">
@@ -231,15 +233,15 @@ export default function ProductDetailPage() {
             <div className="bg-[#071b12] border border-[#e8c872]/30 rounded-2xl p-5 space-y-2 shadow-xl">
               <div className="flex items-center gap-2 text-xs text-[#e8c872] font-semibold uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                <span>Complimentary Wax-Sealed Note</span>
+                <span>{c('wax_note_title', 'Complimentary Wax-Sealed Note')}</span>
               </div>
               <p className="text-[11px] text-[#a3b8af] leading-relaxed">
-                Add an intimate message or name. We will pen it with a calligraphy fountain pen on vintage parchment, sealed with authentic gold wax.
+                {c('wax_note_desc', 'Add an intimate message or name. We will pen it with a calligraphy fountain pen on vintage parchment, sealed with authentic gold wax.')}
               </p>
               <textarea
                 value={customNote}
                 onChange={e => setCustomNote(e.target.value)}
-                placeholder="e.g. For Aarav — to remind you that distance can never fade our childhood bond..."
+                placeholder={c('wax_note_placeholder', 'e.g. For Aarav — to remind you that distance can never fade our childhood bond...')}
                 rows={2}
                 className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-xs text-[#fbf5e6] placeholder-emerald-800 focus:outline-none focus:border-[#e8c872] resize-none"
               />
@@ -269,7 +271,7 @@ export default function ProductDetailPage() {
                   className="flex-1 bg-[#0a2319] hover:bg-[#123627] border border-[#e8c872]/60 text-[#fbf5e6] hover:text-[#e8c872] font-semibold py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all btn-magnetic flex items-center justify-center gap-2 shadow-lg"
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  <span>Add To Bag</span>
+                  <span>{c('add_to_bag_btn', 'Add To Bag')}</span>
                 </button>
               </div>
 
@@ -277,7 +279,7 @@ export default function ProductDetailPage() {
                 onClick={handleBuyNow}
                 className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-4 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_25px_rgba(232,200,114,0.4)] btn-magnetic flex items-center justify-center gap-2"
               >
-                <span>Acquire Masterwork (Instant Checkout)</span>
+                <span>{c('buy_now_btn', 'Acquire Masterwork (Instant Checkout)')}</span>
               </button>
             </div>
 
@@ -285,11 +287,11 @@ export default function ProductDetailPage() {
             <div className="pt-4 border-t border-emerald-950 grid grid-cols-2 gap-4 text-xs text-[#a3b8af]">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#e8c872]" />
-                <span>Archival 100-Year Life Guarantee</span>
+                <span>{c('badge_1', 'Archival 100-Year Life Guarantee')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-[#e8c872]" />
-                <span>Shockproof Air Courier Dispatch</span>
+                <span>{c('badge_2', 'Shockproof Air Courier Dispatch')}</span>
               </div>
             </div>
           </div>
@@ -299,9 +301,9 @@ export default function ProductDetailPage() {
         <div className="mt-20 border-t border-emerald-950 pt-12 space-y-6">
           <div className="flex items-center justify-center gap-4 border-b border-emerald-950 pb-4">
             {[
-              { id: 'story', label: 'Artwork Chronicle' },
-              { id: 'specs', label: 'Technical Specifications' },
-              { id: 'care', label: 'Archival Care' },
+              { id: 'story', label: c('tab_story', 'Artwork Chronicle') },
+              { id: 'specs', label: c('tab_specs', 'Technical Specifications') },
+              { id: 'care', label: c('tab_care', 'Archival Care') },
               { id: 'shipping', label: 'Dispatch & Packaging' }
             ].map(tab => (
               <button
@@ -321,7 +323,7 @@ export default function ProductDetailPage() {
           <div className="max-w-3xl mx-auto py-4 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans space-y-4">
             {activeTab === 'story' && (
               <div className="space-y-4 whitespace-pre-line bg-[#0a2319]/50 border border-emerald-900/60 p-8 rounded-3xl shadow-xl">
-                <h3 className="font-display text-2xl text-zinc-100">The Story Behind the Masterwork</h3>
+                <h3 className="font-display text-2xl text-zinc-100">{c('story_heading', 'The Story Behind the Masterwork')}</h3>
                 <p>{product.description}</p>
               </div>
             )}
@@ -346,26 +348,26 @@ export default function ProductDetailPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 py-2">
                   <span className="text-[#a3b8af]">Authenticity:</span>
-                  <strong className="text-[#e8c872]">Hand-signed by artist Niharika</strong>
+                  <strong className="text-[#e8c872]">{c('authenticity_value', 'Hand-signed by artist Niharika')}</strong>
                 </div>
               </div>
             )}
 
             {activeTab === 'care' && (
               <div className="bg-[#0a2319]/50 border border-emerald-900/60 p-8 rounded-3xl shadow-xl space-y-3">
-                <h4 className="font-display text-lg text-white">Preservation Guidelines</h4>
-                <p>• Avoid direct, prolonged sunlight exposure to maintain archival colour vibrance.</p>
-                <p>• Dust gently with a soft microfibre cloth. Do not use chemical solvents or water on the surface.</p>
-                <p>• Display in humidity-controlled interior spaces.</p>
+                <h4 className="font-display text-lg text-white">{c('care_heading', 'Preservation Guidelines')}</h4>
+                <p>{c('care_1', '• Avoid direct, prolonged sunlight exposure to maintain archival colour vibrance.')}</p>
+                <p>{c('care_2', '• Dust gently with a soft microfibre cloth. Do not use chemical solvents or water on the surface.')}</p>
+                <p>{c('care_3', '• Display in humidity-controlled interior spaces.')}</p>
               </div>
             )}
 
             {activeTab === 'shipping' && (
               <div className="bg-[#0a2319]/50 border border-emerald-900/60 p-8 rounded-3xl shadow-xl space-y-3">
-                <h4 className="font-display text-lg text-white">Secure Atelier Dispatch</h4>
-                <p>• Each piece is insulated in multi-layered moisture-barrier bubblewrap, shockproof honeycomb corner protectors, and solid corrugated shipping casing.</p>
-                <p>• Pan-India express air courier dispatch within 48 to 72 hours of studio inspection.</p>
-                <p>• Live SMS and Email tracking provided from dispatch to doorstep handover.</p>
+                <h4 className="font-display text-lg text-white">{c('shipping_heading', 'Secure Atelier Dispatch')}</h4>
+                <p>{c('shipping_1', '• Each piece is insulated in multi-layered moisture-barrier bubblewrap, shockproof honeycomb corner protectors, and solid corrugated shipping casing.')}</p>
+                <p>{c('shipping_2', '• Pan-India express air courier dispatch within 48 to 72 hours of studio inspection.')}</p>
+                <p>{c('shipping_3', '• Live SMS and Email tracking provided from dispatch to doorstep handover.')}</p>
               </div>
             )}
           </div>
@@ -375,8 +377,8 @@ export default function ProductDetailPage() {
         {related.length > 0 && (
           <div className="mt-20 border-t border-emerald-950 pt-16">
             <div className="text-center mb-12">
-              <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block mb-1">Companion Pieces</span>
-              <h2 className="font-display text-3xl text-zinc-100 font-light">You May Also Cherish</h2>
+              <span className="text-xs uppercase tracking-[0.25em] text-[#e8c872] font-semibold block mb-1">{c('related_label', 'Companion Pieces')}</span>
+              <h2 className="font-display text-3xl text-zinc-100 font-light">{c('related_title', 'You May Also Cherish')}</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {related.map(relProduct => (

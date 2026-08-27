@@ -107,6 +107,31 @@ const LABELS: Record<string, string> = {
   success_title: 'Success Title',
   success_desc: 'Success Description',
   submit_btn: 'Submit Button',
+  // product page
+  dispatch_badge: 'Dispatch Badge (price box)',
+  wax_note_title: 'Wax Note — Section Title',
+  wax_note_desc: 'Wax Note — Description',
+  wax_note_placeholder: 'Wax Note — Placeholder Text',
+  buy_now_btn: 'Buy Now Button',
+  add_to_bag_btn: 'Add to Bag Button',
+  badge_1: 'Value Badge 1 (Archival)',
+  badge_2: 'Value Badge 2 (Courier)',
+  tab_story: 'Tab — Story Label',
+  tab_specs: 'Tab — Specs Label',
+  tab_care: 'Tab — Care Label',
+  tab_shipping: 'Tab — Shipping Label',
+  story_heading: 'Story Tab Heading',
+  care_heading: 'Care Tab Heading',
+  care_1: 'Care Guideline 1',
+  care_2: 'Care Guideline 2',
+  care_3: 'Care Guideline 3',
+  shipping_heading: 'Shipping Tab Heading',
+  shipping_1: 'Shipping Detail 1',
+  shipping_2: 'Shipping Detail 2',
+  shipping_3: 'Shipping Detail 3',
+  related_label: 'Related Section Label',
+  related_title: 'Related Section Title',
+  authenticity_value: 'Authenticity Text (Specs Tab)',
   // shipping / privacy
   para_1: 'Paragraph 1',
   para_2: 'Paragraph 2',
@@ -125,6 +150,7 @@ const SECTION_LABELS: Record<string, string> = {
   contact: '📩 Commissions / Contact Page',
   shipping: '🚚 Shipping Policy',
   privacy: '🔒 Privacy Policy',
+  product: '🛍️ Product Detail Page',
 };
 
 const isLongText = (key: string, value: string) =>
@@ -142,7 +168,7 @@ export default function AdminSiteContent() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     nav: true, home: true, artist: false, footer: false,
     gallery: false, shop: false, community: false, contact: false,
-    shipping: false, privacy: false,
+    shipping: false, privacy: false, product: false,
   });
 
   const token = () => localStorage.getItem('niharikartist_admin_token') || '';
@@ -204,7 +230,7 @@ export default function AdminSiteContent() {
     return acc;
   }, {}), [filteredRows]);
 
-  const sectionOrder = ['nav', 'footer', 'home', 'artist', 'gallery', 'shop', 'community', 'contact', 'shipping', 'privacy'];
+  const sectionOrder = ['nav', 'footer', 'home', 'artist', 'gallery', 'shop', 'community', 'contact', 'shipping', 'privacy', 'product'];
 
   const expandAll = () => setOpenSections(Object.fromEntries(sectionOrder.map(s => [s, true])));
   const collapseAll = () => setOpenSections(Object.fromEntries(sectionOrder.map(s => [s, false])));
