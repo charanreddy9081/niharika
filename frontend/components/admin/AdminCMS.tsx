@@ -363,28 +363,32 @@ function WebsiteSettingsManager() {
       {/* Page Images */}
       <div className="border-t border-emerald-950 pt-5 space-y-3">
         <p className="text-[11px] uppercase tracking-wider text-[#a3b8af] font-semibold">Page Images</p>
-        <p className="text-[10px] text-zinc-600">Paste a URL or upload to Media Library first, then copy the URL here.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className={lbl}>Home — Hero Fallback Image</label>
-            <input className={inp} value={settings.hero_fallback_image || ""} onChange={set("hero_fallback_image")} placeholder="/images/studio_hero.jpg" />
-            {settings.hero_fallback_image && <img src={settings.hero_fallback_image} className="mt-2 w-full h-24 object-cover rounded-lg border border-emerald-900/50" alt="preview" />}
-          </div>
-          <div>
-            <label className={lbl}>Home — Manifesto Section Image</label>
-            <input className={inp} value={settings.manifesto_image || ""} onChange={set("manifesto_image")} placeholder="/images/artist_working.jpg" />
-            {settings.manifesto_image && <img src={settings.manifesto_image} className="mt-2 w-full h-24 object-cover rounded-lg border border-emerald-900/50" alt="preview" />}
-          </div>
-          <div>
-            <label className={lbl}>About Page — Origin Story Image</label>
-            <input className={inp} value={settings.about_origin_image || ""} onChange={set("about_origin_image")} placeholder="https://… or /images/…" />
-            {settings.about_origin_image && <img src={settings.about_origin_image} className="mt-2 w-full h-24 object-cover rounded-lg border border-emerald-900/50" alt="preview" />}
-          </div>
-          <div>
-            <label className={lbl}>About Page — Craft Section Image</label>
-            <input className={inp} value={settings.about_craft_image || ""} onChange={set("about_craft_image")} placeholder="/images/framing_craft.jpg" />
-            {settings.about_craft_image && <img src={settings.about_craft_image} className="mt-2 w-full h-24 object-cover rounded-lg border border-emerald-900/50" alt="preview" />}
-          </div>
+        <p className="text-[10px] text-zinc-600">Upload from device ⬆ or pick from Media Library 🖼 — then click Save All.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <ImagePickerField
+            label="Home — Hero Fallback Image"
+            value={settings.hero_fallback_image || ''}
+            onChange={url => setSettings((p: any) => ({ ...p, hero_fallback_image: url }))}
+            placeholder="/images/studio_hero.jpg"
+          />
+          <ImagePickerField
+            label="Home — Manifesto Section Image"
+            value={settings.manifesto_image || ''}
+            onChange={url => setSettings((p: any) => ({ ...p, manifesto_image: url }))}
+            placeholder="/images/artist_working.jpg"
+          />
+          <ImagePickerField
+            label="About Page — Origin Story Image"
+            value={settings.about_origin_image || ''}
+            onChange={url => setSettings((p: any) => ({ ...p, about_origin_image: url }))}
+            placeholder="https://… or /images/…"
+          />
+          <ImagePickerField
+            label="About Page — Craft Section Image"
+            value={settings.about_craft_image || ''}
+            onChange={url => setSettings((p: any) => ({ ...p, about_craft_image: url }))}
+            placeholder="/images/framing_craft.jpg"
+          />
         </div>
       </div>
     </div>
