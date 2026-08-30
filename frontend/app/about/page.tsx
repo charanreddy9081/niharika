@@ -7,10 +7,12 @@ import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { Sparkles, Heart, Palette, Feather, ArrowRight, Star } from 'lucide-react';
 import { useSiteContent } from '../../hooks/useSiteContent';
+import { useWebsiteSettings } from '../../hooks/useCMSData';
 import { useArtistImage } from '../../hooks/useArtistImage';
 
 export default function AboutPage() {
   const { c } = useSiteContent('artist');
+  const siteSettings = useWebsiteSettings();
   const { src: artistSrc, alt: artistAlt, loading: imgLoading } = useArtistImage(false);
 
   return (
@@ -46,7 +48,7 @@ export default function AboutPage() {
                 <div className="absolute inset-0 bg-[#0a2319] animate-pulse" />
               ) : (
                 <Image
-                  src={artistSrc}
+                  src={siteSettings?.about_origin_image || artistSrc}
                   alt={artistAlt}
                   fill
                   priority
@@ -132,7 +134,7 @@ export default function AboutPage() {
 
           <div className="lg:col-span-6 relative order-1 lg:order-2">
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-              <Image src="/images/framing_craft.jpg" alt="Crafting Teakwood Keepsake Frames" fill className="object-cover" />
+              <Image src={siteSettings?.about_craft_image || "/images/framing_craft.jpg"} alt="Crafting Teakwood Keepsake Frames" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#06120d] via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#081a13]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
                 <span className="text-[10px] uppercase tracking-widest text-[#e8c872] font-semibold block">Solid Wood Framing</span>

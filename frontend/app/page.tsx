@@ -13,6 +13,7 @@ import { useAutoRefresh } from '../hooks/useAutoRefresh';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 import FeaturedCarousel from '../components/FeaturedCarousel';
 import ReviewSection from '../components/ReviewSection';
+import { useWebsiteSettings } from '../hooks/useCMSData';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const SLIDE_DURATION = 900;
@@ -21,6 +22,7 @@ export default function HomePage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { c } = useSiteContent('home');
+  const siteSettings = useWebsiteSettings();
   const {
     current, next, direction, animating, loading: imgLoading,
     currentSrc, currentAlt, hasFallback,
@@ -138,7 +140,7 @@ export default function HomePage() {
                   {hasFallback && !imgLoading && (
                     <div className="absolute inset-0" style={{ zIndex: 1 }}>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/images/studio_hero.jpg" alt="Featured Fine Art Masterpiece" className="w-full h-full object-cover" />
+                      <img src={siteSettings?.hero_fallback_image || "/images/studio_hero.jpg"} alt="Featured Fine Art Masterpiece" className="w-full h-full object-cover" />
                     </div>
                   )}
                 </div>
@@ -177,7 +179,7 @@ export default function HomePage() {
         <section ref={manifestoRef as any} className="py-20 bg-gradient-to-b from-[#081d14] to-[#050f0b] border-t border-white/[0.08]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-[#e8c872]/30 shadow-2xl bg-[#0a2319] reveal reveal-left">
-              <Image src="/images/artist_working.jpg" alt="Artist Niharika at Studio Easel" fill className="object-cover" />
+              <Image src={siteSettings?.manifesto_image || "/images/artist_working.jpg"} alt="Artist Niharika at Studio Easel" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#061810]/90 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
                 <p className="font-editorial italic text-base text-[#fbf5e6]">

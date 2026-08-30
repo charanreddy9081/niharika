@@ -141,7 +141,8 @@ exports.updateSettings = async (req, res) => {
   try {
     const allowed = [
       'site_name','site_tagline','contact_email','contact_phone','whatsapp_number',
-      'address','favicon_url','logo_url','theme_color','meta_title','meta_description'
+      'address','favicon_url','logo_url','theme_color','meta_title','meta_description',
+      'hero_fallback_image','manifesto_image','about_craft_image','about_origin_image'
     ];
     const payload = {};
     allowed.forEach(k => { if (req.body[k] !== undefined) payload[k] = req.body[k]; });
