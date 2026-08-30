@@ -26,10 +26,27 @@ export function useSocialLinks() {
 }
 
 export function useWebsiteSettings() {
-  const [settings, setSettings] = useState<any>(null);
+  const [settings, setSettings] = useState<any>(() => {
+    // Instantly load last known settings from localStorage — no flash
+    if (typeof window === 'undefined') return null;
+    try {
+      const cached = localStorage.getItem('nha_site_settings');
+      return cached ? JSON.parse(cached) : null;
+    } catch { return null; }
+  });
+
   useEffect(() => {
-    fetchCMS('/api/cms/settings', TTL_SETTINGS).then(d => { if (d) setSettings(d); }).catch(() => {});
+    // Always fetch fresh in background — update localStorage + UI
+    fetchCMS('/api/cms/settings', TTL_SETTINGS)
+      .then(d => {
+        if (d) {
+          setSettings(d);
+          try { localStorage.setItem('nha_site_settings', JSON.stringify(d)); } catch {}
+        }
+      })
+      .catch(() => {});
   }, []);
+
   return settings;
 }
 

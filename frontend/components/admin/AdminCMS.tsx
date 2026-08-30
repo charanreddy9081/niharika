@@ -321,7 +321,11 @@ function WebsiteSettingsManager() {
     setSaving(true);
     const r = await fetch(`${API}/api/admin/cms/settings`, { method: 'PUT', headers: authH(), body: JSON.stringify(settings) }).then(r => r.json());
     setSaving(false);
-    if (r.success) toast.success('Settings saved!'); else toast.error(r.message);
+    if (r.success) {
+      toast.success('Settings saved!');
+      // Clear localStorage cache so next visitor gets fresh settings immediately
+      try { localStorage.removeItem('nha_site_settings'); } catch {}
+    } else toast.error(r.message);
   };
 
   if (!settings) return <div className="text-center py-8 text-zinc-500 text-sm">Loading…</div>;
