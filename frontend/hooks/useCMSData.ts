@@ -6,11 +6,12 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 // Cache in module scope — shared across all hook instances
 const _cache: Record<string, { data: any; ts: number }> = {};
-const TTL = 5 * 60 * 1000; // 5 min
+const TTL = 5 * 60 * 1000; // 5 min for content
+const TTL_SETTINGS = 0;     // 0 = always fresh for images/settings
 
-async function fetchCMS(path: string) {
+async function fetchCMS(path: string, ttl = TTL) {
   const now = Date.now();
-  if (_cache[path] && now - _cache[path].ts < TTL) return _cache[path].data;
+  if (ttl > 0 && _cache[path] && now - _cache[path].ts < ttl) return _cache[path].data;
   const r = await fetch(`${API}${path}`).then(r => r.json());
   if (r.success) { _cache[path] = { data: r.data, ts: now }; return r.data; }
   return null;
@@ -27,7 +28,7 @@ export function useSocialLinks() {
 export function useWebsiteSettings() {
   const [settings, setSettings] = useState<any>(null);
   useEffect(() => {
-    fetchCMS('/api/cms/settings').then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetchCMS('/api/cms/settings', TTL_SETTINGS).then(d => { if (d) setSettings(d); }).catch(() => {});
   }, []);
   return settings;
 }
