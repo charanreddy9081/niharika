@@ -6,6 +6,7 @@ import {
   Eye, EyeOff, Star, Globe, Settings,
   Link2, HelpCircle, Quote, Search, MessageCircle
 } from 'lucide-react';
+import ImagePickerField from './ImagePickerField';
 import toast from 'react-hot-toast';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
