@@ -51,7 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="group relative bg-[#0b1a13]/90 border border-[#e8c872]/20 hover:border-[#e8c872]/60 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_12px_40px_rgba(0,0,0,0.65)] flex flex-col">
+    <div className="group relative bg-[#0b1a13]/90 border border-[#e8c872]/20 hover:border-[#e8c872]/60 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_12px_40px_rgba(0,0,0,0.65)] flex flex-col product-card-wrapper">
       {/* Image Showcase */}
       <Link href={'/product/' + product.slug} className="relative block w-full aspect-square overflow-hidden bg-[#06120d]">
         <Image
@@ -95,25 +95,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </Link>
 
       {/* Artwork Narrative & Pricing */}
-      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-4 product-card-body">
         <div>
           {/* Rating */}
           <div className="flex items-center gap-1.5 mb-2 text-xs text-amber-300">
             <Star className="w-3.5 h-3.5 fill-amber-300" />
-            <span className="text-zinc-200 text-[11px] font-semibold">{product.rating || 4.9}</span>
+            <span className="text-zinc-200 text-[11px] font-semibold product-card-rating">{product.rating || 4.9}</span>
             <span className="text-[#a3b8af] text-[10px]">({product.reviews_count || 12} Collector Reviews)</span>
           </div>
 
           {/* Title */}
           <Link href={'/product/' + product.slug}>
-            <h3 className="font-display text-lg text-zinc-100 group-hover:text-[#fbf5e6] transition-colors line-clamp-1 font-medium">
+            <h3 className="font-display text-lg text-zinc-100 group-hover:text-[#fbf5e6] transition-colors line-clamp-1 font-medium product-card-name">
               {product.name}
             </h3>
           </Link>
 
           {/* Story Snippet / Price Note */}
           {product.short_description && (
-            <p className="text-[11px] text-[#e8c872]/80 italic line-clamp-1 mt-1.5 leading-relaxed font-sans">
+            <p className="text-[11px] text-[#e8c872]/80 italic line-clamp-1 mt-1.5 leading-relaxed font-sans product-card-desc">
               {product.short_description}
             </p>
           )}
@@ -122,7 +122,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Pricing & Craftsmanship Tag */}
         <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-bold text-[#fbf5e6]">
+            <span className="text-lg font-bold text-[#fbf5e6] product-card-price">
               ₹{product.price.toLocaleString('en-IN')}
             </span>
             {product.regular_price && product.regular_price > product.price && (
