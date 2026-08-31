@@ -764,3 +764,120 @@ body {
 [data-theme="pink"] .bg-zinc-950 p,
 [data-theme="pink"] .bg-zinc-950 span,
 [data-theme="pink"] .bg-zinc-950 h5 { color: #2B2024 !important; }
+
+/* ─── Pink theme FINAL targeted fixes ──── */
+
+/* Cart item row — bg-[#0e251d]/90 dark green card needs text visible */
+[data-theme="pink"] .bg-\[\#0e251d\]\/90,
+[data-theme="pink"] [class*="bg-\[#0e"] {
+  background-color: #fff0f4 !important;
+}
+[data-theme="pink"] [class*="bg-\[#0e"] * {
+  color: #2B2024 !important;
+}
+
+/* Product card wrapper — bg-[#0b1a13]/90 dark green not caught by existing rules */
+[data-theme="pink"] .bg-\[\#0b1a13\]\/90,
+[data-theme="pink"] [class*="bg-\[#0b"] {
+  background-color: #fff0f4 !important;
+  border-color: #E9CCD5 !important;
+}
+[data-theme="pink"] [class*="bg-\[#0b"] h3,
+[data-theme="pink"] [class*="bg-\[#0b"] h4,
+[data-theme="pink"] [class*="bg-\[#0b"] p,
+[data-theme="pink"] [class*="bg-\[#0b"] span:not([class*="bg-"]) {
+  color: #2B2024 !important;
+}
+
+/* Product card — name h3 (font-display text-lg text-zinc-100) */
+[data-theme="pink"] .font-display.text-lg.text-zinc-100 {
+  color: #2B2024 !important;
+}
+
+/* Product card — price (text-lg font-bold text-[#fbf5e6]) */
+[data-theme="pink"] .text-lg.font-bold.text-\[\#fbf5e6\] {
+  color: #2B2024 !important;
+}
+
+/* Product card — category badge (bg-[#06120d]/85 text-[#fbf5e6]) */
+[data-theme="pink"] .bg-\[\#06120d\]\/85 {
+  background-color: #F6DDE5 !important;
+  border-color: #D98FA6 !important;
+}
+[data-theme="pink"] .bg-\[\#06120d\]\/85.text-\[\#fbf5e6\],
+[data-theme="pink"] .bg-\[\#06120d\]\/85 {
+  color: #A94F6B !important;
+}
+
+/* Product card — HANDPAINTED badge (bg-emerald-950/60 text-emerald-400 border-emerald-700/50) */
+[data-theme="pink"] .bg-emerald-950\/60 {
+  background-color: #F6DDE5 !important;
+  border-color: #D98FA6 !important;
+}
+[data-theme="pink"] .bg-emerald-950\/60 span,
+[data-theme="pink"] .bg-emerald-950\/60 .text-emerald-400 {
+  color: #A94F6B !important;
+}
+
+/* Cart item row — h4 product name (font-display text-sm text-zinc-200) */
+[data-theme="pink"] .font-display.text-sm.text-zinc-200 {
+  color: #2B2024 !important;
+}
+
+/* Cart item row — price (font-semibold text-sm text-[#fbf5e6]) */
+[data-theme="pink"] .font-semibold.text-sm.text-\[\#fbf5e6\] {
+  color: #2B2024 !important;
+}
+
+/* Cart item row — size label (text-[11px] text-[#a3b8af]) */
+[data-theme="pink"] .text-\[\#a3b8af\] {
+  color: #806B72 !important;
+}
+
+/* Product page — wax note box bg-[#071b12] */
+[data-theme="pink"] .bg-\[\#071b12\] {
+  background-color: #fff0f4 !important;
+  border-color: #E9CCD5 !important;
+}
+[data-theme="pink"] .bg-\[\#071b12\] * {
+  color: #2B2024 !important;
+}
+/* Keep the wax note title accent colour */
+[data-theme="pink"] .bg-\[\#071b12\] .text-\[\#e8c872\] {
+  color: #A94F6B !important;
+}
+
+/* Product page — h1 product name (font-display text-3xl text-zinc-100) */
+[data-theme="pink"] .font-display.text-3xl.text-zinc-100,
+[data-theme="pink"] .font-display.text-4xl.text-zinc-100 {
+  color: #2B2024 !important;
+}
+
+/* Product page — price box bg-[#0a2319]/80 */
+[data-theme="pink"] .bg-\[\#0a2319\]\/80 {
+  background-color: #fff0f4 !important;
+  border-color: #E9CCD5 !important;
+}
+[data-theme="pink"] .bg-\[\#0a2319\]\/80 * {
+  color: #2B2024 !important;
+}
+/* Keep price accent rose */
+[data-theme="pink"] .bg-\[\#0a2319\]\/80 .text-\[\#fbf5e6\],
+[data-theme="pink"] .bg-\[\#0a2319\]\/80 .font-display {
+  color: #2B2024 !important;
+}
+[data-theme="pink"] .bg-\[\#0a2319\]\/80 .text-emerald-400 {
+  color: #A94F6B !important;
+}
+
+/* Product page — "Add To Bag" ghost button bg-[#0a2319] */
+[data-theme="pink"] button.bg-\[\#0a2319\],
+[data-theme="pink"] a.bg-\[\#0a2319\] {
+  background-color: #fff0f4 !important;
+  border-color: #A94F6B !important;
+  color: #A94F6B !important;
+}
+[data-theme="pink"] button.bg-\[\#0a2319\] span,
+[data-theme="pink"] button.bg-\[\#0a2319\] svg {
+  color: #A94F6B !important;
+}
