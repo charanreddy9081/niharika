@@ -72,8 +72,8 @@ export default function AboutPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#06120d]/60 via-transparent to-transparent pointer-events-none" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#081a13]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
-                <span className="text-[10px] uppercase tracking-widest text-[#e8c872] font-semibold block">Studio Palette &amp; Easel</span>
-                <p className="font-editorial italic text-xs text-[#fbf5e6] mt-0.5">Where every memory is mixed with fine pigments and raw emotion.</p>
+                <span className="text-[10px] uppercase tracking-widest text-[#e8c872] font-semibold block">{c('origin_box_title', 'Studio Palette & Easel')}</span>
+                <p className="font-editorial italic text-xs text-[#fbf5e6] mt-0.5">{c('origin_box_subtitle', 'Where every memory is mixed with fine pigments and raw emotion.')}</p>
               </div>
             </div>
           </div>
@@ -157,8 +157,8 @@ export default function AboutPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#06120d] via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#081a13]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
-                <span className="text-[10px] uppercase tracking-widest text-[#e8c872] font-semibold block">Solid Wood Framing</span>
-                <p className="font-editorial italic text-xs text-[#fbf5e6] mt-0.5">Museum-grade framing with anti-glare protective shield.</p>
+                <span className="text-[10px] uppercase tracking-widest text-[#e8c872] font-semibold block">{c('craft_box_title', 'Solid Wood Framing')}</span>
+                <p className="font-editorial italic text-xs text-[#fbf5e6] mt-0.5">{c('craft_box_subtitle', 'Museum-grade framing with anti-glare protective shield.')}</p>
               </div>
             </div>
           </div>

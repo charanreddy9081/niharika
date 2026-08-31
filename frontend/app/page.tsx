@@ -165,7 +165,7 @@ export default function HomePage() {
                   <p className="font-editorial italic text-xs text-[#fbf5e6]">
                     {c('hero_testimonial', '"Unwrapping this handpainted piece felt like stepping into an intimate gallery of our childhood memories."')}
                   </p>
-                  <span className="text-[10px] text-[#a3b8af] uppercase tracking-widest block font-sans">— Verified Patron Chronicle</span>
+                  <span className="text-[10px] text-[#a3b8af] uppercase tracking-widest block font-sans">{c('hero_testimonial_author', '— Verified Patron Chronicle')}</span>
                 </div>
               </div>
             </div>
