@@ -42,17 +42,15 @@ export default function AboutPage() {
         {/* Featured Story Split: The Origin */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-28">
           <div className="lg:col-span-6 relative">
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+            <div className="relative rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
               {/* Dynamic artist image — changes on each page load */}
               {imgLoading ? (
                 <div className="absolute inset-0 bg-[#0a2319] animate-pulse" />
               ) : (
-                <Image
+                <img
                   src={siteSettings?.about_origin_image || artistSrc}
                   alt={artistAlt}
-                  fill
-                  priority
-                  className="object-cover"
+                  className="w-full h-auto object-contain"
                   onError={(e) => {
                     (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg';
                   }}
@@ -133,7 +131,7 @@ export default function AboutPage() {
           </div>
 
           <div className="lg:col-span-6 relative order-1 lg:order-2">
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+            <div className="relative rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
               <Image src={siteSettings?.about_craft_image || "/images/framing_craft.jpg"} alt="Crafting Teakwood Keepsake Frames" fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#06120d] via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#081a13]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
