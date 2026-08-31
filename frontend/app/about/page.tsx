@@ -1,29 +1,32 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { Sparkles, Heart, Palette, Feather, ArrowRight, Star } from 'lucide-react';
 import { useSiteContent } from '../../hooks/useSiteContent';
 import { useWebsiteSettings } from '../../hooks/useCMSData';
-import { useArtistImage } from '../../hooks/useArtistImage';
 
 export default function AboutPage() {
   const { c } = useSiteContent('artist');
   const siteSettings = useWebsiteSettings();
-  const { src: artistSrc } = useArtistImage(false);
-  const [originSrc, setOriginSrc] = React.useState('/images/studio_hero.jpg');
 
-  // Set image src client-side only to avoid hydration mismatch
+  // Use state + effect so the image src is always set client-side only,
+  // preventing SSR/client hydration mismatch (React error #418).
+  const [originSrc, setOriginSrc] = React.useState('/images/studio_hero.jpg');
+  const [craftSrc, setCraftSrc] = React.useState('/images/framing_craft.jpg');
+  const [mounted, setMounted] = React.useState(false);
+
   React.useEffect(() => {
+    setMounted(true);
     if (siteSettings?.about_origin_image) {
       setOriginSrc(siteSettings.about_origin_image);
-    } else if (artistSrc) {
-      setOriginSrc(artistSrc);
     }
-  }, [siteSettings, artistSrc]);
+    if (siteSettings?.about_craft_image) {
+      setCraftSrc(siteSettings.about_craft_image);
+    }
+  }, [siteSettings?.about_origin_image, siteSettings?.about_craft_image]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#06120d]">
@@ -56,10 +59,9 @@ export default function AboutPage() {
               {/* Artist image — no fixed aspect ratio, shows full photo */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={originSrc}
+                src={mounted ? originSrc : '/images/studio_hero.jpg'}
                 alt="Artist Niharika"
                 className="w-full h-auto block"
-                suppressHydrationWarning
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg';
                 }}
@@ -140,7 +142,15 @@ export default function AboutPage() {
 
           <div className="lg:col-span-6 relative order-1 lg:order-2">
             <div className="relative rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-              <Image src={siteSettings?.about_craft_image || "/images/framing_craft.jpg"} alt="Crafting Teakwood Keepsake Frames" fill className="object-cover" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={mounted ? craftSrc : '/images/framing_craft.jpg'}
+                alt="Crafting Teakwood Keepsake Frames"
+                className="w-full h-auto block"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/images/framing_craft.jpg';
+                }}
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-[#06120d] via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#081a13]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
                 <span className="text-[10px] uppercase tracking-widest text-[#e8c872] font-semibold block">Solid Wood Framing</span>
