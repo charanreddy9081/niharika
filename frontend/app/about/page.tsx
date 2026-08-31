@@ -13,7 +13,7 @@ import { useArtistImage } from '../../hooks/useArtistImage';
 export default function AboutPage() {
   const { c } = useSiteContent('artist');
   const siteSettings = useWebsiteSettings();
-  const { src: artistSrc, alt: artistAlt, loading: imgLoading } = useArtistImage(false);
+  const { src: artistSrc } = useArtistImage(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#06120d]">
@@ -43,20 +43,17 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-28">
           <div className="lg:col-span-6 relative">
             <div className="relative rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-              {/* Dynamic artist image — changes on each page load */}
-              {imgLoading ? (
-                <div className="absolute inset-0 bg-[#0a2319] animate-pulse" />
-              ) : (
-                <img
-                  src={siteSettings?.about_origin_image || artistSrc}
-                  alt={artistAlt}
-                  className="w-full h-auto object-contain"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg';
-                  }}
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06120d] via-transparent to-transparent" />
+              {/* Artist image — no fixed aspect ratio, shows full photo */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={siteSettings?.about_origin_image || artistSrc || '/images/studio_hero.jpg'}
+                alt="Artist Niharika"
+                className="w-full h-auto block"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06120d]/60 via-transparent to-transparent pointer-events-none" />
               <div className="absolute bottom-6 left-6 right-6 bg-[#081a13]/90 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
                 <span className="text-[10px] uppercase tracking-widest text-[#e8c872] font-semibold block">Studio Palette &amp; Easel</span>
                 <p className="font-editorial italic text-xs text-[#fbf5e6] mt-0.5">Where every memory is mixed with fine pigments and raw emotion.</p>
