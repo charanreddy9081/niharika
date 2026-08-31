@@ -11,22 +11,26 @@ import { useWebsiteSettings } from '../../hooks/useCMSData';
 export default function AboutPage() {
   const { c } = useSiteContent('artist');
   const siteSettings = useWebsiteSettings();
-
-  // Use state + effect so the image src is always set client-side only,
-  // preventing SSR/client hydration mismatch (React error #418).
-  const [originSrc, setOriginSrc] = React.useState('/images/studio_hero.jpg');
-  const [craftSrc, setCraftSrc] = React.useState('/images/framing_craft.jpg');
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
-    if (siteSettings?.about_origin_image) {
-      setOriginSrc(siteSettings.about_origin_image);
-    }
-    if (siteSettings?.about_craft_image) {
-      setCraftSrc(siteSettings.about_craft_image);
-    }
-  }, [siteSettings?.about_origin_image, siteSettings?.about_craft_image]);
+  }, []);
+
+  // On server and first client render, show a skeleton that matches
+  // exactly what the server would render — prevents hydration mismatch (#418)
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#06120d]">
+        <Header />
+        <main className="flex-1" />
+        <Footer />
+      </div>
+    );
+  }
+
+  const originSrc = siteSettings?.about_origin_image || '/images/studio_hero.jpg';
+  const craftSrc = siteSettings?.about_craft_image || '/images/framing_craft.jpg';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#06120d]">
@@ -59,7 +63,7 @@ export default function AboutPage() {
               {/* Artist image — no fixed aspect ratio, shows full photo */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={mounted ? originSrc : '/images/studio_hero.jpg'}
+                src={originSrc}
                 alt="Artist Niharika"
                 className="w-full h-auto block"
                 onError={(e) => {
@@ -144,7 +148,7 @@ export default function AboutPage() {
             <div className="relative rounded-3xl overflow-hidden bg-[#0c241a] border border-[#e8c872]/30 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={mounted ? craftSrc : '/images/framing_craft.jpg'}
+                src={craftSrc}
                 alt="Crafting Teakwood Keepsake Frames"
                 className="w-full h-auto block"
                 onError={(e) => {

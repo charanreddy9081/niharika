@@ -26,17 +26,18 @@ export function useSocialLinks() {
 }
 
 export function useWebsiteSettings() {
-  const [settings, setSettings] = useState<any>(() => {
-    // Instantly load last known settings from localStorage — no flash
-    if (typeof window === 'undefined') return null;
-    try {
-      const cached = localStorage.getItem('nha_site_settings');
-      return cached ? JSON.parse(cached) : null;
-    } catch { return null; }
-  });
+  // Always start with null on both server and client initial render
+  // to prevent SSR/hydration mismatch. Load from localStorage in useEffect only.
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
-    // Always fetch fresh in background — update localStorage + UI
+    // First: instantly apply cached value from localStorage
+    try {
+      const cached = localStorage.getItem('nha_site_settings');
+      if (cached) setSettings(JSON.parse(cached));
+    } catch {}
+
+    // Then: fetch fresh in background
     fetchCMS('/api/cms/settings', TTL_SETTINGS)
       .then(d => {
         if (d) {
