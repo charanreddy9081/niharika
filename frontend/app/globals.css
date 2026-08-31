@@ -689,3 +689,78 @@ body {
 /* About page CTA section text */
 [data-theme="pink"] .text-center.bg-gradient-to-b h3 { color: #fbf5e6 !important; }
 [data-theme="pink"] .text-center.bg-gradient-to-b p { color: #d4c4c8 !important; }
+/* ─── Pink theme round 3 — product cards, cart, buttons ─────────────────── */
+
+/* "Book Custom Commission" ghost button — white on dark bg → visible */
+[data-theme="pink"] [class*="bg-[#0d261e]"],
+[data-theme="pink"] [class*="bg-[#153a2e]"],
+[data-theme="pink"] [class*="bg-[#0d251d]"] {
+  background-color: rgba(169,79,107,0.08) !important;
+  border-color: #A94F6B !important;
+  color: #A94F6B !important;
+}
+[data-theme="pink"] [class*="bg-[#0d261e]"] span,
+[data-theme="pink"] [class*="bg-[#0d251d]"] span { color: #A94F6B !important; }
+
+/* Product card names and text */
+[data-theme="pink"] .product-card h3,
+[data-theme="pink"] .product-card p,
+[data-theme="pink"] .product-card span { color: #2B2024 !important; }
+
+/* Cart drawer item cards — dark green bg → make text visible */
+[data-theme="pink"] [class*="bg-[#071610]"] {
+  background-color: #FFF0F4 !important;
+}
+[data-theme="pink"] [class*="bg-[#071610]"] p,
+[data-theme="pink"] [class*="bg-[#071610]"] span,
+[data-theme="pink"] [class*="bg-[#071610]"] h4 { color: #2B2024 !important; }
+
+/* Cart item name specifically */
+[data-theme="pink"] h5.text-zinc-200,
+[data-theme="pink"] h5.font-editorial { color: #2B2024 !important; }
+
+/* Cart drawer dark bg sections */
+[data-theme="pink"] [class*="bg-[#06120d]"],
+[data-theme="pink"] [class*="bg-[#040e0a]"] {
+  background-color: #FCEEF3 !important;
+}
+[data-theme="pink"] [class*="bg-[#06120d]"] *,
+[data-theme="pink"] [class*="bg-[#040e0a]"] * { color: #2B2024 !important; }
+
+/* Header icons — bag icon, mail icon */
+[data-theme="pink"] header svg { color: #2B2024 !important; }
+[data-theme="pink"] header button svg { color: #2B2024 !important; }
+[data-theme="pink"] header a svg { color: #2B2024 !important; }
+
+/* Cart count badge */
+[data-theme="pink"] header [class*="bg-[#e8c"] { background-color: #A94F6B !important; }
+
+/* Shop product cards — all text inside card footer */
+[data-theme="pink"] .font-display.text-sm { color: #2B2024 !important; }
+[data-theme="pink"] .font-display.text-base { color: #2B2024 !important; }
+[data-theme="pink"] [class*="text-emerald-400"].text-\[10px\] { color: #A94F6B !important; }
+
+/* Product price */
+[data-theme="pink"] [class*="text-[#e8c"] { color: #A94F6B !important; }
+[data-theme="pink"] [class*="text-[#f3e5"] { color: #A94F6B !important; }
+
+/* Handpainted badge on product cards */
+[data-theme="pink"] [class*="bg-[#0a2319]"][class*="text-emerald"] {
+  background-color: #F6DDE5 !important;
+  color: #A94F6B !important;
+  border-color: #D98FA6 !important;
+}
+
+/* Cart drawer bg itself */
+[data-theme="pink"] [class*="bg-[#0a0f0c]"],
+[data-theme="pink"] [class*="bg-[#050f0b]"] {
+  background-color: #FFF7FA !important;
+}
+[data-theme="pink"] [class*="bg-[#0a0f0c]"] *:not(img):not(svg),
+[data-theme="pink"] [class*="bg-[#050f0b]"] *:not(img):not(svg) { color: #2B2024 !important; }
+
+/* Cart item row specifically */
+[data-theme="pink"] .bg-zinc-950 { background-color: #FFF0F4 !important; }
+[data-theme="pink"] .bg-zinc-950 p,
+[data-theme="pink"] .bg-zinc-950 span,
+[data-theme="pink"] .bg-zinc-950 h5 { color: #2B2024 !important; }
