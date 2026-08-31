@@ -895,22 +895,24 @@ body {
 [data-theme="pink"] .product-card-desc { color: #A94F6B !important; }
 [data-theme="pink"] .product-card-rating { color: #2B2024 !important; }
 
-/* About page / home page CTA dark section — keep dark, text white */
+/* About page / home page CTA section — bright rose gradient in pink theme */
 [data-theme="pink"] .cta-dark-section {
-  background: linear-gradient(to bottom, #1a0d12, #0f080a) !important;
-  border-color: rgba(169,79,107,0.4) !important;
+  background: linear-gradient(135deg, #A94F6B 0%, #C27089 50%, #E8A9BA 100%) !important;
+  border-color: rgba(169,79,107,0.3) !important;
+  box-shadow: 0 20px 60px rgba(169,79,107,0.35) !important;
 }
-[data-theme="pink"] .cta-dark-section * { color: #fbf5e6 !important; }
-[data-theme="pink"] .cta-dark-section h3 { color: #fbf5e6 !important; }
-[data-theme="pink"] .cta-dark-section p { color: #d4c4c8 !important; }
+[data-theme="pink"] .cta-dark-section * { color: #fff !important; }
+[data-theme="pink"] .cta-dark-section h3 { color: #fff !important; text-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+[data-theme="pink"] .cta-dark-section p { color: rgba(255,255,255,0.9) !important; }
 
-/* Ghost / outline CTA button inside dark section */
+/* Ghost / outline CTA button on bright rose background */
 [data-theme="pink"] .cta-ghost-btn {
-  background-color: transparent !important;
-  border-color: rgba(255,255,255,0.5) !important;
+  background-color: rgba(255,255,255,0.2) !important;
+  border-color: rgba(255,255,255,0.8) !important;
   color: #ffffff !important;
+  backdrop-filter: blur(4px);
 }
 [data-theme="pink"] .cta-ghost-btn span { color: #ffffff !important; }
 [data-theme="pink"] .cta-ghost-btn:hover {
-  background-color: rgba(255,255,255,0.1) !important;
+  background-color: rgba(255,255,255,0.35) !important;
 }
