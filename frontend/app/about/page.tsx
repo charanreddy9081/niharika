@@ -14,6 +14,16 @@ export default function AboutPage() {
   const { c } = useSiteContent('artist');
   const siteSettings = useWebsiteSettings();
   const { src: artistSrc } = useArtistImage(false);
+  const [originSrc, setOriginSrc] = React.useState('/images/studio_hero.jpg');
+
+  // Set image src client-side only to avoid hydration mismatch
+  React.useEffect(() => {
+    if (siteSettings?.about_origin_image) {
+      setOriginSrc(siteSettings.about_origin_image);
+    } else if (artistSrc) {
+      setOriginSrc(artistSrc);
+    }
+  }, [siteSettings, artistSrc]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#06120d]">
@@ -46,9 +56,10 @@ export default function AboutPage() {
               {/* Artist image — no fixed aspect ratio, shows full photo */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={siteSettings?.about_origin_image || artistSrc || '/images/studio_hero.jpg'}
+                src={originSrc}
                 alt="Artist Niharika"
                 className="w-full h-auto block"
+                suppressHydrationWarning
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg';
                 }}
