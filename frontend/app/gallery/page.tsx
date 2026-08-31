@@ -325,7 +325,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Details below image */}
-            <div className="w-full bg-[#071710]/80 border border-[#e8c872]/20 rounded-2xl p-5 sm:p-7 space-y-4">
+            <div className="lightbox-card w-full bg-[#071710]/80 border border-[#e8c872]/20 rounded-2xl p-5 sm:p-7 space-y-4">
               {/* Tags + counter */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="px-3 py-1 rounded-full bg-[#0a2319] border border-[#e8c872]/40 text-[#e8c872] font-semibold uppercase tracking-wider text-[10px]">

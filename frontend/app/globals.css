@@ -583,3 +583,48 @@ body {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+/* ─── Lightbox / modal — always dark regardless of theme ─────────────────── */
+/* Prevents pink theme from making lightbox cards white with invisible text */
+.lightbox-card,
+.lightbox-card * {
+  background-color: rgba(7, 23, 16, 0.92) !important;
+}
+.lightbox-card h2,
+.lightbox-card h3,
+.lightbox-card p,
+.lightbox-card span:not([class*="bg-"]) {
+  color: inherit !important;
+}
+[data-theme="pink"] .lightbox-card {
+  background-color: rgba(20, 12, 14, 0.95) !important;
+  border-color: rgba(169,79,107,0.4) !important;
+  color: #fbf5e6 !important;
+}
+[data-theme="pink"] .lightbox-card h2,
+[data-theme="pink"] .lightbox-card h3 { color: #fbf5e6 !important; }
+[data-theme="pink"] .lightbox-card p   { color: #d4c4c8 !important; }
+[data-theme="pink"] .lightbox-card .text-zinc-100,
+[data-theme="pink"] .lightbox-card .text-zinc-200,
+[data-theme="pink"] .lightbox-card .text-zinc-300 { color: #fbf5e6 !important; }
+[data-theme="pink"] .lightbox-card .text-zinc-400,
+[data-theme="pink"] .lightbox-card .text-zinc-500,
+[data-theme="pink"] .lightbox-card .text-\[#a3b8af\] { color: #c4a8b0 !important; }
+[data-theme="pink"] .lightbox-card .rounded-full,
+[data-theme="pink"] .lightbox-card .rounded-2xl,
+[data-theme="pink"] .lightbox-card .rounded-3xl {
+  background-color: rgba(43, 20, 25, 0.8) !important;
+}
+[data-theme="pink"] .lightbox-card .text-\[#e8c872\],
+[data-theme="pink"] .lightbox-card .text-zinc-500 { color: #E8A9BA !important; }
+
+/* Fixed backdrop stays dark in all themes */
+[data-theme="pink"] .fixed.bg-black\/96,
+[data-theme="pink"] [class*="bg-black\/9"] {
+  background-color: rgba(20, 5, 10, 0.96) !important;
+}
+/* ─── Gallery page — keep cards dark in pink theme ──────────────────────── */
+[data-theme="pink"] .gallery-card {
+  background-color: #1a0810 !important;
+  border-color: rgba(169,79,107,0.3) !important;
+}
+[data-theme="pink"] .gallery-card * { color: #fbf5e6 !important; }
