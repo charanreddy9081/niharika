@@ -387,17 +387,13 @@ body {
 [data-theme="pink"] [class*="border-\[#e8c"],
 [data-theme="pink"] [class*="border-\[#d4"] { border-color: #D98FA6 !important; }
 
-/* ── Cards & panels ──────────────────────────────────────────────────────── */
-[data-theme="pink"] .rounded-2xl,
-[data-theme="pink"] .rounded-3xl {
+/* ── Cards & panels — only surface cards, NOT dark feature sections ──────── */
+/* Only apply white bg to cards that are NOT inside dark containers */
+[data-theme="pink"] main .rounded-2xl:not([class*="bg-["]):not([class*="bg-zinc"]):not([class*="bg-emerald"]):not(.lightbox-card):not([class*="from-"]),
+[data-theme="pink"] main .rounded-3xl:not([class*="bg-["]):not([class*="bg-zinc"]):not([class*="bg-emerald"]):not(.lightbox-card):not([class*="from-"]) {
   background-color: #FFFFFF !important;
   border-color: #E9CCD5 !important;
   box-shadow: 0 2px 20px rgba(169,79,107,0.07) !important;
-}
-[data-theme="pink"] .rounded-2xl:hover,
-[data-theme="pink"] .rounded-3xl:hover {
-  box-shadow: 0 6px 28px rgba(169,79,107,0.13) !important;
-  border-color: #D98FA6 !important;
 }
 
 /* ── Primary CTA buttons — gold → rose, keep text BLACK ─────────────────── */
@@ -628,3 +624,68 @@ body {
   border-color: rgba(169,79,107,0.3) !important;
 }
 [data-theme="pink"] .gallery-card * { color: #fbf5e6 !important; }
+/* ─── Pink theme comprehensive text visibility fixes ────────────────────── */
+
+/* About page CTA dark section — keep dark */
+[data-theme="pink"] [class*="from-[#0e271e]"],
+[data-theme="pink"] [class*="from-[#0c251d]"],
+[data-theme="pink"] [class*="bg-gradient-to-b"][class*="0e271e"] {
+  background: linear-gradient(to bottom, #1a0d12, #110a0d) !important;
+}
+[data-theme="pink"] [class*="from-[#0e271e]"] *,
+[data-theme="pink"] [class*="from-[#0c251d]"] * { color: #fbf5e6 !important; }
+
+/* Journal article body text */
+[data-theme="pink"] .prose-invert p,
+[data-theme="pink"] .prose-invert li,
+[data-theme="pink"] .prose-invert h1,
+[data-theme="pink"] .prose-invert h2,
+[data-theme="pink"] .prose-invert h3 { color: #2B2024 !important; }
+
+/* Cart drawer — keep cart item cards readable */
+[data-theme="pink"] [class*="bg-[#071610]"],
+[data-theme="pink"] [class*="bg-[#06120d]"],
+[data-theme="pink"] [class*="bg-[#040e0a]"] {
+  background-color: #FCEEF3 !important;
+}
+
+/* Checkout page sections — keep text dark */
+[data-theme="pink"] .bg-zinc-900\/40 { background-color: rgba(255,240,244,0.7) !important; }
+[data-theme="pink"] .bg-zinc-900\/50 { background-color: rgba(255,240,244,0.8) !important; }
+[data-theme="pink"] .bg-zinc-950 h3,
+[data-theme="pink"] .bg-zinc-900\/40 h3,
+[data-theme="pink"] .bg-zinc-900\/50 h3 { color: #2B2024 !important; }
+
+/* Cart drawer item cards */
+[data-theme="pink"] .bg-zinc-900\/40 p,
+[data-theme="pink"] .bg-zinc-900\/40 span,
+[data-theme="pink"] .bg-zinc-900\/50 p,
+[data-theme="pink"] .bg-zinc-900\/50 span { color: #2B2024 !important; }
+
+/* Pay Online selected button — keep dark */
+[data-theme="pink"] [class*="bg-[#d4af37]\/15"],
+[data-theme="pink"] [class*="bg-[#d4af37]/15"] {
+  background-color: rgba(169,79,107,0.15) !important;
+  border-color: #A94F6B !important;
+}
+[data-theme="pink"] [class*="bg-[#d4af37]\/15"] span,
+[data-theme="pink"] [class*="bg-[#d4af37]/15"] span { color: #2B2024 !important; }
+
+/* Wishlist heart icon color */
+[data-theme="pink"] .text-amber-400 { color: #D98FA6 !important; }
+
+/* Navigation buttons — arrow circles in gallery lightbox */
+[data-theme="pink"] .fixed [class*="bg-[#0a2319]"] {
+  background-color: rgba(169,79,107,0.7) !important;
+  border-color: rgba(169,79,107,0.5) !important;
+}
+[data-theme="pink"] .fixed [class*="bg-[#0a2319]"] svg { color: #fff !important; }
+
+/* Journal article page text */
+[data-theme="pink"] article p,
+[data-theme="pink"] article h1,
+[data-theme="pink"] article h2 { color: #2B2024 !important; }
+
+/* About page CTA section text */
+[data-theme="pink"] .text-center.bg-gradient-to-b h3 { color: #fbf5e6 !important; }
+[data-theme="pink"] .text-center.bg-gradient-to-b p { color: #d4c4c8 !important; }
