@@ -128,12 +128,13 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Commission Category</label>
-                    <select value={form.inquiry_type} onChange={e => setForm({ ...form, inquiry_type: e.target.value })} className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl px-4 py-3 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872]">
-                      <option value="commission">Custom Handpainted Painting</option>
-                      <option value="rakhi_customization">Personalized Sibling Heirloom Frame</option>
-                      <option value="vintage_letters">Wax-Sealed Fountain Calligraphy Letter</option>
-                      <option value="general">General Studio / Exhibition Inquiry</option>
-                    </select>
+                    <input
+                      type="text"
+                      value={form.inquiry_type}
+                      onChange={e => setForm({ ...form, inquiry_type: e.target.value })}
+                      placeholder="e.g. Drawing, Painting, Portrait, Caricature, Wedding Art..."
+                      className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl px-4 py-3 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872] placeholder:text-zinc-600"
+                    />
                   </div>
                 </div>
                 <div>
