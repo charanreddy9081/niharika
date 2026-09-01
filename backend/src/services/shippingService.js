@@ -48,13 +48,13 @@ const ZONE_RULES = [
   { min: 682, max: 682, zone: 'D' }, // Lakshadweep
 ];
 
-// ── Rate table (3kg, incl. 18% GST, rounded) ────────────────────────────
+// ── Rate table (3kg incl. 18% GST + packaging, rounded) ─────────────────
 const RATES = {
-  local: { speedPost: 95,  registeredParcel: 65  },
-  A:     { speedPost: 130, registeredParcel: 106 },
-  B:     { speedPost: 202, registeredParcel: 154 },
-  C:     { speedPost: 254, registeredParcel: 208 },
-  D:     { speedPost: 308, registeredParcel: 260 },
+  local: { speedPost: 199, registeredParcel: 149 },
+  A:     { speedPost: 259, registeredParcel: 199 },
+  B:     { speedPost: 369, registeredParcel: 289 },
+  C:     { speedPost: 459, registeredParcel: 359 },
+  D:     { speedPost: 529, registeredParcel: 429 },
 };
 
 const ZONE_LABELS = {
