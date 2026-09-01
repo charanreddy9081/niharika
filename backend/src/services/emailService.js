@@ -173,7 +173,7 @@ async function sendCustomerOrderConfirmation(order) {
     <div class="footer">&copy; 2026 niharikartist fine art atelier • Handmade in India</div>
   </div></body></html>`;
   try {
-    await sendMail(customer.email, `Order Confirmed — ${order_id} | niharikartist`, html, FROM_EMAIL);
+    await sendMail(customer.email, `Your order is confirmed — niharikartist (#${order_id})`, html, FROM_EMAIL);
     console.log(`✅ Customer email sent to ${customer.email} for ${order_id}`);
   } catch (err) {
     console.error(`❌ Customer email failed for ${order_id} (to: ${customer.email}):`, err?.response?.body?.errors || err.message);
@@ -228,7 +228,7 @@ async function sendOrderStatusUpdate({ order_id, status, note, customer, total, 
   </div></body></html>`;
 
   try {
-    await sendMail(customer.email, `Order Update — ${cfg.title} — ${order_id}`, html, FROM_EMAIL);
+    await sendMail(customer.email, `Update on your niharikartist order #${order_id} — ${cfg.title}`, html, FROM_EMAIL);
     console.log(`✅ Status update email sent to ${customer.email} for ${order_id} [${status}]`);
   } catch (err) {
     console.error(`❌ Status update email failed for ${order_id}:`, err?.response?.body?.errors || err.message);

@@ -79,7 +79,7 @@ exports.sendOTP = async (req, res) => {
         const { error } = await resend.emails.send({
           from: `niharikartist Studio <${process.env.RESEND_FROM_EMAIL || 'niharikaananthoja@niharikartist.shop'}>`,
           to: email,
-          subject: `${otp} — Your niharikartist Verification Code`,
+          subject: `niharikartist — Please verify your email to complete your order`,
           html,
         });
         if (error) throw new Error(error.message);
