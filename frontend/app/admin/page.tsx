@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Package, ShoppingCart, MessageSquare, Images,
   Plus, Trash2, Sparkles, RefreshCw, Eye, LogOut, Lock, Mail,
   ShieldCheck, AlertCircle, TrendingUp, Search, Star, DownloadCloud,
-  KeyRound, X, CheckCircle2, EyeOff, ImageIcon, FileText, Home
+  KeyRound, X, CheckCircle2, EyeOff, ImageIcon, FileText, Home, Pencil
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminArtistImages from '../../components/admin/AdminArtistImages';
@@ -77,6 +77,11 @@ export default function AdminPortalPage() {
     isFeatured: false
   });
 
+  // Gallery edit state
+  const [editingGalleryItem, setEditingGalleryItem] = useState<any>(null);
+  const [editGalleryImageFile, setEditGalleryImageFile] = useState<FileData | null>(null);
+  const [editGalleryImageUrl, setEditGalleryImageUrl] = useState('');
+
   // Product search & modal state
   const [productSearch, setProductSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -94,6 +99,11 @@ export default function AdminPortalPage() {
     short_description: '',
     description: ''
   });
+
+  // Product edit state
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editProductImageFile, setEditProductImageFile] = useState<FileData | null>(null);
+  const [editProductImageUrl, setEditProductImageUrl] = useState('');
 
   useEffect(() => {
     // Mark this page as admin so light theme filter doesn't apply
@@ -499,6 +509,100 @@ export default function AdminPortalPage() {
     } catch (err: any) {
       toast.error(err.message || 'Error creating product');
     }
+  };
+
+  // ── Edit Product ─────────────────────────────────────────────────────────
+  const openEditProduct = (p: any) => {
+    setEditingProduct({ ...p });
+    setEditProductImageUrl(p.images?.[0] || p.image || '');
+    setEditProductImageFile(null);
+  };
+
+  const handleEditProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('niharikartist_admin_token');
+    if (!token || !editingProduct) return;
+    try {
+      let finalImage = editProductImageUrl.trim();
+      if (editProductImageFile) {
+        const upRes = await fetch(API + '/api/admin/artist-images/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ fileName: editProductImageFile.fileName, fileData: editProductImageFile.base64, contentType: editProductImageFile.fileType })
+        });
+        const upData = await upRes.json();
+        if (!upData.success) throw new Error(upData.message || 'Image upload failed');
+        finalImage = upData.image_url;
+      }
+      const payload: any = {
+        name: editingProduct.name,
+        price: Number(editingProduct.price),
+        regular_price: Number(editingProduct.regular_price),
+        category: editingProduct.category,
+        medium: editingProduct.medium,
+        size: editingProduct.size,
+        artwork_type: editingProduct.artwork_type,
+        short_description: editingProduct.short_description,
+        description: editingProduct.description,
+      };
+      if (finalImage) { payload.images = [finalImage]; payload.gallery = [finalImage]; }
+      const res = await fetch(API + '/api/admin/products/' + (editingProduct._id || editingProduct.id), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Product updated!');
+        setEditingProduct(null);
+        fetchAdminData();
+      } else { toast.error(data.message || 'Update failed'); }
+    } catch (err: any) { toast.error(err.message || 'Error updating product'); }
+  };
+
+  // ── Edit Gallery Item ─────────────────────────────────────────────────────
+  const openEditGallery = (item: any) => {
+    setEditingGalleryItem({ ...item });
+    setEditGalleryImageUrl(item.imageUrl || '');
+    setEditGalleryImageFile(null);
+  };
+
+  const handleEditGalleryItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('niharikartist_admin_token');
+    if (!token || !editingGalleryItem) return;
+    try {
+      let finalImageUrl = editGalleryImageUrl.trim();
+      if (editGalleryImageFile) {
+        const upRes = await fetch(API + '/api/admin/artist-images/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ fileName: editGalleryImageFile.fileName, fileData: editGalleryImageFile.base64, contentType: editGalleryImageFile.fileType })
+        });
+        const upData = await upRes.json();
+        if (!upData.success) throw new Error(upData.message || 'Image upload failed');
+        finalImageUrl = upData.image_url;
+      }
+      const payload: any = {
+        title: editingGalleryItem.title,
+        category: editingGalleryItem.category,
+        year: editingGalleryItem.year,
+        description: editingGalleryItem.description,
+        isFeatured: editingGalleryItem.isFeatured,
+      };
+      if (finalImageUrl) { payload.imageUrl = finalImageUrl; payload.thumbnailUrl = finalImageUrl; }
+      const res = await fetch(API + '/api/admin/gallery/' + (editingGalleryItem._id || editingGalleryItem.id), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Artwork updated!');
+        setEditingGalleryItem(null);
+        fetchAdminData();
+      } else { toast.error(data.message || 'Update failed'); }
+    } catch (err: any) { toast.error(err.message || 'Error updating artwork'); }
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -1065,6 +1169,13 @@ export default function AdminPortalPage() {
                         </td>
                         <td className="p-4 text-right">
                           <button
+                            onClick={() => openEditProduct(p)}
+                            className="text-[#e8c872]/70 hover:text-[#e8c872] p-2 transition-colors"
+                            title="Edit Product"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
                             onClick={() => handleDeleteProduct(p._id || p.slug)}
                             className="text-red-400/80 hover:text-red-300 p-2 transition-colors"
                             title="Delete Artwork"
@@ -1201,6 +1312,13 @@ export default function AdminPortalPage() {
                           </button>
                         </td>
                         <td className="p-4 text-right">
+                          <button
+                            onClick={() => openEditGallery(item)}
+                            className="text-[#e8c872]/70 hover:text-[#e8c872] p-2 transition-colors"
+                            title="Edit Artwork"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => handleDeleteGalleryItem(item._id || item.id)}
                             className="text-red-400/80 hover:text-red-300 p-2 transition-colors"
@@ -1364,6 +1482,159 @@ export default function AdminPortalPage() {
         {/* TAB 12: PATRON REVIEWS */}
         {activeTab === 'reviews' && (
           <AdminReviews />
+        )}
+
+        {/* Edit Gallery Artwork Modal */}
+        {editingGalleryItem && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#081a13] border border-[#e8c872]/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+              <h3 className="font-display text-2xl text-zinc-100">Edit Gallery Artwork</h3>
+              <form onSubmit={handleEditGalleryItem} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">Artwork Title *</label>
+                  <input type="text" required value={editingGalleryItem.title}
+                    onChange={e => setEditingGalleryItem({ ...editingGalleryItem, title: e.target.value })}
+                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Category *</label>
+                    <select value={editingGalleryItem.category}
+                      onChange={e => setEditingGalleryItem({ ...editingGalleryItem, category: e.target.value })}
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]">
+                      {galleryCategories.length > 0
+                        ? galleryCategories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)
+                        : <>
+                            <option value="Painting">Painting</option>
+                            <option value="Pencil Portraits">Pencil Portraits</option>
+                            <option value="Caricature">Caricature</option>
+                            <option value="Live Wedding Painting">Live Wedding Painting</option>
+                          </>}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Year</label>
+                    <input type="text" value={editingGalleryItem.year || ''}
+                      onChange={e => setEditingGalleryItem({ ...editingGalleryItem, year: e.target.value })}
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">Image</label>
+                  <ImageInput label="Artwork Image" urlValue={editGalleryImageUrl}
+                    onUrlChange={url => { setEditGalleryImageUrl(url); setEditingGalleryItem({ ...editingGalleryItem, imageUrl: url }); }}
+                    selectedFile={editGalleryImageFile} onFileSelected={setEditGalleryImageFile} />
+                </div>
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">Description</label>
+                  <textarea rows={3} value={editingGalleryItem.description || ''}
+                    onChange={e => setEditingGalleryItem({ ...editingGalleryItem, description: e.target.value })}
+                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872] resize-none" />
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <input type="checkbox" id="edit-feat-checkbox" checked={editingGalleryItem.isFeatured}
+                    onChange={e => setEditingGalleryItem({ ...editingGalleryItem, isFeatured: e.target.checked })}
+                    className="rounded border-emerald-800" />
+                  <label htmlFor="edit-feat-checkbox" className="text-[#a3b8af] cursor-pointer">Mark as Featured Artwork</label>
+                </div>
+                <div className="flex justify-end gap-3 pt-3">
+                  <button type="button" onClick={() => setEditingGalleryItem(null)} className="px-4 py-2 text-[#a3b8af] hover:text-white">Cancel</button>
+                  <button type="submit" className="bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-6 py-2.5 rounded-xl uppercase tracking-wider btn-magnetic">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Product Modal */}
+        {editingProduct && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="bg-[#081a13] border border-[#e8c872]/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+              <h3 className="font-display text-2xl text-zinc-100">Edit Product</h3>
+              <form onSubmit={handleEditProduct} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">Artwork Title *</label>
+                  <input type="text" required value={editingProduct.name}
+                    onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Price (₹) *</label>
+                    <input type="number" required value={editingProduct.price}
+                      onChange={e => setEditingProduct({ ...editingProduct, price: Number(e.target.value) })}
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  </div>
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Regular Price (₹)</label>
+                    <input type="number" value={editingProduct.regular_price}
+                      onChange={e => setEditingProduct({ ...editingProduct, regular_price: Number(e.target.value) })}
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">Price Note</label>
+                  <input type="text" value={editingProduct.short_description || ''}
+                    onChange={e => setEditingProduct({ ...editingProduct, short_description: e.target.value })}
+                    placeholder="e.g. Price is negotiable"
+                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Category</label>
+                    <select value={editingProduct.category}
+                      onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]">
+                      <option value="Spiritual & Heritage Art">Spiritual & Heritage Art</option>
+                      <option value="Pencil & Graphite Portraits">Pencil & Graphite Portraits</option>
+                      <option value="Original Acrylic Paintings">Original Acrylic Paintings</option>
+                      <option value="Anime Fanart Series">Anime Fanart Series</option>
+                      <option value="Original Masterworks">Original Masterworks</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Medium</label>
+                    <input type="text" value={editingProduct.medium || ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, medium: e.target.value })}
+                      placeholder="e.g. Acrylic on Canvas"
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Size / Dimensions</label>
+                    <input type="text" value={editingProduct.size || ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, size: e.target.value })}
+                      placeholder="e.g. A5 or 3 × 4 feet"
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  </div>
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Artwork Type</label>
+                    <input type="text" value={editingProduct.artwork_type || ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, artwork_type: e.target.value })}
+                      placeholder="Original Artwork or Art Print"
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">Image</label>
+                  <ImageInput label="Product Image" urlValue={editProductImageUrl}
+                    onUrlChange={url => { setEditProductImageUrl(url); setEditingProduct({ ...editingProduct, image: url }); }}
+                    selectedFile={editProductImageFile} onFileSelected={setEditProductImageFile} />
+                </div>
+                <div>
+                  <label className="block text-[#a3b8af] mb-1">Description</label>
+                  <textarea rows={3} value={editingProduct.description || ''}
+                    onChange={e => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                    className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872] resize-none" />
+                </div>
+                <div className="flex justify-end gap-3 pt-3">
+                  <button type="button" onClick={() => setEditingProduct(null)} className="px-4 py-2 text-[#a3b8af] hover:text-white">Cancel</button>
+                  <button type="submit" className="bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-6 py-2.5 rounded-xl uppercase tracking-wider btn-magnetic">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
 
         {/* Add Gallery Artwork Modal */}
