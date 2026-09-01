@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useSiteContent } from '../hooks/useSiteContent';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const AUTO_INTERVAL = 5000;
+const AUTO_INTERVAL = 3000;
 
 interface Artwork {
   id: string;
