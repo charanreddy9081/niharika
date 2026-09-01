@@ -270,89 +270,88 @@ export default function GalleryPage() {
 
       {/* Lightbox Modal */}
       {activeItem && lightboxIndex !== null && (
-        <div className="fixed inset-0 z-50 bg-black/96 backdrop-blur-xl overflow-y-auto">
-
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl overflow-y-auto"
+          onClick={() => setLightboxIndex(null)}
+        >
           {/* Close Button — fixed top-right */}
           <button
-            onClick={() => setLightboxIndex(null)}
-            className="fixed top-4 right-4 z-[60] p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+            onClick={e => { e.stopPropagation(); setLightboxIndex(null); }}
+            className="fixed top-4 right-4 z-[60] p-3 rounded-full bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-colors shadow-2xl"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Content wrapper — centered column */}
-          <div className="w-full max-w-3xl mx-auto px-4 sm:px-8 py-16 sm:py-12 flex flex-col items-center gap-6">
-
-            {/* Image + side arrows — relative container */}
+          {/* Content wrapper — stop click from bubbling to backdrop */}
+          <div
+            className="w-full max-w-3xl mx-auto px-4 sm:px-8 py-16 sm:py-12 flex flex-col items-center gap-6"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Image + side arrows */}
             <div className="relative w-full flex items-center justify-center">
-
-              {/* Prev arrow — absolute to this container */}
               <button
                 onClick={handlePrev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 p-3 rounded-full bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-colors shadow-2xl"
                 aria-label="Previous artwork"
               >
                 <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
-              {/* Image */}
-              <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-[#e8c872]/20 mx-10">
+              <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/10 mx-10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={activeItem.imageUrl}
                   alt={activeItem.title}
-                  style={{
-                    maxHeight: '70vh',
-                    maxWidth: '100%',
-                    width: 'auto',
-                    height: 'auto',
-                    display: 'block',
-                    objectFit: 'contain',
-                  }}
+                  style={{ maxHeight: '70vh', maxWidth: '100%', width: 'auto', height: 'auto', display: 'block', objectFit: 'contain' }}
                   onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/studio_hero.jpg'; }}
                 />
               </div>
 
-              {/* Next arrow — absolute to this container */}
               <button
                 onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 p-3 rounded-full bg-[#0a2319]/90 border border-white/20 text-zinc-300 hover:text-[#e8c872] hover:border-[#e8c872] transition-colors shadow-2xl"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 p-3 rounded-full bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-colors shadow-2xl"
                 aria-label="Next artwork"
               >
                 <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
-            {/* Details below image */}
-            <div className="lightbox-card w-full bg-[#071710]/80 border border-[#e8c872]/20 rounded-2xl p-5 sm:p-7 space-y-4">
+            {/* Details panel — explicit colors so visible in all themes */}
+            <div className="lightbox-card w-full rounded-2xl p-5 sm:p-7 space-y-4"
+              style={{ backgroundColor: 'rgba(15,10,12,0.92)', border: '1px solid rgba(232,200,114,0.25)' }}
+            >
               {/* Tags + counter */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-3 py-1 rounded-full bg-[#0a2319] border border-[#e8c872]/40 text-[#e8c872] font-semibold uppercase tracking-wider text-[10px]">
+                <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider"
+                  style={{ background: 'rgba(169,79,107,0.25)', border: '1px solid rgba(169,79,107,0.5)', color: '#e8c872' }}
+                >
                   {activeItem.category}
                 </span>
                 {activeItem.year && (
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-950 text-[#a3b8af] border border-emerald-900 text-[10px]">
+                  <span className="px-2.5 py-1 rounded-full text-[10px]"
+                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#c8b89a' }}
+                  >
                     {activeItem.year}
                   </span>
                 )}
-                <span className="ml-auto text-zinc-500 text-[10px] font-mono">
+                <span className="ml-auto text-[10px] font-mono" style={{ color: '#7a7060' }}>
                   {lightboxIndex + 1} of {filteredItems.length}
                 </span>
               </div>
 
-              <h2 className="font-display text-2xl sm:text-3xl text-zinc-100 font-light leading-tight">
+              <h2 className="font-display text-2xl sm:text-3xl font-light leading-tight" style={{ color: '#f5efe6' }}>
                 {activeItem.title}
               </h2>
 
-              <div className="h-px bg-gradient-to-r from-[#e8c872]/40 via-emerald-900 to-transparent" />
+              <div className="h-px" style={{ background: 'linear-gradient(to right, rgba(232,200,114,0.4), rgba(100,80,40,0.2), transparent)' }} />
 
               {activeItem.description ? (
-                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans whitespace-pre-line">
+                <p className="text-xs sm:text-sm leading-relaxed font-sans whitespace-pre-line" style={{ color: '#d4c9b8' }}>
                   {activeItem.description}
                 </p>
               ) : (
-                <p className="text-xs text-[#a3b8af] italic">
+                <p className="text-xs italic" style={{ color: '#9a8f80' }}>
                   Original archival artwork created by Niharika. Handcrafted with bespoke attention to emotion.
                 </p>
               )}
@@ -361,13 +360,13 @@ export default function GalleryPage() {
               <Link
                 href={`/contact?subject=Inquiry%20regarding%20${encodeURIComponent(activeItem.title)}`}
                 onClick={() => setLightboxIndex(null)}
-                className="w-full bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] btn-magnetic flex items-center justify-center gap-2 mt-2"
+                className="w-full py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all btn-magnetic flex items-center justify-center gap-2 mt-2 font-semibold"
+                style={{ background: 'linear-gradient(135deg, #e8c872, #d4a040)', color: '#1a0e00', boxShadow: '0 0 20px rgba(232,200,114,0.35)' }}
               >
                 <Send className="w-4 h-4" />
                 <span>Inquire for Commission</span>
               </Link>
             </div>
-
           </div>
         </div>
       )}
