@@ -74,13 +74,6 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3.5">
-                  <Phone className="w-4 h-4 text-[#e8c872] mt-0.5" />
-                  <div>
-                    <strong className="block text-[#a3b8af] uppercase text-[10px] tracking-wider">Studio Concierge / WhatsApp</strong>
-                    <span className="text-[#fbf5e6]">{c('phone', '+91 98765 43210')}</span>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3.5">
                   <MapPin className="w-4 h-4 text-[#e8c872] mt-0.5" />
                   <div>
                     <strong className="block text-[#a3b8af] uppercase text-[10px] tracking-wider">Atelier Headquarters</strong>
