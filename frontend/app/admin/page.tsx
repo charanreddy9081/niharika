@@ -544,6 +544,8 @@ export default function AdminPortalPage() {
         artwork_type: editingProduct.artwork_type,
         short_description: editingProduct.short_description,
         description: editingProduct.description,
+        stock_quantity: Number(editingProduct.stock_quantity ?? 15),
+        in_stock: editingProduct.in_stock !== false,
       };
       if (finalImage) { payload.images = [finalImage]; payload.gallery = [finalImage]; }
       const res = await fetch(API + '/api/admin/products/' + (editingProduct._id || editingProduct.id), {
@@ -1164,7 +1166,7 @@ export default function AdminPortalPage() {
                         </td>
                         <td className="p-4">
                           <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-900 text-[10px]">
-                            {p.in_stock !== false ? 'In Stock (15)' : 'Out of Stock'}
+                            {p.in_stock !== false ? `In Stock (${p.stock_quantity ?? 15})` : 'Out of Stock'}
                           </span>
                         </td>
                         <td className="p-4 text-right">
@@ -1621,6 +1623,23 @@ export default function AdminPortalPage() {
                   <ImageInput label="Product Image" urlValue={editProductImageUrl}
                     onUrlChange={url => { setEditProductImageUrl(url); setEditingProduct({ ...editingProduct, image: url }); }}
                     selectedFile={editProductImageFile} onFileSelected={setEditProductImageFile} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">Stock Count</label>
+                    <input type="number" min="0" value={editingProduct.stock_quantity ?? 15}
+                      onChange={e => setEditingProduct({ ...editingProduct, stock_quantity: Number(e.target.value) })}
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  </div>
+                  <div>
+                    <label className="block text-[#a3b8af] mb-1">In Stock</label>
+                    <select value={editingProduct.in_stock === false ? 'false' : 'true'}
+                      onChange={e => setEditingProduct({ ...editingProduct, in_stock: e.target.value === 'true' })}
+                      className="w-full bg-[#050f0b] border border-emerald-900 rounded-xl p-3 text-zinc-100 focus:outline-none focus:border-[#e8c872]">
+                      <option value="true">In Stock</option>
+                      <option value="false">Out of Stock</option>
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[#a3b8af] mb-1">Description</label>
