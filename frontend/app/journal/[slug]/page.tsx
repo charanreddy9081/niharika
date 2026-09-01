@@ -151,15 +151,14 @@ export default function JournalArticlePage() {
 
         {/* ── Hero Image ──────────────────────────────────────────── */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-          <div className="relative aspect-[16/9] sm:aspect-[2/1] rounded-2xl overflow-hidden border border-[#e8c872]/15 shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
+          <div className="rounded-2xl overflow-hidden border border-[#e8c872]/15 shadow-[0_20px_60px_rgba(0,0,0,0.7)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={story.image_url || FALLBACK}
               alt={story.title}
-              className="w-full h-full object-cover"
+              className="w-full h-auto block"
               onError={e => { (e.currentTarget as HTMLImageElement).src = FALLBACK; }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06120d]/30 to-transparent" />
           </div>
         </div>
 
@@ -178,7 +177,8 @@ export default function JournalArticlePage() {
           {/* Content — supports rich HTML from TipTap editor */}
           {content.startsWith('<') ? (
             <div
-              className="justified prose prose-invert prose-sm sm:prose-base max-w-none
+              className="prose prose-invert prose-sm sm:prose-base max-w-none
+                [&_p]:text-justify [&_p]:hyphens-auto
                 prose-headings:font-display prose-headings:font-light prose-headings:text-zinc-100
                 prose-p:text-[#c4bfb0] prose-p:leading-[1.9] prose-p:text-base
                 prose-strong:text-zinc-200 prose-em:text-[#a3b8af]
@@ -198,7 +198,7 @@ export default function JournalArticlePage() {
                 const cleaned = para.replace(/\*/g, '').trim();
                 if (!cleaned) return null;
                 return (
-                  <p key={i} className="text-[#c4bfb0] leading-[1.9] text-base sm:text-[17px]">
+                  <p key={i} className="text-[#c4bfb0] leading-[1.9] text-base sm:text-[17px] text-justify hyphens-auto">
                     {cleaned}
                   </p>
                 );
