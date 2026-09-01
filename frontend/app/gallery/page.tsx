@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useSiteContent } from '../../hooks/useSiteContent';
 import { useAutoRefresh } from '../../hooks/useAutoRefresh';
+import { useTheme } from '../../context/ThemeContext';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const PAGE_SIZE = 16; // Load 16 at a time instead of all 50 at once
@@ -37,6 +38,34 @@ export default function GalleryPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const { c } = useSiteContent('gallery');
+  const { theme } = useTheme();
+
+  // Theme-aware lightbox styles
+  const isDark = theme === 'dark' || theme === 'system';
+  const isPink = theme === 'pink';
+  const isLight = theme === 'light';
+
+  const lb = {
+    backdrop:   isDark ? 'rgba(0,0,0,0.88)' : isPink ? 'rgba(80,20,40,0.72)' : 'rgba(0,0,0,0.72)',
+    panelBg:    isDark ? 'rgba(12,24,18,0.97)' : isPink ? '#fff7fa' : '#ffffff',
+    panelBorder:isDark ? 'rgba(232,200,114,0.22)' : isPink ? '#e9ccd5' : '#d1d5db',
+    title:      isDark ? '#f5efe6' : isPink ? '#2B2024' : '#111827',
+    body:       isDark ? '#d4c9b8' : isPink ? '#6b4050' : '#374151',
+    divider:    isDark ? 'rgba(232,200,114,0.3)' : isPink ? '#e9ccd5' : '#e5e7eb',
+    tagBg:      isDark ? 'rgba(169,79,107,0.2)' : isPink ? 'rgba(169,79,107,0.12)' : '#f3f4f6',
+    tagBorder:  isDark ? 'rgba(169,79,107,0.5)' : isPink ? '#D98FA6' : '#d1d5db',
+    tagText:    isDark ? '#e8c872' : isPink ? '#A94F6B' : '#374151',
+    yearBg:     isDark ? 'rgba(255,255,255,0.08)' : isPink ? '#fce8f0' : '#f9fafb',
+    yearBorder: isDark ? 'rgba(255,255,255,0.15)' : isPink ? '#e9ccd5' : '#e5e7eb',
+    yearText:   isDark ? '#c8b89a' : isPink ? '#A94F6B' : '#6b7280',
+    counter:    isDark ? '#7a7060' : isPink ? '#b08090' : '#9ca3af',
+    btnBg:      isPink ? 'linear-gradient(135deg,#E8A9BA,#A94F6B)' : 'linear-gradient(135deg,#e8c872,#d4a040)',
+    btnText:    isPink ? '#ffffff' : '#1a0e00',
+    navBtn:     isDark ? 'rgba(255,255,255,0.12)' : isPink ? 'rgba(169,79,107,0.15)' : 'rgba(0,0,0,0.08)',
+    navBtnBorder:isDark ? 'rgba(255,255,255,0.25)' : isPink ? '#D98FA6' : '#d1d5db',
+    navBtnText: isDark ? '#ffffff' : isPink ? '#A94F6B' : '#374151',
+    closeBtn:   isDark ? 'rgba(255,255,255,0.12)' : isPink ? 'rgba(169,79,107,0.15)' : 'rgba(0,0,0,0.08)',
+  };
 
   const fetchGallery = useCallback(() => {
     fetch(`${API}/api/gallery`)
@@ -271,34 +300,39 @@ export default function GalleryPage() {
       {/* Lightbox Modal */}
       {activeItem && lightboxIndex !== null && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl overflow-y-auto"
+          className="fixed inset-0 z-50 overflow-y-auto"
+          style={{ backgroundColor: lb.backdrop, backdropFilter: 'blur(16px)' }}
           onClick={() => setLightboxIndex(null)}
         >
-          {/* Close Button — fixed top-right */}
+          {/* Close Button */}
           <button
             onClick={e => { e.stopPropagation(); setLightboxIndex(null); }}
-            className="fixed top-4 right-4 z-[60] p-3 rounded-full bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-colors shadow-2xl"
+            className="fixed top-4 right-4 z-[60] p-3 rounded-full transition-colors shadow-2xl"
+            style={{ background: lb.closeBtn, border: `1px solid ${lb.navBtnBorder}`, color: lb.navBtnText }}
             aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Content wrapper — stop click from bubbling to backdrop */}
+          {/* Content wrapper */}
           <div
             className="w-full max-w-3xl mx-auto px-4 sm:px-8 py-16 sm:py-12 flex flex-col items-center gap-6"
             onClick={e => e.stopPropagation()}
           >
-            {/* Image + side arrows */}
+            {/* Image + arrows */}
             <div className="relative w-full flex items-center justify-center">
               <button
                 onClick={handlePrev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 p-3 rounded-full bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-colors shadow-2xl"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 z-10 p-3 rounded-full transition-colors shadow-2xl"
+                style={{ background: lb.navBtn, border: `1px solid ${lb.navBtnBorder}`, color: lb.navBtnText }}
                 aria-label="Previous artwork"
               >
                 <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
-              <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.9)] border border-white/10 mx-10">
+              <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.7)] mx-10"
+                style={{ border: `1px solid ${lb.panelBorder}` }}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={activeItem.imageUrl}
@@ -310,48 +344,49 @@ export default function GalleryPage() {
 
               <button
                 onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 p-3 rounded-full bg-white/10 border border-white/30 text-white hover:bg-white/20 transition-colors shadow-2xl"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 z-10 p-3 rounded-full transition-colors shadow-2xl"
+                style={{ background: lb.navBtn, border: `1px solid ${lb.navBtnBorder}`, color: lb.navBtnText }}
                 aria-label="Next artwork"
               >
                 <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
-            {/* Details panel — explicit colors so visible in all themes */}
-            <div className="lightbox-card w-full rounded-2xl p-5 sm:p-7 space-y-4"
-              style={{ backgroundColor: 'rgba(15,10,12,0.92)', border: '1px solid rgba(232,200,114,0.25)' }}
+            {/* Details panel */}
+            <div className="w-full rounded-2xl p-5 sm:p-7 space-y-4"
+              style={{ background: lb.panelBg, border: `1px solid ${lb.panelBorder}` }}
             >
               {/* Tags + counter */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider"
-                  style={{ background: 'rgba(169,79,107,0.25)', border: '1px solid rgba(169,79,107,0.5)', color: '#e8c872' }}
+                  style={{ background: lb.tagBg, border: `1px solid ${lb.tagBorder}`, color: lb.tagText }}
                 >
                   {activeItem.category}
                 </span>
                 {activeItem.year && (
                   <span className="px-2.5 py-1 rounded-full text-[10px]"
-                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#c8b89a' }}
+                    style={{ background: lb.yearBg, border: `1px solid ${lb.yearBorder}`, color: lb.yearText }}
                   >
                     {activeItem.year}
                   </span>
                 )}
-                <span className="ml-auto text-[10px] font-mono" style={{ color: '#7a7060' }}>
+                <span className="ml-auto text-[10px] font-mono" style={{ color: lb.counter }}>
                   {lightboxIndex + 1} of {filteredItems.length}
                 </span>
               </div>
 
-              <h2 className="font-display text-2xl sm:text-3xl font-light leading-tight" style={{ color: '#f5efe6' }}>
+              <h2 className="font-display text-2xl sm:text-3xl font-light leading-tight" style={{ color: lb.title }}>
                 {activeItem.title}
               </h2>
 
-              <div className="h-px" style={{ background: 'linear-gradient(to right, rgba(232,200,114,0.4), rgba(100,80,40,0.2), transparent)' }} />
+              <div className="h-px" style={{ background: lb.divider }} />
 
               {activeItem.description ? (
-                <p className="text-xs sm:text-sm leading-relaxed font-sans whitespace-pre-line" style={{ color: '#d4c9b8' }}>
+                <p className="text-xs sm:text-sm leading-relaxed font-sans whitespace-pre-line" style={{ color: lb.body }}>
                   {activeItem.description}
                 </p>
               ) : (
-                <p className="text-xs italic" style={{ color: '#9a8f80' }}>
+                <p className="text-xs italic" style={{ color: lb.counter }}>
                   Original archival artwork created by Niharika. Handcrafted with bespoke attention to emotion.
                 </p>
               )}
@@ -361,7 +396,7 @@ export default function GalleryPage() {
                 href={`/contact?subject=Inquiry%20regarding%20${encodeURIComponent(activeItem.title)}`}
                 onClick={() => setLightboxIndex(null)}
                 className="w-full py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] transition-all btn-magnetic flex items-center justify-center gap-2 mt-2 font-semibold"
-                style={{ background: 'linear-gradient(135deg, #e8c872, #d4a040)', color: '#1a0e00', boxShadow: '0 0 20px rgba(232,200,114,0.35)' }}
+                style={{ background: lb.btnBg, color: lb.btnText, boxShadow: '0 0 20px rgba(200,150,100,0.25)' }}
               >
                 <Send className="w-4 h-4" />
                 <span>Inquire for Commission</span>
