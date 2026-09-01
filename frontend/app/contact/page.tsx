@@ -14,7 +14,7 @@ export default function ContactPage() {
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
-    inquiry_type: 'commission', subject: '', message: ''
+    inquiry_type: '', subject: '', message: ''
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
