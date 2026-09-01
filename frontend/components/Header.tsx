@@ -79,7 +79,7 @@ export const Header: React.FC = () => {
               <img
                 src="/logo.png"
                 alt="niharikartist"
-                className="h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(232,200,114,0.35)] group-hover:drop-shadow-[0_0_20px_rgba(232,200,114,0.55)] transition-all duration-300"
+                className="h-10 w-auto max-w-[180px] object-contain group-hover:opacity-90 transition-all duration-300"
               />
             </Link>
           </div>

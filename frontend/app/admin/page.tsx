@@ -718,7 +718,7 @@ export default function AdminPortalPage() {
             <img
               src="/logo.png"
               alt="niharikartist"
-              className="h-16 w-auto object-contain mx-auto drop-shadow-[0_0_20px_rgba(232,200,114,0.4)]"
+              className="h-12 w-auto max-w-[220px] object-contain mx-auto"
             />
           </Link>
           <span className="block text-[10px] tracking-[0.45em] uppercase text-[#a3b8af] mt-2">
@@ -907,7 +907,7 @@ export default function AdminPortalPage() {
               <img
                 src="/logo.png"
                 alt="niharikartist"
-                className="h-9 w-auto object-contain"
+                className="h-7 w-auto max-w-[120px] object-contain"
               />
               <span className="text-[9px] tracking-[0.35em] uppercase text-[#e8c872] font-semibold hidden sm:block">
                 admin studio console
