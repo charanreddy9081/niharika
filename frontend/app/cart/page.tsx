@@ -121,7 +121,7 @@ export default function CartPage() {
                     className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 pl-8 py-2 text-xs text-zinc-100 placeholder-zinc-500 uppercase focus:outline-none focus:border-[#d4af37]"
                   />
                 </div>
-                <button type="submit" className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-4 py-2 rounded text-xs font-semibold uppercase">
+                <button type="submit" className="bg-[#A94F6B] hover:bg-[#7B2D45] text-white px-4 py-2 rounded text-xs font-semibold uppercase transition-colors">
                   Apply
                 </button>
               </form>
