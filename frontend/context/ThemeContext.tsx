@@ -10,7 +10,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: 'pink',
   setTheme: () => {},
 });
 
@@ -50,10 +50,10 @@ function applyTheme(t: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>('pink');
 
   useEffect(() => {
-    const saved = (localStorage.getItem('nha_theme') as Theme) || 'dark';
+    const saved = (localStorage.getItem('nha_theme') as Theme) || 'pink';
     setThemeState(saved);
     applyTheme(saved);
   }, []);
