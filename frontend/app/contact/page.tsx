@@ -123,13 +123,14 @@ export default function ContactPage() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Phone / WhatsApp</label>
-                    <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+91 98765 43210" className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl px-4 py-3 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                    <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Phone / WhatsApp *</label>
+                    <input type="tel" required value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+91 98765 43210" className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl px-4 py-3 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
                   </div>
                   <div>
-                    <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Commission Category</label>
+                    <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Commission Category *</label>
                     <input
                       type="text"
+                      required
                       value={form.inquiry_type}
                       onChange={e => setForm({ ...form, inquiry_type: e.target.value })}
                       placeholder="e.g. Drawing, Painting, Portrait, Caricature, Wedding Art..."
@@ -138,12 +139,12 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Commission Subject</label>
-                  <input type="text" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} placeholder="e.g. Custom Double Portrait for Sibling Wedding Gift" className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl px-4 py-3 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
+                  <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Commission Subject *</label>
+                  <input type="text" required value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} placeholder="e.g. Custom Double Portrait for Sibling Wedding Gift" className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl px-4 py-3 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872]" />
                 </div>
                 <div>
-                  <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Your Story &amp; Artistic Vision *</label>
-                  <textarea required rows={4} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Describe your idea, reference elements, deadline, and the emotional resonance you would like captured..." className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl p-3.5 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872] resize-none" />
+                  <label className="text-[11px] uppercase tracking-wider text-[#a3b8af] block mb-1">Your Story &amp; Artistic Vision</label>
+                  <textarea rows={4} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Describe your idea, reference elements, deadline, and the emotional resonance you would like captured..." className="w-full bg-[#06120d] border border-emerald-900/80 rounded-xl p-3.5 text-xs text-zinc-100 focus:outline-none focus:border-[#e8c872] resize-none" />
                 </div>
                 <button type="submit" disabled={submitting} className="bg-[#e8c872] hover:bg-[#d4b055] text-black font-semibold px-9 py-4 rounded-xl text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_20px_rgba(232,200,114,0.35)] flex items-center justify-center gap-2 btn-magnetic">
                   <Send className="w-3.5 h-3.5" />
