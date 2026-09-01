@@ -88,7 +88,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <ShoppingBag className="w-3.5 h-3.5" />
             <span>Add to Bag</span>
           </button>
-          <div className="w-10 h-10 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:text-[#e8c872] transition-colors">
+          <div className="w-10 h-10 rounded-xl bg-[#A94F6B] backdrop-blur-md border border-[#D98FA6]/40 flex items-center justify-center text-white hover:bg-[#7B2D45] transition-colors">
             <Eye className="w-4 h-4" />
           </div>
         </div>
