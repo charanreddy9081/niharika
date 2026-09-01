@@ -165,20 +165,20 @@ export default function AboutPage() {
         </div>
 
         {/* Call to action */}
-        <div className="text-center bg-gradient-to-b from-[#0e271e] to-[#081812] border border-[#e8c872]/30 rounded-3xl p-12 max-w-3xl mx-auto space-y-6 shadow-2xl cta-dark-section">
-          <Sparkles className="w-8 h-8 text-[#e8c872] mx-auto animate-pulse" />
-          <h3 className="font-display text-3xl sm:text-4xl text-zinc-100 font-light">
+        <div className="text-center bg-gradient-to-b from-[#fce8f0] to-[#fdf2f6] border border-[#D98FA6]/40 rounded-3xl p-12 max-w-3xl mx-auto space-y-6 shadow-2xl cta-dark-section">
+          <Sparkles className="w-8 h-8 text-[#A94F6B] mx-auto animate-pulse" />
+          <h3 className="font-display text-3xl sm:text-4xl text-[#2B2024] font-light">
             {c('cta_title', 'Step Inside The Atelier Store')}
           </h3>
-          <p className="text-xs sm:text-sm text-[#a3b8af] max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-[#806B72] max-w-md mx-auto">
             {c('cta_description', 'Explore our full catalog of handpainted frames, eternal flower bouquets, and vintage calligraphy letters.')}
           </p>
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/shop" className="w-full sm:w-auto bg-gradient-to-r from-[#fbf5e6] via-[#e8c872] to-[#d4b055] hover:opacity-95 text-black font-semibold px-8 py-3.5 rounded-full text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_25px_rgba(232,200,114,0.4)] btn-magnetic flex items-center justify-center gap-2">
+            <Link href="/shop" className="w-full sm:w-auto bg-[#A94F6B] hover:bg-[#7B2D45] text-white font-semibold px-8 py-3.5 rounded-full text-xs uppercase tracking-[0.2em] transition-all shadow-[0_0_25px_rgba(169,79,107,0.4)] btn-magnetic flex items-center justify-center gap-2">
               <span>{c('cta_btn_primary', 'Browse All Artworks')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link href="/contact" className="w-full sm:w-auto bg-[#0d261e] hover:bg-[#153a2e] border border-emerald-800/70 text-zinc-300 px-8 py-3.5 rounded-full text-xs uppercase tracking-[0.2em] transition-colors btn-magnetic flex items-center justify-center cta-ghost-btn">
+            <Link href="/contact" className="w-full sm:w-auto bg-white hover:bg-[#fce8f0] border border-[#D98FA6] text-[#A94F6B] px-8 py-3.5 rounded-full text-xs uppercase tracking-[0.2em] transition-colors btn-magnetic flex items-center justify-center cta-ghost-btn">
               <span>{c('cta_btn_secondary', 'Book Custom Commission')}</span>
             </Link>
           </div>
